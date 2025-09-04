@@ -1,69 +1,74 @@
-# React + TypeScript + Vite
+# 단어학습 (WowLingo)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+농난청인을 위한 한국어 학습 애플리케이션입니다. 음성 합성 기술을 활용하여 한국어 단어를 듣고 정답을 선택하는 학습 도구입니다.
 
-Currently, two official plugins are available:
+## 주요 기능
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🎧 **음성 듣기**: Web Speech API를 사용한 한국어 TTS
+- 📝 **단어 테스트**: 객관식 문제로 단어 학습
+- 📊 **결과 확인**: 테스트 완료 후 점수 표시
+- 📱 **반응형 디자인**: 모바일과 데스크톱 지원
 
-## Expanding the ESLint configuration
+## 기술 스택
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Frontend**: React 19 + TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **Routing**: React Router DOM
+- **State Management**: Zustand
+- **Code Quality**: ESLint + Prettier
 
-```js
-export default tseslint.config([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
+## 프로젝트 구조
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```
+src/
+├── components/          # 재사용 가능한 UI 컴포넌트
+│   ├── Header.tsx      # 앱 헤더
+│   ├── Modal.tsx       # 모달 컴포넌트
+│   ├── Option.tsx      # 선택지 컴포넌트
+│   └── IconSpeaker.tsx # 스피커 아이콘
+├── features/           # 기능별 컴포넌트
+│   └── wordtest/       # 단어 테스트 기능
+│       └── WordTest.tsx
+├── hooks/              # 커스텀 훅
+│   └── useKoreanVoice.ts # 한국어 음성 합성 훅
+├── data/               # 정적 데이터
+│   └── questions.ts    # 테스트 문제 데이터
+├── lib/                # 유틸리티 함수
+│   └── classNames.ts   # CSS 클래스 유틸리티
+└── App.tsx             # 메인 앱 컴포넌트
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 시작하기
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+### 설치
 
-export default tseslint.config([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+npm install
 ```
+
+### 개발 서버 실행
+
+```bash
+npm run dev
+```
+
+### 빌드
+
+```bash
+npm run build
+```
+
+### 기타 스크립트
+
+```bash
+npm run lint      # ESLint 실행
+npm run typecheck # TypeScript 타입 체크
+npm run format    # Prettier 포맷팅
+npm run preview   # 빌드된 앱 미리보기
+```
+
+## 브라우저 지원
+
+- Web Speech API를 지원하는 모던 브라우저
+- Chrome, Edge, Safari 권장
