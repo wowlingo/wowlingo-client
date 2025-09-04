@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/header.tsx","./src/components/iconspeaker.tsx","./src/components/modal.tsx","./src/components/option.tsx","./src/data/questions.ts","./src/features/wordtest/wordtest.tsx","./src/hooks/usekoreanvoice.ts","./src/lib/classnames.ts"],"version":"5.8.3"}
