@@ -1,4 +1,4 @@
-import { cn } from "@/lib/cn";
+import { cn } from "@/shared/lib/cn";
 import PlanetRingIcon from "../icons/PlanetRingIcon";
 import type { PlanetStatus } from "../model/types";
 
@@ -41,7 +41,7 @@ export default function Planet({
         "absolute -translate-x-1/2 -translate-y-1/2 select-none",
         "h-28 w-28 rounded-full grid place-items-center",
         glow,
-        dim
+        dim,
       )}
       onClick={() => onClick(id)}
       role="button"
