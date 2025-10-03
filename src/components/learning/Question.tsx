@@ -37,7 +37,7 @@ export default function Question({ sounds }: QuestionProps) {
     <div className="flex justify-center items-center gap-4 my-4">
       {sounds.map((sound) => (
         <button
-          key={sound.id}
+          key={sound.id + sound.type}
           onClick={() => handlePlaySound(sound.url)}
           className="flex flex-col items-center justify-center p-10 bg-sky-100 text-sky-700 rounded-2xl shadow-sm hover:bg-sky-200 transition-all focus:outline-none focus:ring-2 focus:ring-sky-400"
           aria-label={`${sound.label || '소리'} 듣기`}

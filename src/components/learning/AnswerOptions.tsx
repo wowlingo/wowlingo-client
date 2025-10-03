@@ -1,6 +1,7 @@
 import { useLearningStore } from '../../store/learningStore';
 import { CircleCheck, CircleQuestionMark, CircleX, Dot } from 'lucide-react';
 import Question from './Question';
+import { PartyPopper } from 'lucide-react';
 
 export interface AnswerOption {
   type: 'statement' | 'question' | 'same' | 'different';

@@ -25,6 +25,16 @@ type ApiQuestResponseData = {
   items: ApiQuestItem[];
 };
 
+type ApiCourseResponseData = {
+  courseId: number;
+  title: string;
+  type: string;
+  objective: string;
+  totalQuestCount: number;
+  doneQuestCount: number;
+  enableYn: boolean;
+};
+
 // 학습 데이터 타입 (기존 QuestionData와 유사)
 export type QuestionData = {
   sounds: { id: string; type: string; url: string; label?: string }[];
@@ -43,24 +53,24 @@ type ImageLayer = {
 // 쌓이는 레이어들에 적용할 스타일 목록
 // zIndex를 통해 쌓이는 순서를 제어합니다.
 const STACK_LAYER_STYLES: CSSProperties[] = [
-  { width: '138px', top: '-25%', left: '15%', zIndex: 2 },//빼빼로 10
-  { width: '150px', top: '-20%', left: '27%', zIndex: 3 },//오렌지 22
-  { width: '102px', top: '-20%', left: '50%', zIndex: 4 },//웨하스 45
-  { width: '90px', top: '-15%', left: '53%', zIndex: 5 },//초콜릿문구 48
-  { width: '90px', top: '-22%', left: '45%', zIndex: 6 },//초 43
+  { width: '100%', top: '0%', left: '0%', zIndex: 2 },//빼빼로 10
+  { width: '100%', top: '0%', left: '0%', zIndex: 3 },//오렌지 22
+  { width: '100%', top: '0%', left: '0%', zIndex: 4 },//웨하스 45
+  { width: '100%', top: '0%', left: '0%', zIndex: 5 },//초콜릿문구 48
+  { width: '100%', top: '0%', left: '0%', zIndex: 6 },//초 43
 
-  { width: '114px', top: '-15%', left: '38%', zIndex: 7 }, //키위 33
-  { width: '114px', top: '-17%', left: '20%', zIndex: 8 },//딸기 15
-  { width: '78px', top: '-7%', left: '33%', zIndex: 9 },//블루베리 28
-  { width: '84px', top: '-7%', left: '48%', zIndex: 10 },//휘핑 43
-  { width: '78px', top: '-4%', left: '43%', zIndex: 11 },//초코칩 38
+  { width: '100%', top: '0%', left: '0%', zIndex: 7 }, //키위 33
+  { width: '100%', top: '0%', left: '0%', zIndex: 8 },//딸기 15
+  { width: '100%', top: '0%', left: '0%', zIndex: 9 },//블루베리 28
+  { width: '100%', top: '0%', left: '0%', zIndex: 10 },//휘핑 43
+  { width: '100%', top: '0%', left: '0%', zIndex: 11 },//초코칩 38
 ];
 
 // 기본 배경 이미지 레이어
 const BASE_IMAGE_LAYER: ImageLayer = {
   src: '/images/layer-0.png',
   style: {
-    width: '400px',
+    width: '100%',
     top: '0%',
     left: '0%',
     zIndex: 1,
@@ -81,6 +91,9 @@ interface LearningState {
   learningData: Record<number, QuestionData>; // API로부터 받은 학습 데이터 (변환된 형태)
   isLoading: boolean;
   currentQuestId: number | null; // 현재 로드된 퀘스트 ID
+  courseData: ApiCourseResponseData[];
+  totalCourseCount: number;
+  currentCourseId: number | null;
 }
 
 interface LearningActions {
@@ -88,10 +101,13 @@ interface LearningActions {
   setSelectedAnswer: (answer: string) => void;
   reset: () => void;
   checkAnswer: (correctAnswer: string, stackImageUrl: string) => void;
+  showIncorrectModal: () => void;
   closeModalAndGoToNextStep: () => void;
   startLearning: () => void;
   endLearning: () => void;
+  sendLearningResult: () => Promise<void>; // 학습 결과 전송 액션
   fetchQuestData: (questId: number) => Promise<void>; // 퀘스트 전체를 가져오는 액션
+  fetchCourseData: () => Promise<void>;
 }
 
 // 스토어를 생성합니다.
@@ -109,7 +125,40 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
   learningData: {},
   isLoading: false,
   currentQuestId: null,
+  courseData: [],
+  totalCourseCount: 0,
+  currentCourseId: null,
 
+  fetchCourseData: async () => {
+    set({ isLoading: true });
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/courses?userId=1`);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const jsonResponse: { data: ApiCourseResponseData[] } = await response.json();
+      const courseData = jsonResponse.data;
+
+      let lastCourseId: number | null = null;
+      courseData.forEach((item) => {
+        if (item.enableYn) {
+          lastCourseId = item.courseId;
+        }
+      });
+
+      set({
+        courseData,
+        totalCourseCount: courseData.length,
+        isLoading: false,
+        currentCourseId: lastCourseId,
+      });
+
+    } catch (error) {
+      console.error("Failed to fetch quest data:", error);
+      set({ isLoading: false, learningData: {}, totalSteps: 0 });
+    }
+  },
   // API로부터 퀘스트 데이터를 가져오는 액션
   fetchQuestData: async (questId: number) => {
     // 이미 해당 퀘스트 데이터가 로드되어 있고, currentQuestId와 일치하면 다시 호출하지 않음
@@ -158,6 +207,8 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
     }
   },
 
+  showIncorrectModal: () => set({ modalState: 'incorrect' }),
+
   // 답변을 확인하고 모달 상태를 변경하는 액션
   checkAnswer: (correctAnswer, stackImageUrl) =>
     set((state) => {
@@ -165,7 +216,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
       if (!isCorrect) {
         return {
           isCorrect: false,
-          modalState: 'incorrect',
+          // modalState: 'incorrect',
         };
       }
 
@@ -191,6 +242,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
       // 다음 단계로 넘어가기 전에 현재 답을 기록 (오답이라도 기록)
       const newAnswers = { ...state.answers, [state.currentStep]: state.selectedAnswer! };
       return {
+        isCorrect: null,
         modalState: 'closed', // 모달 닫기
         currentStep: state.currentStep + 1,
         selectedAnswer: null, // 선택 초기화
@@ -234,5 +286,66 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
   }),
 
   // 학습 종료 시 호출, 종료 시간 기록
-  endLearning: () => set({ endTime: Date.now() }),
+  endLearning: () => set((state) => {
+    // 다음 단계로 넘어가기 전에 현재 답을 기록 (오답이라도 기록)
+    const newAnswers = { ...state.answers, [state.currentStep]: state.selectedAnswer! };
+    return {
+      endTime: Date.now(),
+      isCorrect: null,
+      modalState: 'closed', // 모달 닫기
+      selectedAnswer: null, // 선택 초기화
+      answers: newAnswers,
+    };
+  }),
+
+  // 학습 정보 API 전송
+  sendLearningResult: async () => {
+    const { currentQuestId, answers, startTime, endTime, learningData } = get();
+
+    // 데이터가 없으면 전송하지 않음
+    if (!currentQuestId || !startTime || !endTime) {
+      console.error("필수 학습 정보가 부족하여 결과를 전송할 수 없습니다.");
+      return;
+    }
+
+    // API로 보낼 데이터 구성
+    const resultData = {
+      questId: currentQuestId,
+      results: Object.entries(answers).map(([step, userAnswer]) => {
+        const stepNum = parseInt(step, 10);
+        const questionData = learningData[stepNum];
+        return {
+          step: stepNum,
+          questionSoundIds: questionData.sounds.map(s => s.id),
+          userAnswer: userAnswer,
+          correctAnswer: questionData.correctAnswer,
+          isCorrect: questionData.correctAnswer === userAnswer,
+        }
+      }),
+      startTime: new Date(startTime).toISOString(), // ISO 8601 형식
+      endTime: new Date(endTime).toISOString(),     // ISO 8601 형식
+    };
+
+    try {
+      console.log(resultData);
+      const response = await fetch('http://localhost:8080/api/userQuest', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(resultData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API 요청 실패: ${response.statusText}`);
+      }
+
+      const responseData = await response.json();
+      console.log('학습 결과가 성공적으로 전송되었습니다:', responseData);
+
+    } catch (error) {
+      console.error('학습 결과 전송 중 오류가 발생했습니다:', error);
+    }
+  },
+
 }));

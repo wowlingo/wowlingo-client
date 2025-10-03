@@ -9,6 +9,10 @@ import LearningLayout from './layouts/LearningLayout';
 import LearningStepPage from './pages/LearningStepPage';
 import GameClearPage from './pages/GameClearPage';
 import LearningIntroPage from './pages/LearningIntroPage';
+import Home from './pages/Home';
+
+
+import RandomLearningLayout from './layouts/RandomLearningLayout';
 
 const router = createBrowserRouter([
   {
@@ -20,12 +24,17 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: "/home",
+    element: <Home />,
+  },
+  {
     path: '/learning/intro',
     element: <LearningIntroPage />,
   },
   {
     path: "/learning",
-    element: <LearningLayout />, // 공통 레이아웃을 부모로 지정
+    // element: <RandomLearningLayout />, // 랜덤 레이아웃.
+    element: <LearningLayout />,
     children: [
       {
         path: ':stepId', // 동적 경로 파라미터 사용

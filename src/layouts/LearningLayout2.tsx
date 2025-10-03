@@ -6,7 +6,7 @@ import CorrectModal from '../components/common/CorrectModal';
 import IncorrectModal from '../components/common/IncorrectModal';
 import Question from '../components/learning/Question';
 
-export default function LearningLayout() {
+export default function LearningLayout2() {
   const navigate = useNavigate();
   const { stepId } = useParams<{ stepId: string }>();
   const currentStep = parseInt(stepId || '1', 10);

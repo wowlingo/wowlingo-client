@@ -14,11 +14,12 @@ export default function GameClearPage() {
     isLoading: state.isLoading,
     startLearning: state.startLearning,
   }));
-  
+
   // 1. 정답/오답 개수 계산
   const correctCount = Object.keys(answers).reduce((count, step) => {
     const stepNum = parseInt(step, 10);
     const question = learningData[stepNum as keyof typeof learningData];
+    console.log('step: ' + step + ' count:' + count + " boolean:" + ((question && answers[stepNum] === question.correctAnswer)))
     if (question && answers[stepNum] === question.correctAnswer) {
       return count + 1;
     }
@@ -31,7 +32,7 @@ export default function GameClearPage() {
 
   // 3. 정답률 계산
   const accuracy = totalSteps > 0 ? Math.round((correctCount / totalSteps) * 100) : 0;
-  
+
   const handleConfirm = () => {
     reset(); // 상태 초기화
     navigate('/'); // 홈으로 이동
@@ -41,8 +42,8 @@ export default function GameClearPage() {
     <div className="flex flex-col h-screen max-w-lg mx-auto p-4 font-sans">
       <Header />
       {/* 진행도는 10/10으로 꽉 찬 상태로 표시 */}
-      <ProgressBar currentStep={totalSteps} totalSteps={totalSteps} />
-      
+      <ProgressBar currentStep={totalSteps} totalSteps={totalSteps} enableButton={false} />
+
       <h2 className="text-3xl font-bold text-center text-gray-800 my-6">
         Game Clear !!
       </h2>

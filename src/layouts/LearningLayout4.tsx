@@ -6,7 +6,7 @@ import CorrectModal from '../components/common/CorrectModal';
 import IncorrectModal from '../components/common/IncorrectModal';
 import Question from '../components/learning/Question';
 
-export default function LearningLayout() {
+export default function LearningLayout4() {
   const navigate = useNavigate();
   const { stepId } = useParams<{ stepId: string }>();
   const currentStep = parseInt(stepId || '1', 10);
@@ -132,7 +132,7 @@ export default function LearningLayout() {
             }
           }}
           disabled={!selectedAnswer || !currentQuestionData} // 선택된 정답이 없으면 비활성화
-          className="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg disabled:bg-gray-300 hover:bg-blue-600 transition-colors"
+          className="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg disabled:bg-ray-300 hover:bg-blue-600 transition-colors"
         >
           {(isCorrect != null) ? '다음' : '정답 제출'}
         </button>
