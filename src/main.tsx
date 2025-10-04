@@ -10,6 +10,10 @@ import LearningStepPage from './pages/LearningStepPage';
 import GameClearPage from './pages/GameClearPage';
 import LearningIntroPage from './pages/LearningIntroPage';
 import Home from './pages/Home';
+import LearningStatusPage from './pages/LearningStatusPage';
+import MainLayout from './components/layout/MainLayout';
+import ReviewNotesPage from './pages/ReviewNotesPage';
+import VocabularyPage from './pages/VocabularyPage';
 
 
 import RandomLearningLayout from './layouts/RandomLearningLayout';
@@ -26,6 +30,23 @@ const router = createBrowserRouter([
   {
     path: "/home",
     element: <Home />,
+  },
+  {
+    element: <MainLayout />,
+    children: [
+      {
+        path: '/learning-status',
+        element: <LearningStatusPage />,
+      },
+      {
+        path: '/review-notes',
+        element: <ReviewNotesPage />,
+      },
+      {
+        path: '/vocabulary',
+        element: <VocabularyPage />,
+      },
+    ],
   },
   {
     path: '/learning/intro',
