@@ -1,12 +1,22 @@
 // src/pages/LearningStatusPage.tsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Calendar from '../components/learning-status/Calendar';
 import DailySummary from '../components/learning-status/DailySummary';
+import { useLearningStatusStore } from '../store/LearningStatus';
 
 const LearningStatusPage = () => {
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const { isLoading, error, loginedDates, attemptedDates, fetchQuestAttempts } = useLearningStatusStore();
 
-    const completedDates = [7, 8, 13, 14, 15];
+    const userId = 4;
+
+    useEffect(() => {
+        const year = selectedDate.getFullYear();
+        const month = selectedDate.getMonth();
+        fetchQuestAttempts(userId, year, month + 1);
+    }, [fetchQuestAttempts]);
+
+    // const completedDates = [7, 8, 13, 14, 15];
 
     const summaryData = {
         date: `${selectedDate.getMonth() + 1}.${selectedDate.getDate()}`,
@@ -20,7 +30,13 @@ const LearningStatusPage = () => {
             <Calendar
                 selectedDate={selectedDate}
                 onDateSelect={setSelectedDate}
-                completedDates={completedDates}
+                onMonthChange={(newDate) => {
+                    const year = newDate.getFullYear();
+                    const month = newDate.getMonth() + 1;
+                    fetchQuestAttempts(userId, year, month);
+                }}
+                loginedDates={loginedDates}
+                attemptedDates={attemptedDates}
             />
             <DailySummary data={summaryData} />
         </div>

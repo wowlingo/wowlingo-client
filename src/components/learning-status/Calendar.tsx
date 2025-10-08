@@ -1,15 +1,17 @@
 // src/components/learning-status/Calendar.tsx
 import { useState } from 'react';
-import { ChevronDown, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronDown, Check, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import React from 'react';
 
 interface CalendarProps {
-    selectedDate: Date; // 선택된 날짜를 Date 객체로 받습니다.
+    selectedDate: Date; // 선택된 날짜
     onDateSelect: (date: Date) => void;
-    completedDates: number[]; // 이 예제에서는 단순화를 위해 일(day)만 받습니다.
+    onMonthChange: (date: Date) => void;
+    loginedDates: number[]; // 로그인한 날(day)
+    attemptedDates: number[]; // 학습 시도한 날(day)
 }
 
-const Calendar = ({ selectedDate, onDateSelect, completedDates }: CalendarProps) => {
+const Calendar = ({ selectedDate, onDateSelect, onMonthChange, loginedDates, attemptedDates }: CalendarProps) => {
     // 현재 클라이언트 날짜를 기준으로 달력 상태 관리
     const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -44,11 +46,15 @@ const Calendar = ({ selectedDate, onDateSelect, completedDates }: CalendarProps)
 
     // 월 이동 핸들러 함수
     const goToPreviousMonth = () => {
-        setCurrentDate(new Date(year, month - 1, 1));
+        const newDate = new Date(year, month - 1, 1); 
+        setCurrentDate(newDate);
+        onMonthChange?.(newDate);
     };
 
     const goToNextMonth = () => {
-        setCurrentDate(new Date(year, month + 1, 1));
+        const newDate = new Date(year, month + 1, 1); 
+        setCurrentDate(newDate);
+        onMonthChange?.(newDate);
     };
 
     return (
@@ -85,7 +91,8 @@ const Calendar = ({ selectedDate, onDateSelect, completedDates }: CalendarProps)
 
                     // 날짜 비교 로직 수정
                     const isSelected = selectedDate.toDateString() === fullDate.toDateString();
-                    const isCompleted = completedDates.includes(date); // 단순화를 위해 일(day)만 비교
+                    const isLogined = loginedDates.includes(date);
+                    const isAttempted = attemptedDates.includes(date);
                     const isToday = today.toDateString() === fullDate.toDateString();
 
                     const dayIndex = index % 7;
@@ -109,8 +116,12 @@ const Calendar = ({ selectedDate, onDateSelect, completedDates }: CalendarProps)
                                 {date}
                             </span>
 
-                            <div className={`w-8 h-8 flex items-center justify-center rounded-full ${isCompleted ? 'bg-blue-500' : 'bg-gray-200'}`}>
-                                {isCompleted && <Check className="w-5 h-8 text-white" strokeWidth={3} />}
+                            <div className={`w-8 h-8 flex items-center justify-center rounded-full 
+                                ${isAttempted ? 'bg-blue-500' : isLogined ? 'bg-blue-300' : 'bg-gray-200'}`}>
+                                {isAttempted ? (<Check className="w-5 h-8 text-white" strokeWidth={3} />)
+                                    : isLogined ? (<Plus className="w-5 h-8 text-white" strokeWidth={3} />)
+                                    : null
+                                }
                             </div>
                         </div>
                     );
