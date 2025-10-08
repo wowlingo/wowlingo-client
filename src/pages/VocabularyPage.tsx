@@ -4,14 +4,6 @@ import VocaCard from '../components/vocabulary/VocaCard';
 import { useEffect, useState } from 'react';
 import { useVocabularyStore } from '../store/VocabularyStore';
 
-// // 실제 데이터는 API를 통해 가져옵니다.
-// const mockWords = [
-//     { id: 1, word: '목도리', savedDate: '2025.10.03', featured: true },
-//     { id: 2, word: '목도리', savedDate: '2025.10.03', featured: false },
-//     // ... more words
-// ];
-
-
 
 const VocabularyPage = () => {
     const { hashtags, isLoading, error, vocabulary, fetchHashtags, fetchVocabulary } = useVocabularyStore();
@@ -76,7 +68,13 @@ const VocabularyPage = () => {
                 {/* 단어 리스트 */}
                 <div className="flex-1 space-y-3 overflow-y-auto no-scrollbar">
                     {vocabulary.map(item => (
-                        <VocaCard key={item.vocabId} word={item.str} savedDate={item.createdAtKST} urlNormal={item.urlNormal} urlSlow={item.slowNormal} />
+                        <VocaCard 
+                            key={item.vocabId} 
+                            word={item.str} 
+                            savedDate={item.createdAtKST} 
+                            urlNormal={item.urlNormal} 
+                            urlSlow={item.slowNormal} 
+                        />
                     ))}
                 </div>
             </div>
