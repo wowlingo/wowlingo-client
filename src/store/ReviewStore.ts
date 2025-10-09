@@ -21,9 +21,17 @@ interface ReviewState {
     isLoading: boolean;
     error: string | null;
     questItemUnits: QuestItemUnit[];
-    fetchHashtags: () => Promise<void>;
-    fetchQuestItemUnits: (hashtagIds?: number[], sort?: string) => Promise<void>;
+    fetchHashtags: (date?: Date) => Promise<void>;
+    fetchQuestItemUnits: (hashtagIds?: number[], date?: Date, sort?: string) => Promise<void>;
 }
+
+const formatDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+};
 
 export const useReviewStore = create<ReviewState>((set) => ({
     hashtags: [],
@@ -31,10 +39,16 @@ export const useReviewStore = create<ReviewState>((set) => ({
     error: null,
     questItemUnits: [],
 
-    fetchHashtags: async () => {
+    fetchHashtags: async (date?: Date) => {
         set({ isLoading: true, error: null });
         try {
-            const response = await fetch('http://localhost:8080/api/user-quests/review-notes/hashtags?userId=1&date=2025-09-25');
+            const params = new URLSearchParams();
+            params.append('userId', "1");
+            if (date) {
+                params.append('date', formatDate(date));//'2025-09-25');
+            }
+
+            const response = await fetch(`http://localhost:8080/api/user-quests/review-notes/hashtags?${params.toString()}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
@@ -54,13 +68,15 @@ export const useReviewStore = create<ReviewState>((set) => ({
         }
     },
 
-    fetchQuestItemUnits: async (hashtagIds: number[] = [], sort: string = 'latest') => {
+    fetchQuestItemUnits: async (hashtagIds: number[] = [], date?: Date, sort: string = 'latest') => {
         set({ isLoading: true, error: null });
         try {
             const params = new URLSearchParams();
             params.append('userId', "1");
             hashtagIds.forEach(id => params.append('hashtags', id.toString()));
-            params.append('date', '2025-09-25');
+            if (date) {
+                params.append('date', formatDate(date));//'2025-09-25');
+            }
             // if (sort) params.append('sort', sort);
 
             const response = await fetch(`http://localhost:8080/api/user-quests/review-notes?${params.toString()}`);

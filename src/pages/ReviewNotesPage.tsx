@@ -23,7 +23,7 @@ const ReviewNotesPage = () => {
             newSelected = [...selectedTags, tagId]; // 추가 선택
         }
         setSelectedTags(newSelected);
-        fetchQuestItemUnits(newSelected, 'latest');
+        fetchQuestItemUnits(newSelected, currentDate, 'latest');
     };
 
     const formatDate = (date: Date) => {
@@ -35,11 +35,17 @@ const ReviewNotesPage = () => {
     };
 
     const handleDateChange = (offset: number) => {
-        setCurrentDate(prevDate => {
-            const newDate = new Date(prevDate);
-            newDate.setDate(newDate.getDate() + offset);
-            return newDate;
-        });
+        // setCurrentDate(prevDate => {
+        //     const newDate = new Date(prevDate);
+        //     newDate.setDate(newDate.getDate() + offset);
+        //     return newDate;
+        // });
+        // const newDate = currentDate.setDate(currentDate.getDate() + offset); 
+        const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + offset);
+        console.log(newDate);
+
+        setCurrentDate(newDate);
+        fetchQuestItemUnits(selectedTags, newDate, 'latest');
     };
 
     return (
