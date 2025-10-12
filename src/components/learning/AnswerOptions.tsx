@@ -1,55 +1,87 @@
 import { useLearningStore } from '../../store/learningStore';
 import { CircleCheck, CircleQuestionMark, CircleX, Dot } from 'lucide-react';
-import Question from './Question';
-import { PartyPopper } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export interface AnswerOption {
-  type: 'statement' | 'question' | 'same' | 'different';
+  id: string;
+  type: string;
   label: string;
 }
 
 interface AnswerOptionsProps {
   options: AnswerOption[];
+  questType?: string; // quest 타입 정보 추가
 }
 
-export default function AnswerOptions({ options }: AnswerOptionsProps) {
-  const { selectedAnswer, setSelectedAnswer } = useLearningStore();
+export default function AnswerOptions({ options, questType }: AnswerOptionsProps) {
+  const { setSelectedAnswer } = useLearningStore();
+  // 로컬 상태로 선택된 옵션 인덱스 관리 (시각적 선택용)
+  const [localSelectedIndex, setLocalSelectedIndex] = useState<number | null>(null);
 
-  const renderIcon = (type: AnswerOption['type']) => {
-    if (type === 'statement') {
-      return <Dot size={24} className="text-blue-500" />;
-    }
-    if (type === 'question') {
-      return <CircleQuestionMark size={24} className="text-blue-500" />;
-    }
-    if (type === 'same') {
-      return <CircleCheck size={24} className="text-blue-500" />;
-    }
-    if (type === 'different') {
-      return <CircleX size={24} className="text-red-500" />;
-    }
-    return null; // 다른 타입의 버튼에는 아이콘 없음
+  // 옵션이 변경될 때 로컬 선택 상태 초기화
+  useEffect(() => {
+    setLocalSelectedIndex(null);
+  }, [options]);
+
+  const renderIcon = (type: string, isSelected: boolean) => {
+    const iconClass = isSelected ? "text-white" : "text-blue-500";
+    const iconClassRed = isSelected ? "text-white" : "text-red-500";
+    const iconClassGreen = isSelected ? "text-white" : "text-green-500";
+    const iconClassPurple = isSelected ? "text-white" : "text-purple-500";
+    const iconClassGray = isSelected ? "text-white" : "text-gray-500";
+    
+    // 타입에 따른 아이콘 매핑
+    const iconMap: Record<string, React.ReactNode> = {
+      'statement': <Dot size={24} className={iconClass} />,
+      'question': <CircleQuestionMark size={24} className={iconClass} />,
+      'same': <CircleCheck size={24} className={iconClass} />,
+      'different': <CircleX size={24} className={iconClassRed} />,
+      'word': <Dot size={24} className={iconClassGreen} />,
+      'senstence': <CircleX size={24} className={iconClassPurple} />,
+    };
+    
+    return iconMap[type] || <Dot size={24} className={iconClassGray} />;
   };
+
+  const handleOptionClick = (option: AnswerOption, index: number) => {
+    // quest type에 따라 다른 값 사용
+    const answerValue = questType === 'choice' ? option.id : option.type;
+    console.log('Option clicked:', answerValue, 'Quest type:', questType, 'Index:', index); // 디버깅용
+    setLocalSelectedIndex(index); // 시각적 선택 상태 업데이트
+    setSelectedAnswer(answerValue); // 스토어의 정답 상태 업데이트
+    console.log('selectedAnswer should be set to:', answerValue); // 디버깅용
+  };
+
+  // options가 없거나 배열이 아닌 경우 안전하게 처리
+  if (!options || !Array.isArray(options)) {
+    return <div>Loading options...</div>;
+  }
+
+  // 디버깅용 - options 데이터 확인
+  console.log('AnswerOptions - options:', options);
 
   return (
     <div className="w-full flex flex-col items-center gap-4">
-      {/* <img src={imageSrc} alt="Question clue" className="w-full max-w-sm rounded-lg shadow-md mb-4" /> */}
-
       <div className="grid grid-cols-2 gap-4 w-full">
-        {options.map((option) => (
-          <button
-            key={option.type}
-            onClick={() => setSelectedAnswer(option.type)}
-            className={`flex items-center justify-center gap-4 p-8 border rounded-lg text-lg transition-all font-semibold
-              ${selectedAnswer === option.type
-                ? 'ring-2 ring-offset-2 border-blue-500 bg-blue-100 text-blue-700'
-                : 'bg-white hover:bg-gray-50'
-              }`}
-          >
-            {renderIcon(option.type)}
-            <span>{option.label}</span>
-          </button>
-        ))}
+        {options.map((option, index) => {
+          console.log(`Option ${index}:`, option); // 각 옵션 디버깅
+          // 인덱스 기반으로 시각적 선택 상태 결정
+          const isSelected = localSelectedIndex === index;
+          return (
+            <button
+              key={`${option.type || 'unknown'}-${index}`} // 고유한 키 생성 (type 사용)
+              onClick={() => handleOptionClick(option, index)}
+              className={`flex items-center justify-center gap-4 p-8 border-2 rounded-lg text-lg transition-all font-semibold
+                ${isSelected
+                  ? 'border-blue-500 bg-blue-500 text-white ring-4 ring-blue-200 shadow-lg scale-105'
+                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400'
+                }`}
+            >
+              {renderIcon(option.type, isSelected)}
+              <span>{option.label}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

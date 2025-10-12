@@ -1,14 +1,15 @@
+import React from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import Header from '../components/common/Header';
 import ProgressBar from '../components/common/ProgressBar';
 import { useLearningStore } from '../store/learningStore';
-import CorrectModal from '../components/common/CorrectModal';
 import IncorrectModal from '../components/common/IncorrectModal';
 import Question from '../components/learning/Question';
 
 export default function LearningLayout() {
   const navigate = useNavigate();
-  const { stepId } = useParams<{ stepId: string }>();
+  const { questId, stepId } = useParams<{ questId: string; stepId: string }>();
+  const urlQuestId = parseInt(questId || '1', 10);
   const currentStep = parseInt(stepId || '1', 10);
 
   // Zustand 스토어에서 상태와 액션을 가져옵니다.
@@ -24,15 +25,35 @@ export default function LearningLayout() {
     endLearning,
     sendLearningResult,
     learningData, // 스토어에서 learningData 가져오기
+    startStep,
+    endStep,
   } = useLearningStore();
 
   const currentQuestionData = learningData[currentStep];
 
+  // 디버깅용 - selectedAnswer 상태 확인
+  console.log('LearningLayout - selectedAnswer:', selectedAnswer);
+  console.log('LearningLayout - currentQuestionData:', currentQuestionData);
+
+  // 현재 단계가 시작될 때 시간 기록
+  React.useEffect(() => {
+    if (currentQuestionData) {
+      startStep(currentStep);
+    }
+  }, [currentStep, currentQuestionData, startStep]);
+
   const handleSubmit = () => {
     // 여기에 정답 확인 로직을 추가할 수 있습니다.
     console.log(`Step ${currentStep} Answer: ${selectedAnswer}`);
+    console.log(`Correct Answer: ${currentQuestionData?.correctAnswer}`);
 
-    if (!selectedAnswer || !currentQuestionData) return;
+    if (!selectedAnswer || !currentQuestionData) {
+      console.log('Submit blocked - selectedAnswer:', selectedAnswer, 'currentQuestionData:', currentQuestionData);
+      return;
+    }
+
+    // 현재 단계의 시간 및 답변 기록
+    endStep(currentStep, selectedAnswer, currentQuestionData.correctAnswer);
 
     // Zustand 스토어의 checkAnswer 액션 호출
     checkAnswer(currentQuestionData.correctAnswer, currentQuestionData.stackImage);
@@ -41,7 +62,7 @@ export default function LearningLayout() {
   const handleNext = () => {
     if (currentStep < totalSteps) {
       closeModalAndGoToNextStep(); // 스토어 액션 호출
-      navigate(`/learning/${currentStep + 1}`);
+      navigate(`/learning/${urlQuestId}/${currentStep + 1}`);
     } else {
       // 마지막 문제일 경우
       endLearning(); // 학습 종료 시간 기록

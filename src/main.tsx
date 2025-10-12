@@ -2,33 +2,23 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
-import App from "./App";
-import WordTest from "./features/wordtest/WordTest";
-import { SpacePlanetQuestion } from "./features/space";
 import LearningLayout from './layouts/LearningLayout';
 import LearningStepPage from './pages/LearningStepPage';
 import GameClearPage from './pages/GameClearPage';
 import LearningIntroPage from './pages/LearningIntroPage';
+import GameLayout from './layouts/GameLayout';
+import GameStepPage from './pages/GameStepPage';
+import GameResultPage from './pages/GameResultPage';
+import GameIntroPage from './pages/GameIntroPage';
 import Home from './pages/Home';
 import LearningStatusPage from './pages/LearningStatusPage';
 import MainLayout from './components/layout/MainLayout';
 import ReviewNotesPage from './pages/ReviewNotesPage';
 import VocabularyPage from './pages/VocabularyPage';
 
-
-import RandomLearningLayout from './layouts/RandomLearningLayout';
-
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
-    children: [
-      { index: true, element: <WordTest /> },
-      { path: "space", element: <SpacePlanetQuestion /> },
-    ],
-  },
-  {
-    path: "/home",
     element: <Home />,
   },
   {
@@ -49,11 +39,11 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: '/learning/intro',
+    path: '/learning/intro/:questId?',
     element: <LearningIntroPage />,
   },
   {
-    path: "/learning",
+    path: "/learning/:questId",
     // element: <RandomLearningLayout />, // 랜덤 레이아웃.
     element: <LearningLayout />,
     children: [
@@ -66,6 +56,25 @@ const router = createBrowserRouter([
   {
     path: '/result',
     element: <GameClearPage />,
+  },
+  // 새로운 게임 페이지들
+  {
+    path: '/game/intro',
+    element: <GameIntroPage />,
+  },
+  {
+    path: "/game",
+    element: <GameLayout />,
+    children: [
+      {
+        path: ':stepId',
+        element: <GameStepPage />,
+      },
+    ],
+  },
+  {
+    path: '/game/result',
+    element: <GameResultPage />,
   },
 ]);
 

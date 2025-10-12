@@ -1,13 +1,13 @@
-import Question from '../learning/Question'; // Question 컴포넌트 재사용
+import { Ghost } from 'lucide-react';
+import GameQuestion from './GameQuestion';
 
-interface IncorrectModalProps {
+interface GameIncorrectModalProps {
   onNext: () => void;
   sounds: { id: string | number; type: string; url: string; label?: string }[];
 }
 
-export default function IncorrectModal({ onNext, sounds }: IncorrectModalProps) {
+export default function GameIncorrectModal({ onNext, sounds }: GameIncorrectModalProps) {
   const handleAddToNotes = () => {
-    // 오답노트 추가 로직 (지금은 콘솔에 로그만 출력)
     console.log('오답노트에 추가되었습니다.');
     alert('오답노트에 추가되었습니다.');
   };
@@ -15,10 +15,13 @@ export default function IncorrectModal({ onNext, sounds }: IncorrectModalProps) 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center p-4 z-50">
       <div className="bg-white rounded-2xl p-8 text-center flex flex-col items-center gap-6 w-full max-w-sm">
-        <h2 className="text-2xl font-bold text-red-500">다시 들어보아요!</h2>
+        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+          <Ghost size={32} className="text-red-500" />
+        </div>
+        <h2 className="text-2xl font-bold text-red-500">틀렸대~요</h2>
         
         {/* 음성 다시 듣기 버튼 */}
-        <Question sounds={sounds} />
+        <GameQuestion sounds={sounds} />
 
         {/* 오답노트 추가 버튼 */}
         <button

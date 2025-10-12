@@ -4,11 +4,11 @@ import { ChevronRight } from 'lucide-react'; // 아이콘 라이브러리 예시
 import { useLearningStore } from '../store/learningStore';
 
 const Home: React.FC = () => {
-    const { fetchCourseData, courseData, totalCourseCount, currentCourseId, isLoading } = useLearningStore();
+    const { fetchQuestList, questList, isLoading } = useLearningStore();
 
     useEffect(() => {
-        fetchCourseData(); // Quest ID 1로 데이터 요청
-    }, [fetchCourseData]);
+        fetchQuestList(); // Quest 목록 데이터 요청
+    }, [fetchQuestList]);
 
     return (
         <div className="flex flex-col h-screen max-w-lg mx-auto p-4 font-sans">
@@ -83,13 +83,13 @@ const Home: React.FC = () => {
                     {isLoading ? (
                         <div>Loading...</div>
                     ) : (
-                        Array.from({ length: totalCourseCount }, (_, i) => i).map((idx) => (
-                            <Link to={`/learning/intro`} key={idx} className="flex-shrink-0 w-2xs snap-center block bg-sky-500/60 rounded-2xl p-6 relative overflow-hidden shadow-md">
+                        questList.map((quest) => (
+                            <Link to={`/learning/intro/${quest.questId}`} key={quest.questId} className="flex-shrink-0 w-2xs snap-center block bg-sky-500/60 rounded-2xl p-6 relative overflow-hidden shadow-md">
 
-                                <div className="text-3xl font-bold text-gray-900 mb-12">{courseData[idx].doneQuestCount}/{courseData[idx].totalQuestCount}</div>
-                                <div className="text-4xl font-extrabold text-gray-900 mb-4">{courseData[idx].title}</div>
+                                <div className="text-3xl font-bold text-gray-900 mb-12">{quest.order}</div>
+                                <div className="text-4xl font-extrabold text-gray-900 mb-4">{quest.title}</div>
                                 <span className="flex items-center mb-4">
-                                    <span className="bg-gray-100 text-gray-500 px-2 py-1 rounded-full text-xs mr-2">#{courseData[idx].objective}</span>
+                                    <span className="bg-gray-100 text-gray-500 px-2 py-1 rounded-full text-xs mr-2">#{quest.type}</span>
                                 </span>
                                 <div className="flex space-x-2">
                                     <span className="text-3xl text-gray-400 opacity-50">⚪</span>

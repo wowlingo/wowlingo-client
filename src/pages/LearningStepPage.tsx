@@ -5,34 +5,44 @@ import { useLearningStore, QuestionData } from '../store/learningStore';
 
 export default function LearningStepPage() {
   const navigate = useNavigate();
-  const { stepId } = useParams<{ stepId: string }>();
+  const { questId, stepId } = useParams<{ questId: string; stepId: string }>();
+  const urlQuestId = parseInt(questId || '1', 10); // URL에서 가져온 퀘스트 ID
   const urlStepNumber = parseInt(stepId || '1', 10); // URL에서 가져온 현재 문제 번호
 
-  const { learningData, isLoading, startLearning, currentStep, currentQuestId: storeLoadedQuestId } = useLearningStore((state) => ({
+  const { learningData, isLoading, startLearning, currentStep, currentQuestId: storeLoadedQuestId, fetchQuestData, rawQuestData } = useLearningStore((state) => ({
     learningData: state.learningData,
     isLoading: state.isLoading,
     startLearning: state.startLearning,
     currentStep: state.currentStep,
     currentQuestId: state.currentQuestId, // 스토어에 로드된 퀘스트 ID
+    fetchQuestData: state.fetchQuestData,
+    rawQuestData: state.rawQuestData, // quest 타입 정보를 위해 추가
   }));
+
+  // URL의 questId와 스토어의 questId가 다르면 데이터를 다시 로드
+  useEffect(() => {
+    if (urlQuestId && urlQuestId !== storeLoadedQuestId) {
+      fetchQuestData(urlQuestId);
+    }
+  }, [urlQuestId, storeLoadedQuestId, fetchQuestData]);
 
   // 퀘스트 데이터가 로드되지 않았거나 유효하지 않은 경우 인트로 페이지로 리다이렉트
   useEffect(() => {
     // 로딩 중이 아니고, 스토어에 로드된 퀘스트 ID가 없거나, learningData가 비어있으면 리다이렉트
     // (이는 직접 접근했거나, 로딩 실패, 또는 퀘스트 데이터가 아직 없는 경우)
     if (!isLoading && (!storeLoadedQuestId || Object.keys(learningData).length === 0)) {
-      navigate('/learning/intro');
+      navigate(`/learning/intro/${urlQuestId}`);
     }
-  }, [isLoading, storeLoadedQuestId, learningData, navigate]);
+  }, [isLoading, storeLoadedQuestId, learningData, navigate, urlQuestId]);
 
   // 스토어의 currentStep과 URL의 stepNumber가 다르면 스토어의 currentStep으로 이동
   useEffect(() => {
     // storeLoadedQuestId가 있고, learningData가 비어있지 않으며,
     // URL의 stepNumber가 스토어의 currentStep과 다르면 동기화
     if (storeLoadedQuestId && Object.keys(learningData).length > 0 && urlStepNumber !== currentStep) {
-      navigate(`/learning/${currentStep}`);
+      navigate(`/learning/${urlQuestId}/${currentStep}`);
     }
-  }, [urlStepNumber, currentStep, navigate, storeLoadedQuestId, learningData]);
+  }, [urlStepNumber, currentStep, navigate, storeLoadedQuestId, learningData, urlQuestId]);
 
 
   useEffect(() => {
@@ -61,7 +71,7 @@ export default function LearningStepPage() {
       {/* <Question sounds={data.sounds} /> */}
 
       {/* 3-2. 정답 (이미지 + 버튼) */}
-      <AnswerOptions options={data.options} />
+      <AnswerOptions options={data.options} questType={rawQuestData?.type} />
     </div>
   );
 }

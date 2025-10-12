@@ -1,8 +1,6 @@
 import { create } from 'zustand';
 import type { CSSProperties } from 'react'; // CSSProperties 타입을 가져옵니다.
 
-const BASE_IMAGE_URL = '/images/layer-0.png';
-
 // 모달 상태를 위한 타입 추가
 type ModalState = 'correct' | 'incorrect' | 'closed';
 
@@ -13,9 +11,16 @@ type ApiQuestUnit = {
   type: string;
 };
 
+type ApiQuestOption = {
+  id: string;
+  type: string;
+  label: string;
+};
+
 type ApiQuestItem = {
   units: ApiQuestUnit[];
   answer: string;
+  options: ApiQuestOption[];
 };
 
 type ApiQuestResponseData = {
@@ -25,21 +30,20 @@ type ApiQuestResponseData = {
   items: ApiQuestItem[];
 };
 
-type ApiCourseResponseData = {
-  courseId: number;
+
+type ApiQuestListData = {
+  questId: number;
   title: string;
   type: string;
-  objective: string;
-  totalQuestCount: number;
-  doneQuestCount: number;
-  enableYn: boolean;
+  questItemCount: number;
+  order: number;
 };
 
 // 학습 데이터 타입 (기존 QuestionData와 유사)
 export type QuestionData = {
   sounds: { id: string; type: string; url: string; label?: string }[];
   image: string;
-  options: { type: string; label: string }[];
+  options: { id: string; type: string; label: string }[];
   stackImage: string;
   correctAnswer: string;
 };
@@ -77,6 +81,17 @@ const BASE_IMAGE_LAYER: ImageLayer = {
   },
 };
 
+// 문제별 진행 상황을 추적하는 타입
+type StepProgress = {
+  questItemId: number; // 실제 questItemId (API에서 받은 값)
+  startedAt: number; // 문제 시작 시간
+  endedAt: number | null; // 문제 종료 시간
+  attemptCount: number; // 시도 횟수
+  userAnswer: string | null; // 사용자 답변
+  correctAnswer: string; // 정답
+  isCorrect: boolean | null; // 정답 여부
+};
+
 // 상태(state)와 액션(actions)에 대한 타입을 정의합니다.
 interface LearningState {
   currentStep: number;
@@ -89,11 +104,12 @@ interface LearningState {
   endTime: number | null;   // 학습 종료 시간 (타임스탬프)
   correctImageStack: ImageLayer[]; // 타입을 string[] 에서 ImageLayer[] 로 변경
   learningData: Record<number, QuestionData>; // API로부터 받은 학습 데이터 (변환된 형태)
+  rawQuestData: ApiQuestResponseData | null; // 원본 API 응답 데이터 저장
   isLoading: boolean;
   currentQuestId: number | null; // 현재 로드된 퀘스트 ID
-  courseData: ApiCourseResponseData[];
-  totalCourseCount: number;
-  currentCourseId: number | null;
+  questList: ApiQuestListData[];
+  totalQuestCount: number;
+  stepProgress: Record<number, StepProgress>; // 각 단계별 진행 상황
 }
 
 interface LearningActions {
@@ -105,9 +121,11 @@ interface LearningActions {
   closeModalAndGoToNextStep: () => void;
   startLearning: () => void;
   endLearning: () => void;
+  startStep: (stepNumber: number) => void; // 단계별 시작 시간 기록
+  endStep: (stepNumber: number, userAnswer: string, correctAnswer: string) => void; // 단계별 종료 시간 및 답변 기록
   sendLearningResult: () => Promise<void>; // 학습 결과 전송 액션
   fetchQuestData: (questId: number) => Promise<void>; // 퀘스트 전체를 가져오는 액션
-  fetchCourseData: () => Promise<void>;
+  fetchQuestList: () => Promise<void>;
 }
 
 // 스토어를 생성합니다.
@@ -123,40 +141,33 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
   endTime: null,
   correctImageStack: [BASE_IMAGE_LAYER], // 초기값을 객체 배열로 변경
   learningData: {},
+  rawQuestData: null,
   isLoading: false,
   currentQuestId: null,
-  courseData: [],
-  totalCourseCount: 0,
-  currentCourseId: null,
+  questList: [],
+  totalQuestCount: 0,
+  stepProgress: {},
 
-  fetchCourseData: async () => {
+  fetchQuestList: async () => {
     set({ isLoading: true });
 
     try {
-      const response = await fetch(`http://localhost:8080/api/courses?userId=1`);
+      const response = await fetch(`http://localhost:8080/api/quests`);
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-      const jsonResponse: { data: ApiCourseResponseData[] } = await response.json();
-      const courseData = jsonResponse.data;
-
-      let lastCourseId: number | null = null;
-      courseData.forEach((item) => {
-        if (item.enableYn) {
-          lastCourseId = item.courseId;
-        }
-      });
+      const jsonResponse: { data: ApiQuestListData[] } = await response.json();
+      const questList = jsonResponse.data;
 
       set({
-        courseData,
-        totalCourseCount: courseData.length,
+        questList,
+        totalQuestCount: questList.length,
         isLoading: false,
-        currentCourseId: lastCourseId,
       });
 
     } catch (error) {
-      console.error("Failed to fetch quest data:", error);
-      set({ isLoading: false, learningData: {}, totalSteps: 0 });
+      console.error("Failed to fetch quest list:", error);
+      set({ isLoading: false, questList: [], totalQuestCount: 0 });
     }
   },
   // API로부터 퀘스트 데이터를 가져오는 액션
@@ -166,7 +177,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
       return;
     }
 
-    set({ isLoading: true, currentQuestId: questId, learningData: {} }); // 새 퀘스트 로드 시 데이터 초기화
+    set({ isLoading: true, currentQuestId: questId, learningData: {}, rawQuestData: null }); // 새 퀘스트 로드 시 데이터 초기화
     try {
       const response = await fetch(`http://localhost:8080/api/quests/${questId}`);
       if (!response.ok) {
@@ -176,11 +187,9 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
       const questData = jsonResponse.data;
 
       const transformedLearningData: Record<number, QuestionData> = {};
-      const defaultOptions = questData.type === 'statement-question'
-        ? [{ type: 'statement', label: '평서문' }, { type: 'question', label: '의문문' }]
-        : []; // 다른 타입에 대한 기본 옵션 추가 필요
 
       questData.items.forEach((item, index) => {
+        console.log('Processing item:', item); // 디버깅용
         transformedLearningData[index + 1] = { // 1-based index
           sounds: item.units.map(unit => ({
             id: String(unit.id), // id를 string으로 변환
@@ -189,7 +198,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
             // label은 필요에 따라 추가
           })),
           image: `https://picsum.photos/200/300?random=${questId}-${index}`, // 예시 이미지
-          options: defaultOptions,
+          options: item.options, // 서버에서 받은 옵션 사용
           stackImage: `/images/layer-${index + 1}.png`, // 예시 스택 이미지 (4개 레이어 반복)
           correctAnswer: item.answer,
         };
@@ -197,6 +206,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
 
       set({
         learningData: transformedLearningData,
+        rawQuestData: questData, // 원본 API 응답 데이터 저장
         totalSteps: questData.items.length,
         isLoading: false,
         currentStep: 1, // 새 퀘스트 로드 시 currentStep을 1로 초기화
@@ -274,8 +284,10 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
       endTime: null,
       correctImageStack: [BASE_IMAGE_LAYER], // 이미지 스택 초기화
       learningData: {}, // 학습 데이터 초기화
+      rawQuestData: null, // 원본 API 데이터 초기화
       isLoading: false,
       currentQuestId: null,
+      stepProgress: {}, // 단계별 진행 상황 초기화
     }),
 
   // 학습 시작 시 호출, 시작 시간 기록
@@ -298,9 +310,59 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
     };
   }),
 
+  // 단계별 시작 시간 기록
+  startStep: (stepNumber: number) => set((state) => {
+    const currentQuestionData = state.learningData[stepNumber];
+    if (!currentQuestionData || !state.rawQuestData) return {};
+
+    // 실제 questItemId 추출 (API 응답에서)
+    // API 응답 구조에 따라 questItemId를 추출해야 함
+    // 현재는 stepNumber를 사용하지만, 실제로는 API 응답에서 questItemId를 추출해야 함
+    const questItemId = stepNumber; // TODO: API 응답에서 실제 questItemId 추출
+
+    const stepProgress: StepProgress = {
+      questItemId,
+      startedAt: Date.now(),
+      endedAt: null,
+      attemptCount: 0,
+      userAnswer: null,
+      correctAnswer: currentQuestionData.correctAnswer,
+      isCorrect: null,
+    };
+
+    return {
+      stepProgress: {
+        ...state.stepProgress,
+        [stepNumber]: stepProgress,
+      },
+    };
+  }),
+
+  // 단계별 종료 시간 및 답변 기록
+  endStep: (stepNumber: number, userAnswer: string, correctAnswer: string) => set((state) => {
+    const currentStepProgress = state.stepProgress[stepNumber];
+    if (!currentStepProgress) return {};
+
+    const isCorrect = userAnswer === correctAnswer;
+    const updatedStepProgress: StepProgress = {
+      ...currentStepProgress,
+      endedAt: Date.now(),
+      attemptCount: currentStepProgress.attemptCount + 1,
+      userAnswer,
+      isCorrect,
+    };
+
+    return {
+      stepProgress: {
+        ...state.stepProgress,
+        [stepNumber]: updatedStepProgress,
+      },
+    };
+  }),
+
   // 학습 정보 API 전송
   sendLearningResult: async () => {
-    const { currentQuestId, answers, startTime, endTime, learningData } = get();
+    const { currentQuestId, stepProgress, startTime, endTime, totalSteps, rawQuestData } = get();
 
     // 데이터가 없으면 전송하지 않음
     if (!currentQuestId || !startTime || !endTime) {
@@ -308,27 +370,48 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
       return;
     }
 
-    // API로 보낼 데이터 구성
+    const progressItems = Object.values(stepProgress);
+    
+    // 전체 학습 통계 계산
+    const totalQuestItemCount = totalSteps;
+    const correctQuestItemCount = progressItems.filter(item => item.isCorrect === true).length;
+    const accuracyRate = totalQuestItemCount > 0 ? (correctQuestItemCount / totalQuestItemCount) * 100 : 0;
+    const totalTimeSpent = Math.round((endTime - startTime) / 1000); // 초 단위
+
+    // API로 보낼 데이터 구성 (새로운 형식)
     const resultData = {
-      questId: currentQuestId,
-      results: Object.entries(answers).map(([step, userAnswer]) => {
-        const stepNum = parseInt(step, 10);
-        const questionData = learningData[stepNum];
+      startedAt: new Date(startTime).toISOString(),
+      endedAt: new Date(endTime).toISOString(),
+      timeSpent: totalTimeSpent,
+      doneYn: true,
+      totalQuestItemCount,
+      correctQuestItemCount,
+      accuracyRate: Math.round(accuracyRate * 100) / 100, // 소수점 2자리까지
+      items: progressItems.map((progress) => {
+        const itemTimeSpent = progress.endedAt 
+          ? Math.round((progress.endedAt - progress.startedAt) / 1000) // 초 단위
+          : 0;
+        
+        // quest type에 따라 userAnswer 형식 결정
+        const userAnswer = rawQuestData?.type === 'choice' 
+          ? parseInt(progress.userAnswer || '0', 10) // choice 타입은 숫자
+          : progress.userAnswer || ''; // 다른 타입은 문자열
+
         return {
-          step: stepNum,
-          questionSoundIds: questionData.sounds.map(s => s.id),
-          userAnswer: userAnswer,
-          correctAnswer: questionData.correctAnswer,
-          isCorrect: questionData.correctAnswer === userAnswer,
-        }
+          questItemId: progress.questItemId,
+          userAnswer,
+          correctYn: progress.isCorrect || false,
+          timeSpent: itemTimeSpent,
+          attemptCount: progress.attemptCount,
+          startedAt: new Date(progress.startedAt).toISOString(),
+          endedAt: progress.endedAt ? new Date(progress.endedAt).toISOString() : new Date().toISOString(),
+        };
       }),
-      startTime: new Date(startTime).toISOString(), // ISO 8601 형식
-      endTime: new Date(endTime).toISOString(),     // ISO 8601 형식
     };
 
     try {
-      console.log(resultData);
-      const response = await fetch('http://localhost:8080/api/userQuest', {
+      console.log('Sending learning result:', resultData);
+      const response = await fetch(`http://localhost:8080/api/user-quests/1/${currentQuestId}/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

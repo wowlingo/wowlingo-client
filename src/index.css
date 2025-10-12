@@ -3,9 +3,19 @@
 @tailwind components;
 @tailwind utilities;
 
-/* @tailwind base;
-@tailwind components;
-@tailwind utilities; */
+/* 3D 카드 뒤집기 애니메이션 */
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.card-flip {
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease-in-out;
+}
+
+.card-flip.flipped {
+  transform: rotateY(180deg);
+}
 
 html,
 body,

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Turtle, Volume2 } from 'lucide-react'; // 듣기 아이콘
 
 // 하나의 사운드에 대한 타입 정의
