@@ -39,6 +39,26 @@ type ApiQuestListData = {
   order: number;
 };
 
+// 홈 화면용 퀘스트 진행 상태 타입
+type ApiUserQuestProgress = {
+  questId: number;
+  title: string;
+  type: string;
+  order: number;
+  tags: string[];
+  correctCount: number;
+  totalCount: number;
+  isCompleted: boolean;
+  isStarted: boolean;
+  accuracyRate: string;
+  progressRate: number;
+};
+
+type ApiUserQuestResponse = {
+  quests: ApiUserQuestProgress[];
+  activeQuestId: number;
+};
+
 // 학습 데이터 타입 (기존 QuestionData와 유사)
 export type QuestionData = {
   sounds: { id: string; type: string; url: string; label?: string }[];
@@ -57,17 +77,17 @@ type ImageLayer = {
 // 쌓이는 레이어들에 적용할 스타일 목록
 // zIndex를 통해 쌓이는 순서를 제어합니다.
 const STACK_LAYER_STYLES: CSSProperties[] = [
-  { width: '100%', top: '0%', left: '0%', zIndex: 2 },//빼빼로 10
-  { width: '100%', top: '0%', left: '0%', zIndex: 3 },//오렌지 22
-  { width: '100%', top: '0%', left: '0%', zIndex: 4 },//웨하스 45
-  { width: '100%', top: '0%', left: '0%', zIndex: 5 },//초콜릿문구 48
-  { width: '100%', top: '0%', left: '0%', zIndex: 6 },//초 43
+  { width: '100%', height: '100%', top: '0%', left: '0%', zIndex: 2 },//빼빼로 10
+  { width: '100%', height: '100%', top: '0%', left: '0%', zIndex: 3 },//오렌지 22
+  { width: '100%', height: '100%', top: '0%', left: '0%', zIndex: 4 },//웨하스 45
+  { width: '100%', height: '100%', top: '0%', left: '0%', zIndex: 5 },//초콜릿문구 48
+  { width: '100%', height: '100%', top: '0%', left: '0%', zIndex: 6 },//초 43
 
-  { width: '100%', top: '0%', left: '0%', zIndex: 7 }, //키위 33
-  { width: '100%', top: '0%', left: '0%', zIndex: 8 },//딸기 15
-  { width: '100%', top: '0%', left: '0%', zIndex: 9 },//블루베리 28
-  { width: '100%', top: '0%', left: '0%', zIndex: 10 },//휘핑 43
-  { width: '100%', top: '0%', left: '0%', zIndex: 11 },//초코칩 38
+  { width: '100%', height: '100%', top: '0%', left: '0%', zIndex: 7 }, //키위 33
+  { width: '100%', height: '100%', top: '0%', left: '0%', zIndex: 8 },//딸기 15
+  { width: '100%', height: '100%', top: '0%', left: '0%', zIndex: 9 },//블루베리 28
+  { width: '100%', height: '100%', top: '0%', left: '0%', zIndex: 10 },//휘핑 43
+  { width: '100%', height: '100%', top: '0%', left: '0%', zIndex: 11 },//초코칩 38
 ];
 
 // 기본 배경 이미지 레이어
@@ -75,6 +95,7 @@ const BASE_IMAGE_LAYER: ImageLayer = {
   src: '/images/layer-0.png',
   style: {
     width: '100%',
+    height: '100%',
     top: '0%',
     left: '0%',
     zIndex: 1,
@@ -110,6 +131,9 @@ interface LearningState {
   questList: ApiQuestListData[];
   totalQuestCount: number;
   stepProgress: Record<number, StepProgress>; // 각 단계별 진행 상황
+  selectedLayoutType: number; // 선택된 레이아웃 타입 (1, 2, 3, 4)
+  userQuestProgress: ApiUserQuestProgress[]; // 사용자 퀘스트 진행 상태
+  activeQuestId: number | null; // 현재 활성 퀘스트 ID
 }
 
 interface LearningActions {
@@ -126,6 +150,8 @@ interface LearningActions {
   sendLearningResult: () => Promise<void>; // 학습 결과 전송 액션
   fetchQuestData: (questId: number) => Promise<void>; // 퀘스트 전체를 가져오는 액션
   fetchQuestList: () => Promise<void>;
+  fetchUserQuestProgress: (userId: number) => Promise<void>; // 사용자 퀘스트 진행 상태 조회
+  setSelectedLayoutType: (layoutType: number) => void; // 레이아웃 타입 설정
 }
 
 // 스토어를 생성합니다.
@@ -147,6 +173,9 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
   questList: [],
   totalQuestCount: 0,
   stepProgress: {},
+  selectedLayoutType: 1, // 기본값은 1 (푸딩 레이아웃)
+  userQuestProgress: [], // 사용자 퀘스트 진행 상태
+  activeQuestId: null, // 현재 활성 퀘스트 ID
 
   fetchQuestList: async () => {
     set({ isLoading: true });
@@ -177,7 +206,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
       return;
     }
 
-    set({ isLoading: true, currentQuestId: questId, learningData: {}, rawQuestData: null }); // 새 퀘스트 로드 시 데이터 초기화
+    set({ isLoading: true, currentQuestId: questId, learningData: {}, rawQuestData: null, correctImageStack: [BASE_IMAGE_LAYER] }); // 새 퀘스트 로드 시 데이터 초기화
     try {
       const response = await fetch(`http://localhost:8080/api/quests/${questId}`);
       if (!response.ok) {
@@ -288,6 +317,8 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
       isLoading: false,
       currentQuestId: null,
       stepProgress: {}, // 단계별 진행 상황 초기화
+      userQuestProgress: [], // 사용자 퀘스트 진행 상태 초기화
+      activeQuestId: null, // 활성 퀘스트 ID 초기화
     }),
 
   // 학습 시작 시 호출, 시작 시간 기록
@@ -392,10 +423,29 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
           ? Math.round((progress.endedAt - progress.startedAt) / 1000) // 초 단위
           : 0;
         
-        // quest type에 따라 userAnswer 형식 결정
-        const userAnswer = rawQuestData?.type === 'choice' 
-          ? parseInt(progress.userAnswer || '0', 10) // choice 타입은 숫자
-          : progress.userAnswer || ''; // 다른 타입은 문자열
+        // 모든 quest type에서 userAnswer를 숫자로 변환
+        let userAnswer;
+        
+        // progress.userAnswer가 문자열인 경우 숫자로 변환
+        // if (typeof progress.userAnswer === 'string') {
+        //   // "same", "different", "statement", "question" 등을 숫자로 매핑
+        //   if (progress.userAnswer === 'same') {
+        //     userAnswer = 1;
+        //   } else if (progress.userAnswer === 'different') {
+        //     userAnswer = 2;
+        //   } else if (progress.userAnswer === 'statement') {
+        //     userAnswer = 1;
+        //   } else if (progress.userAnswer === 'question') {
+        //     userAnswer = 2;
+        //   } else {
+        //     // 숫자 문자열인 경우
+        //     userAnswer = parseInt(progress.userAnswer, 10) || 0;
+        //   }
+        // } else {
+        //   // 이미 숫자인 경우
+        //   userAnswer = progress.userAnswer || 0;
+        // }
+        
 
         return {
           questItemId: progress.questItemId,
@@ -426,9 +476,42 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
       const responseData = await response.json();
       console.log('학습 결과가 성공적으로 전송되었습니다:', responseData);
 
+      // 학습 완료 후 진행 상태 새로고침을 위해 홈 페이지에 알림
+      window.dispatchEvent(new CustomEvent('learningCompleted'));
+
     } catch (error) {
       console.error('학습 결과 전송 중 오류가 발생했습니다:', error);
     }
+  },
+
+  // 사용자 퀘스트 진행 상태 조회
+  fetchUserQuestProgress: async (userId: number) => {
+    set({ isLoading: true });
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/user-quests/${userId}`);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const jsonResponse: { data: ApiUserQuestResponse } = await response.json();
+      const userQuestProgress = jsonResponse.data.quests;
+      const activeQuestId = jsonResponse.data.activeQuestId;
+
+      set({
+        userQuestProgress,
+        activeQuestId,
+        isLoading: false,
+      });
+
+    } catch (error) {
+      console.error("Failed to fetch user quest progress:", error);
+      set({ isLoading: false, userQuestProgress: [] });
+    }
+  },
+
+  // 레이아웃 타입 설정 액션
+  setSelectedLayoutType: (layoutType: number) => {
+    set({ selectedLayoutType: layoutType });
   },
 
 }));
