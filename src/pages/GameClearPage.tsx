@@ -3,10 +3,11 @@ import Header from '../components/common/Header';
 import ProgressBar from '../components/common/ProgressBar';
 import ResultsInfo from '../components/result/ResultsInfo';
 import { useLearningStore } from '../store/learningStore';
+import CatImageStack from '../components/backgrounds/CatImageStack';
 
 export default function GameClearPage() {
   const navigate = useNavigate();
-  const { totalSteps, answers, startTime, endTime, reset, correctImageStack } = useLearningStore();
+  const { totalSteps, answers, startTime, endTime, reset, correctImageStack, selectedLayoutType } = useLearningStore();
 
   const { learningData } = useLearningStore((state) => ({
     fetchLearningData: state.fetchQuestData,
@@ -42,7 +43,7 @@ export default function GameClearPage() {
     <div className="flex flex-col h-screen max-w-lg mx-auto p-4 font-sans">
       <Header />
       {/* 진행도는 10/10으로 꽉 찬 상태로 표시 */}
-      <ProgressBar currentStep={totalSteps} totalSteps={totalSteps} enableButton={false} />
+      <ProgressBar currentStep={totalSteps} totalSteps={totalSteps} />
 
       <h2 className="text-3xl font-bold text-center text-gray-800 my-6">
         Game Clear !!
@@ -50,20 +51,25 @@ export default function GameClearPage() {
 
       <div className="flex-grow"></div>
 
-      <main className="flex-grow flex flex-col justify-center items-center text-center gap-8 mb-12">
-        {/* 풀이 끝 이미지 */}
-        {/* <img src="https://picsum.photos/200/300" alt="Game Clear" className="w-full max-w-sm rounded-lg shadow-md" /> */}
-        <div className="relative w-full max-w-sm mx-auto aspect-square">
-          {correctImageStack.map((layer, index) => (
-            <img
-              key={index}
-              src={layer.src}
-              alt={`Final Layer ${index + 1}`}
-              className="absolute w-full h-full object-contain"
-              style={layer.style}
-            />
-          ))}
-        </div>
+      <main className="flex-grow flex flex-col justify-center items-center text-center mb-4">
+        {/* 풀이 끝 이미지 - 레이아웃에 따라 다른 이미지 표시 */}
+        {selectedLayoutType === 2 ? (
+          // Layout2일 때는 CatImageStack 표시
+          <CatImageStack />
+        ) : (
+          // Layout1, 3, 4 등 기본적으로는 케이크 이미지 스택 표시
+          <div className="relative w-full max-w-sm mx-auto aspect-square">
+            {correctImageStack.map((layer, index) => (
+              <img
+                key={index}
+                src={layer.src}
+                alt={`Final Layer ${index + 1}`}
+                className="absolute w-full h-full object-contain"
+                style={layer.style}
+              />
+            ))}
+          </div>
+        )}
 
         <div className="flex-grow"></div>
 

@@ -9,7 +9,7 @@ export default function LearningStepPage() {
   const urlQuestId = parseInt(questId || '1', 10); // URL에서 가져온 퀘스트 ID
   const urlStepNumber = parseInt(stepId || '1', 10); // URL에서 가져온 현재 문제 번호
 
-  const { learningData, isLoading, startLearning, currentStep, currentQuestId: storeLoadedQuestId, fetchQuestData, rawQuestData } = useLearningStore((state) => ({
+  const { learningData, isLoading, startLearning, currentStep, currentQuestId: storeLoadedQuestId, fetchQuestData, rawQuestData, selectedLayoutType } = useLearningStore((state) => ({
     learningData: state.learningData,
     isLoading: state.isLoading,
     startLearning: state.startLearning,
@@ -17,6 +17,7 @@ export default function LearningStepPage() {
     currentQuestId: state.currentQuestId, // 스토어에 로드된 퀘스트 ID
     fetchQuestData: state.fetchQuestData,
     rawQuestData: state.rawQuestData, // quest 타입 정보를 위해 추가
+    selectedLayoutType: state.selectedLayoutType, // 선택된 레이아웃 타입
   }));
 
   // URL의 questId와 스토어의 questId가 다르면 데이터를 다시 로드
@@ -71,7 +72,7 @@ export default function LearningStepPage() {
       {/* <Question sounds={data.sounds} /> */}
 
       {/* 3-2. 정답 (이미지 + 버튼) */}
-      <AnswerOptions options={data.options} questType={rawQuestData?.type} />
+      <AnswerOptions options={data.options} questType={rawQuestData?.type} layoutType={selectedLayoutType} />
     </div>
   );
 }
