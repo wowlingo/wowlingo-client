@@ -1,12 +1,24 @@
 import React from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
-import Header from '../components/common/Header';
+import { X } from 'lucide-react';
 import ProgressBar from '../components/common/ProgressBar';
 import { useLearningStore } from '../store/learningStore';
 import IncorrectModal from '../components/common/IncorrectModal';
 import Question from '../components/learning/Question';
+import CakeImageStack from '../components/backgrounds/CakeImageStack';
 
-export default function LearningLayout() {
+// 각 레이아웃에서 커스터마이징할 수 있는 props
+interface BaseLearningLayoutProps {
+  children?: React.ReactNode; // 중앙 이미지 영역
+  backgroundClassName?: string; // 배경색 커스터마이징
+  submitButtonClassName?: string; // 제출 버튼 스타일 커스터마이징
+}
+
+export default function BaseLearningLayout({ 
+  children, 
+  backgroundClassName = "bg-blue-50",
+  submitButtonClassName = "bg-blue-500 hover:bg-blue-600"
+}: BaseLearningLayoutProps) {
   const navigate = useNavigate();
   const { questId, stepId } = useParams<{ questId: string; stepId: string }>();
   const urlQuestId = parseInt(questId || '1', 10);
@@ -17,33 +29,28 @@ export default function LearningLayout() {
     totalSteps,
     selectedAnswer,
     modalState,
-    correctImageStack,
     isCorrect,
     checkAnswer,
     showIncorrectModal,
     closeModalAndGoToNextStep,
     endLearning,
     sendLearningResult,
-    learningData, // 스토어에서 learningData 가져오기
+    learningData,
     startStep,
     endStep,
+    rawQuestData, // quest title을 위해 추가
   } = useLearningStore();
 
   const currentQuestionData = learningData[currentStep];
-
-  // 디버깅용 - selectedAnswer 상태 확인
-  console.log('LearningLayout - selectedAnswer:', selectedAnswer);
-  console.log('LearningLayout - currentQuestionData:', currentQuestionData);
 
   // 현재 단계가 시작될 때 시간 기록
   React.useEffect(() => {
     if (currentQuestionData) {
       startStep(currentStep);
     }
-  }, [currentStep, currentQuestionData, startStep]);
+  }, [currentStep, currentQuestionData]);
 
   const handleSubmit = () => {
-    // 여기에 정답 확인 로직을 추가할 수 있습니다.
     console.log(`Step ${currentStep} Answer: ${selectedAnswer}`);
     console.log(`Correct Answer: ${currentQuestionData?.correctAnswer}`);
 
@@ -61,69 +68,67 @@ export default function LearningLayout() {
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
-      closeModalAndGoToNextStep(); // 스토어 액션 호출
+      closeModalAndGoToNextStep();
       navigate(`/learning/${urlQuestId}/${currentStep + 1}`);
     } else {
       // 마지막 문제일 경우
-      endLearning(); // 학습 종료 시간 기록
-      sendLearningResult(); // 학습 정보 API 전송
-      navigate('/result'); // 결과 페이지로 이동
+      endLearning();
+      sendLearningResult();
+      navigate('/result');
     }
   };
 
   // 현재 문제의 사운드 데이터를 가져옵니다 (오답 모달용).
   const currentSounds = currentQuestionData?.sounds || [];
-  // 오답 모달에서는 느린 속도 버튼이 없으므로, 필터링합니다.
   const incorrectModalSounds = currentSounds.map(sound => ({ ...sound, label: undefined }));
 
-
   return (
-    <div className="flex flex-col h-screen max-w-lg mx-auto p-4 font-sans">
-      {/* 1. 헤더 (나가기 버튼) */}
-      <Header />
+    <div className={`flex flex-col h-screen max-w-lg mx-auto font-sans ${backgroundClassName}`}>
+      {/* 1. 헤더 (타이틀과 나가기 버튼) */}
+      <header className="flex justify-between items-center py-2 px-4">
+        {/* 왼쪽 빈 공간 (균형을 위해) */}
+        <div className="w-10"></div>
+        
+        {/* 가운데 타이틀 */}
+        {rawQuestData?.title && (
+          <h1 className="text-xl font-bold text-gray-900 text-center flex-1">{rawQuestData.title}</h1>
+        )}
+        
+        {/* 우측 나가기 버튼 */}
+        <button
+          onClick={() => navigate('/')}
+          aria-label="Exit learning session"
+          className="p-2 text-gray-500 rounded-full hover:bg-gray-100 hover:text-gray-800 transition-colors"
+        >
+          <X size={24} />
+        </button>
+      </header>
 
       {/* 2. 진행도 (Progress Bar) */}
-      <ProgressBar currentStep={currentStep} totalSteps={totalSteps} enableButton={true} />
+      <div className="px-4">
+        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
+      </div>
 
-      {/* 3. 문제와 정답 영역 (동적으로 변경됨) */}
-      {/* <main className="flex-grow my-6">
-        <Outlet />
-      </main> */}
-
-      {/* ✨ 메인 콘텐츠 영역 레이아웃 수정 */}
-      <div className="flex-grow flex flex-col justify-center items-center py-4 gap-6">
-
-        {/* 1. 소리 재생 버튼 */}
-        {currentQuestionData && <Question sounds={currentQuestionData.sounds} />}
-
-        <div className="flex-grow"></div>
-
-        {/* 1. 이미지 스택 표시 영역 */}
-        <div className="relative w-full max-w-sm mx-auto aspect-square flex-shrink-0 flex items-center justify-center">
-          {correctImageStack.map((layer, index) => (
-            <img
-              key={index}
-              src={layer.src}
-              alt={`Correct Answer Layer ${index + 1}`}
-              className="absolute w-full h-full object-contain transition-all duration-500 ease-out"
-              style={layer.style}
-            />
-          ))
-          }
+      {/* 3. 메인 콘텐츠 영역 */}
+      <div className="flex-grow flex flex-col justify-between items-center px-4 py-2 min-h-0">
+        {/* 상단: 소리 재생 버튼 */}
+        <div className="flex-shrink-0 pt-2">
+          {currentQuestionData && <Question key={currentStep} sounds={currentQuestionData.sounds} />}
         </div>
 
-        {/* 콘텐츠 사이의 공간을 채움 */}
-        <div className="flex-grow"></div>
+        {/* 중앙: 커스터마이징 가능한 이미지 영역 */}
+        <div className="flex-grow flex items-center justify-center">
+          {children || <CakeImageStack />}
+        </div>
 
-        {/* 2. 문제 풀이(Outlet) 영역 */}
-        <main className="flex-shrink-0">
+        {/* 하단: 문제 풀이(Outlet) 영역 */}
+        <main className="flex-shrink-0 w-full">
           <Outlet />
         </main>
       </div>
 
       {/* 4. 정답 제출 버튼 */}
-      <div className="flex-shrink-0">
-
+      <div className="flex-shrink-0 px-4 pb-4">
         {isCorrect === true && (
           <h3 className="w-full bg-gray-100 text-xl font-bold text-blue-500 py-3 px-4 rounded-lg mb-4">
             정답이에요! 이어서 가볼까요?
@@ -134,7 +139,6 @@ export default function LearningLayout() {
             오답 문구
           </h3>
         )}
-        {/* <h3 className="text-xl font-bold text-red-500 mb-4 bg-gray-100">오답 문구</h3> */}
 
         <button
           onClick={() => {
@@ -144,22 +148,20 @@ export default function LearningLayout() {
               handleNext();
             } else { // isCorrect === false (오답)
               if (modalState === 'closed') {
-                // 3. 오답이고, 모달이 닫혀있을 때 -> 모달 띄우기
-                showIncorrectModal(); // 새로 만든 액션 호출
+                showIncorrectModal();
               } else {
-                // 4. 오답이고, 모달이 열려있을 때 -> 다음 문제로
                 handleNext();
               }
             }
           }}
-          disabled={!selectedAnswer || !currentQuestionData} // 선택된 정답이 없으면 비활성화
-          className="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-lg disabled:bg-gray-300 hover:bg-blue-600 transition-colors"
+          disabled={!selectedAnswer || !currentQuestionData}
+          className={`w-full ${submitButtonClassName} text-white font-bold py-3 px-4 rounded-lg disabled:bg-gray-300 transition-colors`}
         >
           {(isCorrect != null) ? '다음' : '정답 제출'}
         </button>
       </div>
 
-      {/* {modalState === 'correct' && <CorrectModal onNext={handleNext} />} */}
+      {/* 오답 모달 */}
       {modalState === 'incorrect' && (
         <IncorrectModal
           onNext={handleNext}
