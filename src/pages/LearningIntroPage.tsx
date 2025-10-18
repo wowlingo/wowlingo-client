@@ -1,31 +1,44 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useLearningStore } from '../store/learningStore';
 import IntroHeader from '../components/intro/IntroHeader';
-import { useEffect, useState } from 'react'; // useState 추가
+import { useState, useEffect } from 'react';
 
 export default function PracticeIntroPage() {
   const navigate = useNavigate();
-  const { reset, startLearning, fetchQuestData, isLoading } = useLearningStore();
+  const { questId } = useParams<{ questId: string }>();
+  const { reset, startLearning, fetchQuestData, isLoading, questList, fetchQuestList } = useLearningStore();
   const [isFetching, setIsFetching] = useState(false); // 로딩 상태 추가
+
+  // URL에서 questId가 없으면 기본값 1 사용
+  const selectedQuestId = parseInt(questId || '1', 10);
+
+  // questList가 비어있으면 가져오기
+  useEffect(() => {
+    if (questList.length === 0) {
+      fetchQuestList();
+    }
+  }, [questList.length, fetchQuestList]);
+
+  // 현재 quest 정보 찾기
+  const currentQuest = questList.find(q => q.questId === selectedQuestId);
 
   const handleStart = async () => {
     setIsFetching(true); // 로딩 시작
     reset();           // 이전 학습 기록 초기화
     startLearning();   // 학습 시작 시간 기록
 
-    // 퀘스트 ID를 1로 가정하고 데이터를 미리 불러옵니다.
-    // 실제 앱에서는 introData에서 questId를 가져오거나, 사용자가 선택하도록 할 수 있습니다.
-    await fetchQuestData(1);
+    // URL에서 받은 questId로 데이터를 불러옵니다.
+    await fetchQuestData(selectedQuestId);
     setIsFetching(false); // 로딩 종료
-    navigate('/learning/1'); // 첫 번째 문제로 이동
+    navigate(`/learning/${selectedQuestId}/1`); // questId와 함께 첫 번째 문제로 이동
   };
 
   // 실제 앱에서는 이 데이터를 외부(예: API)에서 받아옵니다.
   const introData = {
-    groupName: '듣기 연습 2',
-    title: '2.1 평서문/의문문 억양 변별',
+    groupName: currentQuest?.title || '학습',
+    title: currentQuest?.title || '학습 시작',
     imageUrl: 'https://picsum.photos/200/300',
-    hashtags: ['#듣기연습2'],
+    hashtags: currentQuest ? [`#${currentQuest.type}`] : ['#학습'],
     description: (
       <>
        다음 문장을 듣고, <strong>평서문</strong>과 <strong>의문문</strong> 중 {"\n"}

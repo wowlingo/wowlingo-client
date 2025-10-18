@@ -1,14 +1,11 @@
-import React from 'react';
-import { Turtle, NotebookPen } from 'lucide-react';
 
 // 컴포넌트가 받을 props의 타입을 정의합니다.
 interface ProgressBarProps {
   currentStep: number;
   totalSteps: number;
-  enableButton: boolean;
 }
 
-export default function ProgressBar({ currentStep, totalSteps, enableButton }: ProgressBarProps) {
+export default function ProgressBar({ currentStep, totalSteps }: ProgressBarProps) {
   // 진행률을 퍼센트로 계산합니다.
   const progressPercentage = (currentStep / totalSteps) * 100;
 
@@ -29,17 +26,6 @@ export default function ProgressBar({ currentStep, totalSteps, enableButton }: P
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
-
-        {enableButton === true && (
-          <button
-            // key={sound.id + sound.type}
-            // onClick={() => handlePlaySound(sound.url)}
-            className="flex flex-col items-center justify-center p-3 bg-sky-100 text-sky-700 rounded-2xl shadow-sm hover:bg-sky-200 transition-all focus:outline-none focus:ring-2 focus:ring-sky-400"
-          >
-            <NotebookPen size={20} className="" />
-          </button>
-        )}
-
       </div>
     </div>
   );

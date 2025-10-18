@@ -4,11 +4,37 @@ import { ChevronRight } from 'lucide-react'; // 아이콘 라이브러리 예시
 import { useLearningStore } from '../store/learningStore';
 
 const Home: React.FC = () => {
-    const { fetchCourseData, courseData, totalCourseCount, currentCourseId, isLoading } = useLearningStore();
+    const { fetchUserQuestProgress, userQuestProgress, isLoading, fetchQuestList, questList, activeQuestId } = useLearningStore();
 
     useEffect(() => {
-        fetchCourseData(); // Quest ID 1로 데이터 요청
-    }, [fetchCourseData]);
+        console.log('Home useEffect - fetchUserQuestProgress called');
+        fetchUserQuestProgress(1); // 사용자 ID 1의 퀘스트 진행 상태 요청
+        
+        // API가 아직 구현되지 않은 경우를 위한 fallback
+        if (questList.length === 0) {
+            fetchQuestList();
+        }
+    }, [fetchUserQuestProgress, fetchQuestList, questList.length]);
+
+    // 페이지 포커스 및 학습 완료 시 진행 상태 새로고침
+    useEffect(() => {
+        const handleFocus = () => {
+            fetchUserQuestProgress(1);
+        };
+
+        const handleLearningCompleted = () => {
+            fetchUserQuestProgress(1);
+        };
+
+        window.addEventListener('focus', handleFocus);
+        window.addEventListener('learningCompleted', handleLearningCompleted);
+        
+        return () => {
+            window.removeEventListener('focus', handleFocus);
+            window.removeEventListener('learningCompleted', handleLearningCompleted);
+        };
+    }, [fetchUserQuestProgress]);
+
 
     return (
         <div className="flex flex-col h-screen max-w-lg mx-auto p-4 font-sans">
@@ -82,22 +108,85 @@ const Home: React.FC = () => {
                 <div className="scrollbar-hide flex overflow-x-auto snap-x snap-mandatory gap-4">
                     {isLoading ? (
                         <div>Loading...</div>
-                    ) : (
-                        Array.from({ length: totalCourseCount }, (_, i) => i).map((idx) => (
-                            <Link to={`/learning/intro`} key={idx} className="flex-shrink-0 w-2xs snap-center block bg-sky-500/60 rounded-2xl p-6 relative overflow-hidden shadow-md">
-
-                                <div className="text-3xl font-bold text-gray-900 mb-12">{courseData[idx].doneQuestCount}/{courseData[idx].totalQuestCount}</div>
-                                <div className="text-4xl font-extrabold text-gray-900 mb-4">{courseData[idx].title}</div>
-                                <span className="flex items-center mb-4">
-                                    <span className="bg-gray-100 text-gray-500 px-2 py-1 rounded-full text-xs mr-2">#{courseData[idx].objective}</span>
-                                </span>
-                                <div className="flex space-x-2">
-                                    <span className="text-3xl text-gray-400 opacity-50">⚪</span>
-                                    <span className="text-3xl text-gray-400 opacity-50">⚪</span>
-                                    <span className="text-3xl text-gray-400 opacity-50">⚪</span>
+                    ) : Array.isArray(userQuestProgress) && userQuestProgress.length > 0 ? (
+                        userQuestProgress.map((quest) => (
+                            <Link 
+                                to={`/learning/intro/${quest.questId}`} 
+                                key={quest.questId} 
+                                className={`flex-shrink-0 w-2xs snap-center block rounded-2xl p-6 relative overflow-hidden shadow-md ${
+                                    quest.questId === activeQuestId
+                                        ? 'bg-black text-white' 
+                                        : quest.isStarted 
+                                            ? 'bg-blue-50 text-blue-800' 
+                                            : 'bg-gray-100 text-gray-600'
+                                }`}
+                            >
+                                {/* 진행 상태 표시 */}
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="text-sm font-semibold">
+                                        {quest.correctCount}/{quest.totalCount}
+                                    </div>
+                                </div>
+                                
+                                {/* 퀘스트 제목 */}
+                                <div className={`text-2xl font-extrabold mb-4 ${
+                                    quest.questId === activeQuestId ? 'text-white' : quest.isStarted ? 'text-blue-800' : 'text-gray-800'
+                                }`}>
+                                    {quest.title}
+                                </div>
+                                
+                                {/* 태그 */}
+                                <div className="flex flex-wrap gap-1 mb-4">
+                                    {quest.tags.map((tag, index) => (
+                                        <span key={index} className={`px-2 py-1 rounded-full text-xs ${
+                                            quest.questId === activeQuestId 
+                                                ? 'bg-gray-700 text-gray-300' 
+                                                : quest.isStarted
+                                                    ? 'bg-blue-200 text-blue-700'
+                                                    : 'bg-gray-200 text-gray-600'
+                                        }`}>
+                                            {tag}
+                                        </span>
+                                    ))}
+                                </div>
+                                
+                                {/* 정답률 및 진행률 표시 */}
+                                {quest.isStarted && (
+                                    <div className={`text-xs ${
+                                        quest.questId === activeQuestId ? 'text-gray-300' : 'text-gray-500'
+                                    }`}>
+                                        정답률: {quest.accuracyRate}% | 진행률: {quest.progressRate}%
+                                    </div>
+                                )}
+                            </Link>
+                        ))
+                    ) : Array.isArray(questList) && questList.length > 0 ? (
+                        // API가 구현되지 않은 경우 기존 questList 사용
+                        questList.map((quest) => (
+                            <Link 
+                                to={`/learning/intro/${quest.questId}`} 
+                                key={quest.questId} 
+                                className="flex-shrink-0 w-2xs snap-center block bg-gray-100 rounded-2xl p-6 relative overflow-hidden shadow-md"
+                            >
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="text-sm font-semibold text-gray-600">
+                                        0/{quest.questItemCount}
+                                    </div>
+                                </div>
+                                
+                                <div className="text-2xl font-extrabold mb-4 text-gray-800">
+                                    {quest.title}
+                                </div>
+                                
+                                <div className="flex flex-wrap gap-1 mb-4">
+                                    <span className="px-2 py-1 rounded-full text-xs bg-gray-200 text-gray-600">
+                                        #{quest.type}
+                                    </span>
                                 </div>
                             </Link>
                         ))
+                    ) : (
+                        <div className="text-gray-500">퀘스트 데이터를 불러올 수 없습니다.</div>
                     )}
                 </div>
             </section>

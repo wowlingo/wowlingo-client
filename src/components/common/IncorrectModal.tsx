@@ -1,5 +1,3 @@
-import { Turtle } from 'lucide-react';
-import React from 'react';
 import Question from '../learning/Question'; // Question 컴포넌트 재사용
 
 interface IncorrectModalProps {
