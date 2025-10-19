@@ -6,7 +6,7 @@ import { useLearningStatusStore } from '../store/LearningStatus';
 
 const LearningStatusPage = () => {
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const { isLoading, error, loginedDates, attemptedDates, fetchQuestAttempts } = useLearningStatusStore();
+    const { loginedDates, attemptedDates, fetchQuestAttempts } = useLearningStatusStore();
 
     const userId = 4;
 

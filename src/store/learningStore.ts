@@ -393,7 +393,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
 
   // 학습 정보 API 전송
   sendLearningResult: async () => {
-    const { currentQuestId, stepProgress, startTime, endTime, totalSteps, rawQuestData } = get();
+    const { currentQuestId, stepProgress, startTime, endTime, totalSteps } = get();
 
     // 데이터가 없으면 전송하지 않음
     if (!currentQuestId || !startTime || !endTime) {

@@ -1,6 +1,6 @@
 // src/components/learning-status/Calendar.tsx
 import { useState } from 'react';
-import { ChevronDown, Check, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import React from 'react';
 
 interface CalendarProps {
@@ -26,8 +26,8 @@ const Calendar = ({ selectedDate, onDateSelect, onMonthChange, loginedDates, att
     const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0: 일요일, 1: 월요일...
     const daysInMonth = new Date(year, month + 1, 0).getDate(); // 현재 월의 마지막 날짜
 
-    const dates = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-    const emptyDays = Array(firstDayOfMonth).fill(null);
+    // const dates = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+    // const emptyDays = Array(firstDayOfMonth).fill(null);
     // const calendarGrid = [...emptyDays, ...dates];
     const calendarGrid = React.useMemo(() => {
         const grid = [];

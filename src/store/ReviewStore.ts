@@ -43,7 +43,7 @@ export const useReviewStore = create<ReviewState>((set) => ({
         set({ isLoading: true, error: null });
         try {
             const params = new URLSearchParams();
-            params.append('userId', "1");
+            params.append('userId', "4");
             if (date) {
                 params.append('date', formatDate(date));//'2025-09-25');
             }
@@ -68,11 +68,11 @@ export const useReviewStore = create<ReviewState>((set) => ({
         }
     },
 
-    fetchQuestItemUnits: async (hashtagIds: number[] = [], date?: Date, sort: string = 'latest') => {
+    fetchQuestItemUnits: async (hashtagIds: number[] = [], date?: Date) => {
         set({ isLoading: true, error: null });
         try {
             const params = new URLSearchParams();
-            params.append('userId', "1");
+            params.append('userId', "4");
             hashtagIds.forEach(id => params.append('hashtags', id.toString()));
             if (date) {
                 params.append('date', formatDate(date));//'2025-09-25');

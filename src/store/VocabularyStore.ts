@@ -1,5 +1,3 @@
-import { EvChargerIcon } from 'lucide-react';
-import it from 'node:test';
 import { create } from 'zustand';
 
 
@@ -73,7 +71,7 @@ export const useVocabularyStore = create<VocabularyState>((set) => ({
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            
+
             const jsonResponse: { data: VocabularyData[] } = await response.json();
 
             const newVocabulary = jsonResponse.data;
