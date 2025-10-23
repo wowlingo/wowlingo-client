@@ -7,25 +7,11 @@ import CatImageStack from '../components/backgrounds/CatImageStack';
 
 export default function GameClearPage() {
   const navigate = useNavigate();
-  const { totalSteps, answers, startTime, endTime, reset, correctImageStack, selectedLayoutType } = useLearningStore();
+  const { totalSteps, stepProgress, startTime, endTime, reset, correctImageStack, selectedLayoutType } = useLearningStore();
 
-  const { learningData } = useLearningStore((state) => ({
-    fetchLearningData: state.fetchQuestData,
-    learningData: state.learningData,
-    isLoading: state.isLoading,
-    startLearning: state.startLearning,
-  }));
-
-  // 1. 정답/오답 개수 계산
-  const correctCount = Object.keys(answers).reduce((count, step) => {
-    const stepNum = parseInt(step, 10);
-    const question = learningData[stepNum as keyof typeof learningData];
-    console.log('step: ' + step + ' count:' + count + " boolean:" + ((question && answers[stepNum] === question.correctAnswer)))
-    if (question && answers[stepNum] === question.correctAnswer) {
-      return count + 1;
-    }
-    return count;
-  }, 0);
+  // 1. stepProgress를 사용하여 정답/오답 개수 계산
+  const progressItems = Object.values(stepProgress);
+  const correctCount = progressItems.filter(item => item.isCorrect === true).length;
   const incorrectCount = totalSteps - correctCount;
 
   // 2. 총 소요 시간 계산
