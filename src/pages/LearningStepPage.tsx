@@ -9,7 +9,7 @@ export default function LearningStepPage() {
   const urlQuestId = parseInt(questId || '1', 10); // URL에서 가져온 퀘스트 ID
   const urlStepNumber = parseInt(stepId || '1', 10); // URL에서 가져온 현재 문제 번호
 
-  const { learningData, isLoading, startLearning, currentStep, currentQuestId: storeLoadedQuestId, fetchQuestData, rawQuestData, selectedLayoutType } = useLearningStore((state) => ({
+  const { learningData, isLoading, startLearning, currentStep, currentQuestId: storeLoadedQuestId, fetchQuestData, rawQuestData } = useLearningStore((state) => ({
     learningData: state.learningData,
     isLoading: state.isLoading,
     startLearning: state.startLearning,
@@ -17,7 +17,6 @@ export default function LearningStepPage() {
     currentQuestId: state.currentQuestId, // 스토어에 로드된 퀘스트 ID
     fetchQuestData: state.fetchQuestData,
     rawQuestData: state.rawQuestData, // quest 타입 정보를 위해 추가
-    selectedLayoutType: state.selectedLayoutType, // 선택된 레이아웃 타입
   }));
 
   // URL의 questId와 스토어의 questId가 다르면 데이터를 다시 로드
@@ -36,15 +35,6 @@ export default function LearningStepPage() {
     }
   }, [isLoading, storeLoadedQuestId, learningData, navigate, urlQuestId]);
 
-  // 스토어의 currentStep과 URL의 stepNumber가 다르면 스토어의 currentStep으로 이동
-  useEffect(() => {
-    // storeLoadedQuestId가 있고, learningData가 비어있지 않으며,
-    // URL의 stepNumber가 스토어의 currentStep과 다르면 동기화
-    if (storeLoadedQuestId && Object.keys(learningData).length > 0 && urlStepNumber !== currentStep) {
-      navigate(`/learning/${urlQuestId}/${currentStep}`);
-    }
-  }, [urlStepNumber, currentStep, navigate, storeLoadedQuestId, learningData, urlQuestId]);
-
 
   useEffect(() => {
     // 1단계일 때만 학습 시작 기록
@@ -59,7 +49,8 @@ export default function LearningStepPage() {
     return <div>Loading...</div>;
   }
 
-  const data: QuestionData | undefined = learningData[currentStep];
+  // URL의 stepId를 사용 (BaseLearningLayout에서 navigate로 변경한 URL 반영)
+  const data: QuestionData | undefined = learningData[urlStepNumber];
 
   // 특정 단계의 데이터가 없으면 에러 메시지 또는 인트로로 리다이렉트 (이미 위에서 처리됨)
   if (!data) {
@@ -72,7 +63,7 @@ export default function LearningStepPage() {
       {/* <Question sounds={data.sounds} /> */}
 
       {/* 3-2. 정답 (이미지 + 버튼) */}
-      <AnswerOptions options={data.options} questType={rawQuestData?.type} layoutType={selectedLayoutType} />
+      <AnswerOptions options={data.options} questType={rawQuestData?.type} />
     </div>
   );
 }
