@@ -1,11 +1,9 @@
-import { Turtle, Volume2, NotebookPen } from 'lucide-react'; // 듣기 아이콘
-
 // 하나의 사운드에 대한 타입 정의
 interface Sound {
   id: number | string; // key로 사용될 고유 ID
   type: string;
   url: string;         // 오디오 파일의 경로
-  label?: string;       // 버튼에 표시될 텍스트 (예: '느리게')
+  label?: string;       // 버튼에 표시될 텍스트
 }
 
 // 컴포넌트가 받을 props 타입 정의
@@ -14,17 +12,6 @@ interface QuestionProps {
 }
 
 export default function Question({ sounds }: QuestionProps) {
-
-  const renderIcon = (type: Sound['type']) => {
-    if (type === 'normal') {
-      return <Volume2 size={24} className="text-blue-600" />;
-    }
-    if (type === 'slow') {
-      return <Turtle size={24} className="text-blue-600" />;
-    }
-    return <Volume2 size={24} className="text-blue-600" />;
-  };
-
   // 사운드를 재생하는 함수
   const handlePlaySound = (audioUrl: string) => {
     const audio = new Audio(audioUrl);
@@ -38,50 +25,59 @@ export default function Question({ sounds }: QuestionProps) {
   };
 
   return (
-    // 피그마 디자인에 맞는 컨테이너
-    <div 
-      className="w-[335px] h-[115px] bg-gray-100 rounded-2xl p-2 flex items-center gap-[9px] mx-auto my-4"
-      style={{
-        paddingTop: '8px',
-        paddingRight: '10px', 
-        paddingBottom: '8px',
-        paddingLeft: '10px'
-      }}
-    >
+    <div className="flex items-center bg-white rounded-xl overflow-hidden">
       {/* 문제 듣기 버튼 */}
       <button
-        onClick={() => sounds.find(s => s.type === 'normal') && handlePlaySound(sounds.find(s => s.type === 'normal')!.url)}
-        className="flex-1 flex flex-col items-center justify-center p-3 bg-white rounded-xl hover:bg-gray-50 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400"
+        onClick={() => {
+          const normalSound = sounds.find(s => s.type === 'normal');
+          if (normalSound) handlePlaySound(normalSound.url);
+        }}
+        className="w-[100px] h-[99px] flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] hover:bg-gray-50 transition-colors"
         aria-label="문제 듣기"
       >
-        {renderIcon('normal')}
-        <span className="text-xs text-gray-700 mt-1 font-medium">문제 듣기</span>
+        <div className="w-10 h-10 flex items-center justify-center">
+            <img src="/images/ic_set_sound.png" alt="문제 듣기" className="w-10 h-10" />
+        </div>
+        <span className="text-[16px] font-semibold text-[#4A5564] leading-[22.4px] tracking-[-0.32px]">
+          문제 듣기
+        </span>
       </button>
 
       {/* 구분선 */}
-      <div className="w-px h-12 bg-gray-300"></div>
+      <div className="w-[1px] h-[67px] bg-[#E5E7EB]" />
 
       {/* 천천히 듣기 버튼 */}
       <button
-        onClick={() => sounds.find(s => s.type === 'slow') && handlePlaySound(sounds.find(s => s.type === 'slow')!.url)}
-        className="flex-1 flex flex-col items-center justify-center p-3 bg-white rounded-xl hover:bg-gray-50 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400"
+        onClick={() => {
+          const slowSound = sounds.find(s => s.type === 'slow');
+          if (slowSound) handlePlaySound(slowSound.url);
+        }}
+        className="w-[100px] h-[99px] flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] hover:bg-gray-50 transition-colors"
         aria-label="천천히 듣기"
       >
-        {renderIcon('slow')}
-        <span className="text-xs text-gray-700 mt-1 font-medium">천천히 듣기</span>
+        <div className="w-10 h-10 flex items-center justify-center">
+          <img src="/images/ic_set_slowly.png" alt="천천히 듣기" className="w-10 h-10" />
+        </div>
+        <span className="text-[16px] font-semibold text-[#4A5564] leading-[22.4px] tracking-[-0.32px]">
+          천천히 듣기
+        </span>
       </button>
 
       {/* 구분선 */}
-      <div className="w-px h-12 bg-gray-300"></div>
+      <div className="w-[1px] h-[67px] bg-[#E5E7EB]" />
 
       {/* 단어장 추가 버튼 */}
       <button
         onClick={handleAddToVocabulary}
-        className="flex-1 flex flex-col items-center justify-center p-3 bg-gray-200 rounded-xl hover:bg-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="w-[100px] h-[99px] flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] hover:bg-gray-50 transition-colors"
         aria-label="단어장 추가"
       >
-        <NotebookPen size={24} className="text-gray-700" />
-        <span className="text-xs text-gray-700 mt-1 font-medium">단어장 추가</span>
+        <div className="w-10 h-10 flex items-center justify-center">
+          <img src="/images/ic_set_add.png" alt="단어장 추가" className="w-10 h-10" />
+        </div>
+        <span className="text-[16px] font-semibold text-[#4A5564] leading-[22.4px] tracking-[-0.32px]">
+          단어장 추가
+        </span>
       </button>
     </div>
   );
