@@ -13,7 +13,7 @@ export default function CatImageStack() {
   return (
     <div className="w-full h-full flex items-center justify-center">
       {/* Cat 이미지 (cat, jar, speech bubble 포함) */}
-      <div className="relative w-full h-full flex items-center justify-center">
+      <div className="relative w-80 h-80 max-w-sm aspect-square flex items-center justify-center">
         <img
           src={`/images/cat-${currentLevel}.png`}
           alt={`Cat Level ${currentLevel}`}

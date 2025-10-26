@@ -2,33 +2,32 @@ import { useLearningStore } from '../../store/learningStore';
 import { useState, useEffect } from 'react';
 
 /**
- * 게임유형 D의 배경 이미지 스택 컴포넌트
- * Figma 디자인: 배경 이미지와 상태에 따라 변하는 카드 이미지
+ * 게임유형 C의 배경 이미지 스택 컴포넌트
+ * Figma 디자인: 뽑기
  */
-export default function GameTypeDBg() {
+export default function GameTypeCBg() {
   const { isCorrect } = useLearningStore();
-  const [isFlipping, setIsFlipping] = useState(false);
-  const [currentCard, setCurrentCard] = useState('/images/card-question.png');
+  const [isCatching, setIsCatching] = useState(false);
+  const [currentCatch, setCurrentCatch] = useState('/images/img_catcher.png');
 
-  // 정답/오답 상태에 따라 카드 이미지 변경
   useEffect(() => {
     if (isCorrect === null) {
-      // 초기 상태: 물음표 카드
-      setCurrentCard('/images/card-question.png');
-      setIsFlipping(false);
+      // 초기 상태
+      setCurrentCatch('/images/img_catcher.png');
+      setIsCatching(false);
     } else if (isCorrect === true) {
-      // 정답: 물방울 카드로 뒤집기
-      setIsFlipping(true);
+      // 정답
+      setIsCatching(true);
       setTimeout(() => {
-        setCurrentCard('/images/card-drop.png');
-        setTimeout(() => setIsFlipping(false), 300);
+        setCurrentCatch('/images/img_learning_correct_c.png');
+        setTimeout(() => setIsCatching(false), 300);
       }, 300);
     } else if (isCorrect === false) {
-      // 오답: 원 카드로 뒤집기
-      setIsFlipping(true);
+      // 오답
+      setIsCatching(true);
       setTimeout(() => {
-        setCurrentCard('/images/card-circle.png');
-        setTimeout(() => setIsFlipping(false), 300);
+        setCurrentCatch('/images/img_catcher_open.png');
+        setTimeout(() => setIsCatching(false), 300);
       }, 300);
     }
   }, [isCorrect]);
@@ -38,7 +37,7 @@ export default function GameTypeDBg() {
       {/* 배경 이미지 레이어 - 부모 컨텐츠 영역 전체를 덮고 하단에서 시작 */}
       <div className="absolute bottom-0 left-0 right-0 top-0 z-0 pointer-events-none">
         <img
-          src="/images/img_learning_bg_d.png"
+          src="/images/img_learning_bg_c.png"
           alt="Learning background"
           className="w-full h-full object-cover object-bottom"
         />
@@ -49,12 +48,12 @@ export default function GameTypeDBg() {
         <div
           className="transition-transform duration-300 ease-in-out w-full max-w-[200px] px-5"
           style={{
-            transform: isFlipping ? 'rotateY(90deg)' : 'rotateY(0deg)',
+            transform: isCatching ? 'rotateY(90deg)' : 'rotateY(0deg)',
             transformStyle: 'preserve-3d',
           }}
         >
           <img
-            src={currentCard}
+            src={currentCatch}
             alt="Learning card"
             className="w-full h-auto drop-shadow-2xl"
             style={{
@@ -63,14 +62,6 @@ export default function GameTypeDBg() {
           />
         </div>
       </div>
-
-      {/* 하단 그라데이션 오버레이 - 부모 영역 하단에 표시 */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-[82px] z-20 pointer-events-none"
-        style={{
-          background: 'linear-gradient(180deg, rgba(245, 249, 255, 0) 0%, rgba(245, 249, 255, 0.8) 100%)'
-        }}
-      />
     </>
   );
 }
