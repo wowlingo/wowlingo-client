@@ -3,24 +3,100 @@ import { useLearningStore } from '../store/learningStore';
 import IntroHeader from '../components/intro/IntroHeader';
 import { useState, useEffect } from 'react';
 
+// quest type에 따른 설명 매핑
+const getDescriptionByType = (type: string): { description_a: React.ReactNode; description_b: React.ReactNode } => {
+  switch (type) {
+    case 'statement-question':
+      return {
+        description_a: (
+        <>
+          문장을 듣고, 평서문과 의문문 중{'\n'}
+          맞는 보기를 고르세요.
+        </>
+        ),
+        description_b: (
+        <>
+          문제를 맞춰 물방울을 모아보세요.{'\n'}
+          70개를 모으면 열매를 수확할 수 있어요!
+        </>
+        )
+      }
+    case 'choice':
+      return {
+        description_a: (
+        <>
+          들려준 문장과{'\n'}
+          일치하는 보기를 고르세요
+        </>
+        ),
+        description_b: (
+        <>
+          문제를 맞춰 물방울을 모아보세요.{'\n'}
+          70개를 모으면 열매를 수확할 수 있어요!
+        </>
+        )
+      }
+    case 'same-different':
+      return {
+        description_a: (
+        <>
+          들려준 2개의 단어가{'\n'}
+          일치하는지 구분해 주세요
+        </>
+        ),
+        description_b: (
+        <>
+          문제를 맞춰 물방울을 모아보세요.{'\n'}
+          70개를 모으면 열매를 수확할 수 있어요!
+        </>
+        )
+      }
+    default:
+      return {
+        description_a: (
+        <>
+
+        </>
+        ),
+        description_b: (
+        <>
+          문제를 맞춰 물방울을 모아보세요.{'\n'}
+          70개를 모으면 열매를 수확할 수 있어요!
+        </>
+        )
+      }
+  }
+};
+
+// correctCount에 따라 물뿌리개 이미지 결정
+const getWateringCanImage = (correctCount: number): string => {
+  if (correctCount >= 61) return '/images/img_tutorial_wateringcan_70.png';
+  if (correctCount >= 51) return '/images/img_tutorial_wateringcan_60.png';
+  if (correctCount >= 41) return '/images/img_tutorial_wateringcan_50.png';
+  if (correctCount >= 31) return '/images/img_tutorial_wateringcan_40.png';
+  if (correctCount >= 21) return '/images/img_tutorial_wateringcan_30.png';
+  if (correctCount >= 11) return '/images/img_tutorial_wateringcan_20.png';
+  return '/images/img_tutorial_wateringcan_10.png';
+};
+
 export default function PracticeIntroPage() {
   const navigate = useNavigate();
   const { questId } = useParams<{ questId: string }>();
-  const { reset, startLearning, fetchQuestData, isLoading, questList, fetchQuestList } = useLearningStore();
+  const { reset, startLearning, fetchQuestData, isLoading, userQuestProgress, fetchUserQuestProgress } = useLearningStore();
   const [isFetching, setIsFetching] = useState(false); // 로딩 상태 추가
 
   // URL에서 questId가 없으면 기본값 1 사용
   const selectedQuestId = parseInt(questId || '1', 10);
 
-  // questList가 비어있으면 가져오기
+  // userQuestProgress가 비어있으면 가져오기 (userId는 임시로 1 사용)
   useEffect(() => {
-    if (questList.length === 0) {
-      fetchQuestList();
+    if (userQuestProgress.length === 0) {
+      fetchUserQuestProgress(1); // TODO: 실제 userId로 변경
     }
-  }, [questList.length, fetchQuestList]);
+  }, [userQuestProgress.length, fetchUserQuestProgress]);
 
   // 현재 quest 정보 찾기
-  const currentQuest = questList.find(q => q.questId === selectedQuestId);
+  const currentQuest = userQuestProgress.find(q => q.questId === selectedQuestId);
 
   const handleStart = async () => {
     setIsFetching(true); // 로딩 시작
@@ -33,63 +109,69 @@ export default function PracticeIntroPage() {
     navigate(`/learning/${selectedQuestId}/1`); // questId와 함께 첫 번째 문제로 이동
   };
 
-  // 실제 앱에서는 이 데이터를 외부(예: API)에서 받아옵니다.
+  // 물방울 개수와 물뿌리개 이미지
+  const correctCount = currentQuest?.correctCount || 0;
+  const wateringCanImage = getWateringCanImage(correctCount);
+
+  // 화면에 표시할 데이터
   const introData = {
-    groupName: currentQuest?.title || '학습',
     title: currentQuest?.title || '학습 시작',
-    imageUrl: 'https://picsum.photos/200/300',
-    hashtags: currentQuest ? [`#${currentQuest.type}`] : ['#학습'],
-    description: (
-      <>
-       다음 문장을 듣고, <strong>평서문</strong>과 <strong>의문문</strong> 중 {"\n"}
-       맞는 보기를 고르세요.
-       {"\n"}{"\n"}
-       정답을 맞추고 우측 상단의 보상을 얻어 {"\n"}케이크를 완성해주세요.
-      </>
-    ),
+    wateringCanImage,
+    waterDropCount: correctCount,
+    hashtags: currentQuest?.tags || ['#학습'],
+    description_a: currentQuest ? getDescriptionByType(currentQuest.type).description_a : '학습을 시작해주세요.',
+    description_b: currentQuest ? getDescriptionByType(currentQuest.type).description_b : '학습을 시작해주세요.',
   };
 
   return (
-    <div className="flex flex-col h-screen max-w-lg mx-auto p-4 font-sans">
-      {/* 1. 헤더 (이전 버튼, 문제 그룹 이름) */}
-      <IntroHeader groupName={introData.groupName} />
+    <div className="flex flex-col h-screen max-w-lg mx-auto font-sans bg-gradient-to-b from-white to-white">
+      {/* 1. 헤더 (이전 버튼) */}
+      <IntroHeader groupName={introData.title} />
 
-      <main className="flex-grow flex flex-col items-center justify-center text-center px-4">
-        {/* 2. 타이틀 */}
-        <h2 className="text-3xl font-bold mb-4">{introData.title}</h2>
+      <main className="flex-grow flex flex-col items-center justify-center text-center px-5">
 
-        {/* 3. 이미지 */}
-        <div className="w-full max-w-sm aspect-video rounded-lg shadow-md mb-6 overflow-hidden">
+        {/* 3. 물뿌리개 이미지와 물방울 개수 */}
+        <div className="relative mb-4">
           <img
-            src={introData.imageUrl}
-            alt={introData.title}
-            className="w-full h-full object-cover"
+            src={introData.wateringCanImage}
+            alt="Watering Can"
+            className="w-60 h-60 object-contain"
           />
+          {/* 물방울 개수 표시 */}
+          <div className="absolute top-4 right-4 bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg shadow-lg">
+            {introData.waterDropCount}
+          </div>
         </div>
 
-        {/* 4. #해시태그 안내 */}
-        <div className="flex flex-wrap justify-center gap-2 mb-6">
+        {/* 4. #해시태그 */}
+        <div className="flex flex-wrap justify-center gap-2.5 mb-5">
           {introData.hashtags.map((tag) => (
-            <span key={tag} className="bg-gray-200 text-gray-700 rounded-full px-3 py-1 text-sm font-semibold">
+            <span
+              key={tag}
+              className="bg-blue-100 text-blue-500 rounded-full px-2 py-1 text-sm font-semibold text-center font-semibold font-['Pretendard'] leading-5"
+            >
               {tag}
             </span>
           ))}
         </div>
 
-        {/* 5. 문제 설명서 */}
-        <p className="text-gray-600 whitespace-pre-line">
-          {introData.description}
+        {/* 5. 문제 설명 */}
+        <p className="mb-3 self-stretch text-center justify-start text-slate-800 text-xl font-semibold font-['Pretendard'] leading-8 whitespace-pre-line">
+          {introData.description_a}
+        </p>
+        <p className="text-gray-600 text-base whitespace-pre-line leading-relaxed whitespace-pre-line">
+          {introData.description_b}
         </p>
       </main>
 
-      {/* 6. 'START' 버튼 */}
-      <div className="mt-auto py-4">
+      {/* 6. START 버튼 */}
+      <div className="px-5 pb-6">
         <button
           onClick={handleStart}
-          disabled={isFetching || isLoading} // 로딩 중일 때 버튼 비활성화
-          className="w-full bg-blue-500 text-white font-bold text-lg py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors shadow-lg"
+          disabled={isFetching || isLoading}
+          className="w-full px-6 pt-4 pb-3.5 bg-blue-500 gap-2 text-white font-bold text-lg rounded-full hover:bg-blue-600 transition-colors shadow-lg disabled:bg-gray-400"
         >
-          {isFetching ? '로딩 중...' : 'START'}
+          {isFetching ? '로딩 중...' : '학습 시작'}
         </button>
       </div>
     </div>
