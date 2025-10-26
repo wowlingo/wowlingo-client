@@ -4,6 +4,8 @@ import ProgressBar from '../components/common/ProgressBar';
 import { useLearningStore } from '../store/learningStore';
 import Question from '../components/learning/Question';
 import IntroHeader from '../components/intro/IntroHeader';
+import ExitConfirmModal from '../components/modals/ExitConfirmModal';
+import WaterDropModal from '../components/modals/WaterDropModal';
 
 // 각 레이아웃에서 커스터마이징할 수 있는 props
 interface BaseLearningLayoutProps {
@@ -36,6 +38,7 @@ export default function BaseLearningLayout({
     endStep,
     rawQuestData, // quest title을 위해 추가
     stepProgress, // 정답/오답 개수 계산을 위해 추가
+    reset, // 학습 중단 시 스토어 초기화를 위해 추가
   } = useLearningStore();
 
   const currentQuestionData = learningData[currentStep];
@@ -43,6 +46,11 @@ export default function BaseLearningLayout({
   // 정답/오답 개수 계산
   const correctCount = Object.values(stepProgress).filter(step => step.isCorrect === true).length;
   const incorrectCount = Object.values(stepProgress).filter(step => step.isCorrect === false).length;
+
+  // 물방울 획득 모달 상태
+  const [showWaterDropModal, setShowWaterDropModal] = React.useState(false);
+  // 학습 중단 확인 모달 상태
+  const [showExitModal, setShowExitModal] = React.useState(false);
 
   // 현재 단계가 시작될 때 시간 기록
   React.useEffect(() => {
@@ -88,8 +96,23 @@ export default function BaseLearningLayout({
     }
   };
 
+  // 학습 완료 시 모달 표시
+  React.useEffect(() => {
+    if (isCompleted) {
+      setShowWaterDropModal(true);
+    }
+  }, [isCompleted]);
+
   const handleConfirm = () => {
     navigate('/');
+  };
+
+  const handleModalConfirm = () => {
+    setShowWaterDropModal(false);
+    // 모달이 닫힌 후 잠시 대기했다가 홈으로 이동
+    setTimeout(() => {
+      navigate('/');
+    }, 300);
   };
 
 
@@ -110,7 +133,7 @@ export default function BaseLearningLayout({
         <IntroHeader
           groupName={rawQuestData?.title || '학습하기'}
           buttonType="close"
-          onClose={() => navigate('/')}
+          onClose={() => setShowExitModal(true)}
         />
       </div>
 
@@ -228,6 +251,23 @@ export default function BaseLearningLayout({
         )}
       </div>
       </div>
+
+      {/* 물방울 획득 모달 */}
+      <WaterDropModal
+        isOpen={showWaterDropModal}
+        waterDropCount={correctCount}
+        onConfirm={handleModalConfirm}
+      />
+
+      {/* 학습 중단 확인 모달 */}
+      <ExitConfirmModal
+        isOpen={showExitModal}
+        onContinue={() => setShowExitModal(false)}
+        onExit={() => {
+          reset(); // 스토어 완전 초기화
+          navigate('/'); // 홈으로 이동
+        }}
+      />
       </div>
   );
 }
