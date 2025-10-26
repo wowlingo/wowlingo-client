@@ -262,7 +262,8 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
   // 답변을 확인하고 모달 상태를 변경하는 액션
   checkAnswer: (correctAnswer, stackImageUrl) =>
     set((state) => {
-      const isCorrect = state.selectedAnswer === correctAnswer;
+      // 타입에 관계없이 값을 문자열로 변환하여 비교
+      const isCorrect = String(state.selectedAnswer) === String(correctAnswer);
       if (!isCorrect) {
         return {
           isCorrect: false,
