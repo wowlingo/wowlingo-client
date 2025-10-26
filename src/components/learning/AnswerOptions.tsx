@@ -27,8 +27,8 @@ export default function AnswerOptions({ options, questType }: AnswerOptionsProps
     const iconMap: Record<string, string> = {
       'statement': '/images/ic_choice_statement.png',
       'question': '/images/ic_choice_question.png',
-      'same': '/images/ic_choice_statement.png', // 같은 아이콘 사용
-      'different': '/images/ic_choice_question.png', // 같은 아이콘 사용
+      'same': '/images/ic_choice_o.png',
+      'different': '/images/ic_choice_x.png',
     };
 
     const iconSrc = iconMap[type];
