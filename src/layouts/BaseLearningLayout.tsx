@@ -8,14 +8,12 @@ import Question from '../components/learning/Question';
 // 각 레이아웃에서 커스터마이징할 수 있는 props
 interface BaseLearningLayoutProps {
   children?: React.ReactNode; // 중앙 배경 영역 (이미지 스택 또는 배경 컴포넌트)
-  backgroundClassName?: string; // 배경색 커스터마이징
   submitButtonClassName?: string; // 제출 버튼 스타일 커스터마이징
 }
 
-export default function BaseLearningLayout({ 
-  children, 
-  backgroundClassName = "bg-blue-50",
-  submitButtonClassName = "bg-blue-500 hover:bg-blue-600"
+export default function BaseLearningLayout({
+  children,
+  submitButtonClassName = "bg-blue-500 hover:bg-[#2265CC] rounded-[999px]"
 }: BaseLearningLayoutProps) {
   const navigate = useNavigate();
   const { questId, stepId } = useParams<{ questId: string; stepId: string }>();
@@ -82,14 +80,21 @@ export default function BaseLearningLayout({
     }
   };
 
-  // 현재 문제의 사운드 데이터를 가져옵니다 (오답 모달용).
-  const currentSounds = currentQuestionData?.sounds || [];
-  const incorrectModalSounds = currentSounds.map(sound => ({ ...sound, label: undefined }));
 
   return (
-    <div className={`flex flex-col h-screen max-w-lg mx-auto font-sans ${backgroundClassName}`}>
-      {/* 1. 헤더 (타이틀과 나가기 버튼) */}
-      <header className="flex justify-between items-center py-2 px-4">
+    <div className="relative h-screen max-w-lg mx-auto font-sans overflow-hidden">
+      {/* 배경 그라디언트 */}
+      <div
+        className="absolute inset-0 bg-gradient-to-b"
+        style={{
+          backgroundImage: 'linear-gradient(to bottom, rgba(219, 234, 254, 0.5), rgba(239, 246, 255, 0.5))'
+        }}
+      />
+
+      {/* 메인 컨텐츠 */}
+      <div className="relative z-10 flex flex-col h-full">
+      {/* 1. 헤더 (타이틀과 나가기 버튼) - 52px */}
+      <header className="flex-shrink-0 h-[52px] flex justify-between items-center px-5">
         {/* 왼쪽 빈 공간 (균형을 위해) */}
         <div className="w-10"></div>
         
@@ -108,83 +113,86 @@ export default function BaseLearningLayout({
         </button>
       </header>
 
-      {/* 2. 진행도 (Progress Bar) */}
-      <div className="px-4">
+      {/* 2. 진행도 (Progress Bar) - 12px */}
+      <div className="flex-shrink-0 px-5 py-2">
         <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
       </div>
 
-      {/* 3. 메인 콘텐츠 영역 */}
-      <div className="relative flex-grow flex flex-col px-4 py-2 min-h-0">
-        {/* 상단: 소리 재생 버튼 */}
-        <div className="relative z-50 flex-shrink-0 pt-2 flex justify-center">
-          {currentQuestionData && <Question key={currentStep} sounds={currentQuestionData.sounds} />}
-        </div>
+      {/* 3. Question (Learning Set) - 115px - 상단 고정 */}
+      <div className="flex-shrink-0 px-5 pt-2 flex justify-center">
+        {currentQuestionData && <Question key={currentStep} sounds={currentQuestionData.sounds} />}
+      </div>
 
-        {/* 중앙: 배경 컴포넌트 영역 */}
-        <div className="relative flex-grow flex items-center justify-center">
-          {children}
-        </div>
+      {/* 4. 중앙 배경 영역 - Cake */}
+      <div className="flex-shrink-0 flex items-center justify-center px-5">
+        {children}
+      </div>
 
-        {/* 하단: 문제 풀이(Outlet) 또는 정답/오답 피드백 영역 */}
-        <div className="relative z-50 flex-shrink-0 w-full mb-4">
-          {/* 문제 풀이(Outlet) 영역 - 정답/오답 상태가 아닐 때만 표시 */}
-          {isCorrect === null && (
+      {/* 5. 하단 영역 - 답 선택/피드백 + 버튼 */}
+      <div className="flex-grow flex flex-col justify-end relative">
+        {isCorrect === null ? (
+          // 답 선택 시: Learning Btn (Outlet) + Primary Button
+          <div className="flex-shrink-0 px-5 pb-4 space-y-2 relative z-50">
             <main className="w-full">
               <Outlet />
             </main>
-          )}
-
-          {/* 정답 피드백 박스 */}
-          {isCorrect === true && (
-            <div className="w-full bg-white rounded-2xl p-6 shadow-lg border-2 border-blue-500">
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-blue-500">정답이에요!</h3>
+            <button
+              onClick={handleSubmit}
+              disabled={!selectedAnswer || !currentQuestionData}
+              className={`w-full h-[53px] ${submitButtonClassName} text-white font-bold disabled:bg-gray-300 transition-colors text-[16px]`}
+            >
+              정답 제출
+            </button>
+          </div>
+        ) : (
+          // 정답/오답 시: Bottom Sheet + Button (같은 위치)
+          <div className={`flex-shrink-0 relative z-50 animate-slide-u rounded-tl-3xl rounded-tr-3xl outline outline-1 shadow-2xl overflow-hidden ${
+                isCorrect ? 'outline-blue-200 bg-blue-100' : 'outline-red-200 bg-red-100'
+              }`}>
+            {/* Bottom Sheet 배경 */}
+            <div
+              className={`px-5 pt-6 pb-4`}
+            >
+              {/* 피드백 헤더 */}
+              <div className="flex items-center gap-2 mb-4">
+                {isCorrect ? (
+                  <>
+                    <img src="/images/ic_explain_correct.png" alt="정답" className="w-6 h-6" />
+                    <span className="justify-start text-blue-500 text-xl font-semibold font-['Pretendard'] leading-7">
+                      정답이에요! 이어서 가볼까요?
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <img src="/images/ic_explain_incorrect.png" alt="오답" className="w-6 h-6" />
+                    <span className="justify-start text-red-500 text-xl font-semibold font-['Pretendard'] leading-7">
+                      아쉽지만 오답이에요
+                    </span>
+                  </>
+                )}
               </div>
-              <p className="text-center text-gray-600 text-lg">이어서 가볼까요?</p>
-            </div>
-          )}
 
-          {/* 오답 피드백 박스 */}
-          {isCorrect === false && (
-            <div className="w-full bg-white rounded-2xl p-6 shadow-lg border-2 border-red-500">
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
+              {/* 정답 설명 */}
+              {currentQuestionData && (
+                <div className="justify-start text-gray-600 text-lg font-semibold font-['Pretendard'] leading-7">
+                  정답: {currentQuestionData.correctAnswer}
                 </div>
-                <h3 className="text-2xl font-bold text-red-500">아쉬워요!</h3>
-              </div>
-              <p className="text-center text-gray-600 text-lg mb-4">다시 들어보아요!</p>
-              {/* 오답 시 음성 다시 듣기 버튼 */}
-              {currentQuestionData && <Question key={`incorrect-${currentStep}`} sounds={incorrectModalSounds} />}
+              )}
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* 4. 정답 제출 버튼 */}
-      <div className="flex-shrink-0 px-4 pb-4 relative z-50">
-        <button
-          onClick={() => {
-            if (isCorrect === null) {
-              handleSubmit();
-            } else {
-              handleNext();
-            }
-          }}
-          disabled={!selectedAnswer || !currentQuestionData}
-          className={`w-full ${submitButtonClassName} text-white font-bold py-3 px-4 rounded-lg disabled:bg-gray-300 transition-colors`}
-        >
-          {(isCorrect != null) ? '다음' : '정답 제출'}
-        </button>
+            {/* 다음 버튼 - Bottom Sheet 밖에 배치하여 "정답 제출"과 같은 위치 */}
+            <div className="px-5 pb-4">
+              <button
+                onClick={handleNext}
+                className={`w-full h-[53px] ${isCorrect ? submitButtonClassName : 'bg-red-400 hover:bg-red-500 rounded-[999px]'} text-white font-bold transition-colors text-[16px]`}
+              >
+                다음
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+      </div>
+      </div>
   );
 }

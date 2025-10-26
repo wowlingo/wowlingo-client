@@ -13,8 +13,7 @@ export default function LearningLayout1() {
 
   return (
     <BaseLearningLayout
-      backgroundClassName="bg-blue-50"
-      submitButtonClassName="bg-blue-500 hover:bg-blue-600"
+      submitButtonClassName="bg-blue-500 hover:bg-[#2265CC] rounded-[999px]"
     >
       {/* 배경 컴포넌트 */}
       <CakeImageStack />

@@ -19,10 +19,10 @@ export default function ProgressBar({ currentStep, totalSteps }: ProgressBarProp
 
       <div className="flex items-center gap-2">
         {/* 프로그레스 바의 배경 */}
-        <div className="w-sm bg-gray-200 rounded-full h-2.5 flex-1">
+        <div className="w-sm bg-[#E5E7EB] rounded-full h-3 flex-1">
           {/* 실제 진행 상태를 보여주는 바 */}
           <div
-            className="bg-blue-500 h-2.5 rounded-full transition-all duration-500 ease-out"
+            className="bg-[#2B7FFF] h-3 rounded-full transition-all duration-500 ease-out"
             style={{ width: `${progressPercentage}%` }}
           />
         </div>

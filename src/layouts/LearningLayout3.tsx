@@ -1,6 +1,7 @@
 import BaseLearningLayout from './BaseLearningLayout';
 import { useLearningStore } from '../store/learningStore';
 import { useEffect } from 'react';
+import GameTypeCBg from '../components/backgrounds/GameTypeCBg';
 
 export default function LearningLayout3() {
   const { setSelectedLayoutType } = useLearningStore();
@@ -12,10 +13,9 @@ export default function LearningLayout3() {
 
   return (
     <BaseLearningLayout
-      backgroundClassName="bg-green-50"
-      submitButtonClassName="bg-blue-500 hover:bg-blue-600"
+      submitButtonClassName="bg-blue-500 hover:bg-[#2265CC] rounded-[999px]"
     >
-      {/* Layout3은 plain background (이미지 스택 없음) */}
+      <GameTypeCBg />
     </BaseLearningLayout>
   );
 }
