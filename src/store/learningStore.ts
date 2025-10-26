@@ -18,6 +18,7 @@ type ApiQuestOption = {
 };
 
 type ApiQuestItem = {
+  questItemId: number; // API로부터 받은 실제 questItemId
   units: ApiQuestUnit[];
   answer: string;
   options: ApiQuestOption[];
@@ -61,6 +62,7 @@ type ApiUserQuestResponse = {
 
 // 학습 데이터 타입 (기존 QuestionData와 유사)
 export type QuestionData = {
+  questItemId: number; // API로부터 받은 실제 questItemId
   sounds: { id: number; type: string; url: string; label?: string }[];
   options: { id?: string | number; type: string; label: string }[];
   stackImage: string;
@@ -219,6 +221,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
       questData.items.forEach((item, index) => {
         console.log('Processing item:', item); // 디버깅용
         transformedLearningData[index + 1] = { // 1-based index
+          questItemId: item.questItemId, // 실제 questItemId 저장
           sounds: item.units.map(unit => ({
             id: unit.id, // [TODO] string으로 변환해야하는지 확인
             url: unit.url,
@@ -343,10 +346,8 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
     const currentQuestionData = state.learningData[stepNumber];
     if (!currentQuestionData || !state.rawQuestData) return {};
 
-    // 실제 questItemId 추출 (API 응답에서)
-    // API 응답 구조에 따라 questItemId를 추출해야 함
-    // 현재는 stepNumber를 사용하지만, 실제로는 API 응답에서 questItemId를 추출해야 함
-    const questItemId = stepNumber; // TODO: API 응답에서 실제 questItemId 추출
+    // learningData에 저장된 실제 questItemId 사용
+    const questItemId = currentQuestionData.questItemId;
 
     const stepProgress: StepProgress = {
       questItemId,
