@@ -1,9 +1,9 @@
 import React from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
-import { X } from 'lucide-react';
 import ProgressBar from '../components/common/ProgressBar';
 import { useLearningStore } from '../store/learningStore';
 import Question from '../components/learning/Question';
+import IntroHeader from '../components/intro/IntroHeader';
 
 // 각 레이아웃에서 커스터마이징할 수 있는 props
 interface BaseLearningLayoutProps {
@@ -105,25 +105,14 @@ export default function BaseLearningLayout({
 
       {/* 메인 컨텐츠 */}
       <div className="relative z-10 flex flex-col h-full">
-      {/* 1. 헤더 (타이틀과 나가기 버튼) - 52px */}
-      <header className="flex-shrink-0 h-[52px] flex justify-between items-center px-5">
-        {/* 왼쪽 빈 공간 (균형을 위해) */}
-        <div className="w-10"></div>
-        
-        {/* 가운데 타이틀 */}
-        {rawQuestData?.title && (
-          <h1 className="text-xl font-bold text-Gray-99 text-base font-semibold font-['Pretendard'] leading-6 text-center flex-1">{rawQuestData.title}</h1>
-        )}
-        
-        {/* 우측 나가기 버튼 */}
-        <button
-          onClick={() => navigate('/')}
-          aria-label="Exit learning session"
-          className="p-2 text-gray-500 rounded-full hover:bg-gray-100 hover:text-gray-800 transition-colors"
-        >
-          <X size={24} />
-        </button>
-      </header>
+      {/* 1. 헤더 - IntroHeader 컴포넌트 사용 */}
+      <div className="flex-shrink-0 px-5">
+        <IntroHeader
+          groupName={rawQuestData?.title || '학습하기'}
+          buttonType="close"
+          onClose={() => navigate('/')}
+        />
+      </div>
 
       {/* 2. 진행도 (Progress Bar) - 12px */}
       <div className="flex-shrink-0 px-5 py-2">
