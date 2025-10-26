@@ -25,7 +25,7 @@ export default function Question({ sounds }: QuestionProps) {
   };
 
   return (
-    <div className="flex items-center bg-white rounded-xl overflow-hidden">
+    <div className="flex items-center bg-white rounded-xl overflow-hidden shadow-sm">
       {/* 문제 듣기 버튼 */}
       <button
         onClick={() => {
