@@ -11,6 +11,12 @@ type ApiQuestUnit = {
   type: string;
 };
 
+type ApiQuestAnswerDetail = {
+  type: string;
+  label: string;
+  units: string[];
+};
+
 type ApiQuestOption = {
   id: string;
   type: string;
@@ -21,6 +27,7 @@ type ApiQuestItem = {
   questItemId: number; // API로부터 받은 실제 questItemId
   units: ApiQuestUnit[];
   answer: string;
+  answerDetail: ApiQuestAnswerDetail;
   options: ApiQuestOption[];
 };
 
@@ -67,6 +74,7 @@ export type QuestionData = {
   options: { id?: string | number; type: string; label: string }[];
   stackImage: string;
   correctAnswer: string | number;
+  answerDetail: ApiQuestAnswerDetail;
 };
 
 // 새로 추가할 타입: 각 이미지 레이어의 구조 정의
@@ -122,6 +130,7 @@ interface LearningState {
   answers: Record<number, string | number>; // 단계별 사용자의 답 기록
   modalState: ModalState;
   isCorrect: boolean | null;
+  isCompleted: boolean; // 학습 완료 상태
   startTime: number | null; // 학습 시작 시간 (타임스탬프)
   endTime: number | null;   // 학습 종료 시간 (타임스탬프)
   correctImageStack: ImageLayer[]; // 타입을 string[] 에서 ImageLayer[] 로 변경
@@ -164,6 +173,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
   answers: {},
   modalState: 'closed',
   isCorrect: null,
+  isCompleted: false, // 초기 완료 상태는 false
   startTime: null,
   endTime: null,
   correctImageStack: [BASE_IMAGE_LAYER], // 초기값을 객체 배열로 변경
@@ -230,6 +240,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
           options: item.options,  // 서버에서 받은 옵션 사용
           stackImage: `/images/layer-${index + 1}.png`,  // 예시 스택 이미지
           correctAnswer: item.answer,
+          answerDetail: item.answerDetail,
         };
       });
 
@@ -309,6 +320,9 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
       totalSteps: 0,
       selectedAnswer: null,
       answers: {},
+      modalState: 'closed',
+      isCorrect: null,
+      isCompleted: false,
       startTime: null,
       endTime: null,
       correctImageStack: [BASE_IMAGE_LAYER], // 이미지 스택 초기화
@@ -334,6 +348,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
     const newAnswers = { ...state.answers, [state.currentStep]: state.selectedAnswer! };
     return {
       endTime: Date.now(),
+      isCompleted: true, // 학습 완료 상태로 설정
       isCorrect: null,
       modalState: 'closed', // 모달 닫기
       selectedAnswer: null, // 선택 초기화
