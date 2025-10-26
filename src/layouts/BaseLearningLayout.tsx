@@ -136,19 +136,19 @@ export default function BaseLearningLayout({
       ) : (
         <div className="flex-shrink-0 px-5 pt-4 flex justify-center">
           <div className="text-center">
-            <h2 className="text-4xl font-bold text-gray-800 mb-2">학습완료!</h2>
-            <p className="text-lg text-gray-600">수고하셨어요</p>
+            <h2 className="text-gray-800 text-slate-800 text-2xl font-semibold font-['Pretendard'] leading-9">학습 완료!</h2>
+            <p className="text-gray-500 text-base font-medium font-['Pretendard'] leading-6">수고하셨어요</p>
           </div>
         </div>
       )}
 
       {/* 4. 중앙 배경 영역 - Cake */}
-      <div className="flex-shrink-0 flex items-center justify-center px-5">
+      <div className="flex-grow flex items-center justify-center px-5 relative min-h-[270px]">
         {children}
       </div>
 
       {/* 5. 하단 영역 - 답 선택/피드백/완료 + 버튼 */}
-      <div className="flex-grow flex flex-col justify-end relative">
+      <div className="flex-shrink-0 flex flex-col justify-end relative">
         {isCompleted ? (
           // 학습 완료 시: 결과 표시 + 확인 버튼
           <div className="flex-shrink-0 px-5 pb-4 space-y-4 relative z-50">
