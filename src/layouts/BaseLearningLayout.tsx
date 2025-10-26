@@ -25,6 +25,7 @@ export default function BaseLearningLayout({
     totalSteps,
     selectedAnswer,
     isCorrect,
+    isCompleted,
     checkAnswer,
     endLearning,
     sendLearningResult,
@@ -32,9 +33,14 @@ export default function BaseLearningLayout({
     startStep,
     endStep,
     rawQuestData, // quest title을 위해 추가
+    stepProgress, // 정답/오답 개수 계산을 위해 추가
   } = useLearningStore();
 
   const currentQuestionData = learningData[currentStep];
+
+  // 정답/오답 개수 계산
+  const correctCount = Object.values(stepProgress).filter(step => step.isCorrect === true).length;
+  const incorrectCount = Object.values(stepProgress).filter(step => step.isCorrect === false).length;
 
   // 현재 단계가 시작될 때 시간 기록
   React.useEffect(() => {
@@ -76,8 +82,12 @@ export default function BaseLearningLayout({
       // 마지막 문제일 경우
       endLearning();
       sendLearningResult();
-      navigate('/result');
+      // navigate('/result'); // 더 이상 결과 페이지로 이동하지 않음
     }
+  };
+
+  const handleConfirm = () => {
+    navigate('/');
   };
 
 
@@ -118,19 +128,51 @@ export default function BaseLearningLayout({
         <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
       </div>
 
-      {/* 3. Question (Learning Set) - 115px - 상단 고정 */}
-      <div className="flex-shrink-0 px-5 pt-2 flex justify-center">
-        {currentQuestionData && <Question key={currentStep} sounds={currentQuestionData.sounds} />}
-      </div>
+      {/* 3. Question (Learning Set) or 완료 텍스트 - 상단 고정 */}
+      {!isCompleted ? (
+        <div className="flex-shrink-0 px-5 pt-2 flex justify-center">
+          {currentQuestionData && <Question key={currentStep} sounds={currentQuestionData.sounds} />}
+        </div>
+      ) : (
+        <div className="flex-shrink-0 px-5 pt-4 flex justify-center">
+          <div className="text-center">
+            <h2 className="text-4xl font-bold text-gray-800 mb-2">학습완료!</h2>
+            <p className="text-lg text-gray-600">수고하셨어요</p>
+          </div>
+        </div>
+      )}
 
       {/* 4. 중앙 배경 영역 - Cake */}
       <div className="flex-shrink-0 flex items-center justify-center px-5">
         {children}
       </div>
 
-      {/* 5. 하단 영역 - 답 선택/피드백 + 버튼 */}
+      {/* 5. 하단 영역 - 답 선택/피드백/완료 + 버튼 */}
       <div className="flex-grow flex flex-col justify-end relative">
-        {isCorrect === null ? (
+        {isCompleted ? (
+          // 학습 완료 시: 결과 표시 + 확인 버튼
+          <div className="flex-shrink-0 px-5 pb-4 space-y-4 relative z-50">
+            {/* 정답/오답 결과 박스 */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex justify-center gap-12">
+              <div className="text-center">
+                <p className="text-base text-gray-600 font-medium mb-2">정답</p>
+                <p className="text-4xl font-bold text-blue-500">{correctCount}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-base text-gray-600 font-medium mb-2">오답</p>
+                <p className="text-4xl font-bold text-red-500">{incorrectCount}</p>
+              </div>
+            </div>
+
+            {/* 확인 버튼 */}
+            <button
+              onClick={handleConfirm}
+              className={`w-full h-[53px] ${submitButtonClassName} text-white font-bold transition-colors text-[16px]`}
+            >
+              확인
+            </button>
+          </div>
+        ) : isCorrect === null ? (
           // 답 선택 시: Learning Btn (Outlet) + Primary Button
           <div className="flex-shrink-0 px-5 pb-4 space-y-2 relative z-50">
             <main className="w-full">
@@ -175,7 +217,9 @@ export default function BaseLearningLayout({
               {/* 정답 설명 */}
               {currentQuestionData && (
                 <div className="justify-start text-gray-600 text-lg font-semibold font-['Pretendard'] leading-7">
-                  정답: {currentQuestionData.correctAnswer}
+                  정답: {currentQuestionData.answerDetail.label}
+                  <br />
+                  "{currentQuestionData.answerDetail.units.join(', ')}"
                 </div>
               )}
             </div>

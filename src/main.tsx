@@ -4,7 +4,6 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 import RandomLearningLayout from './layouts/RandomLearningLayout';
 import LearningStepPage from './pages/LearningStepPage';
-import GameClearPage from './pages/GameClearPage';
 import LearningIntroPage from './pages/LearningIntroPage';
 import Home from './pages/Home';
 import LearningStatusPage from './pages/LearningStatusPage';
@@ -47,10 +46,6 @@ const router = createBrowserRouter([
         element: <LearningStepPage />,
       },
     ],
-  },
-  {
-    path: '/result',
-    element: <GameClearPage />,
   },
 ]);
 
