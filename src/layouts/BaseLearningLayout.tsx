@@ -9,11 +9,13 @@ import Question from '../components/learning/Question';
 interface BaseLearningLayoutProps {
   children?: React.ReactNode; // 중앙 배경 영역 (이미지 스택 또는 배경 컴포넌트)
   submitButtonClassName?: string; // 제출 버튼 스타일 커스터마이징
+  backgroundGradient?: string; // 배경 그라디언트 커스터마이징 (CSS gradient 문자열)
 }
 
 export default function BaseLearningLayout({
   children,
-  submitButtonClassName = "bg-blue-500 hover:bg-[#2265CC] rounded-[999px]"
+  submitButtonClassName = "bg-blue-500 hover:bg-[#2265CC] rounded-[999px]",
+  backgroundGradient = "linear-gradient(to bottom, rgba(219, 234, 254, 0.5), rgba(239, 246, 255, 0.5))"
 }: BaseLearningLayoutProps) {
   const navigate = useNavigate();
   const { questId, stepId } = useParams<{ questId: string; stepId: string }>();
@@ -95,9 +97,9 @@ export default function BaseLearningLayout({
     <div className="relative h-screen max-w-lg mx-auto font-sans overflow-hidden">
       {/* 배경 그라디언트 */}
       <div
-        className="absolute inset-0 bg-gradient-to-b"
+        className="absolute inset-0"
         style={{
-          backgroundImage: 'linear-gradient(to bottom, rgba(219, 234, 254, 0.5), rgba(239, 246, 255, 0.5))'
+          backgroundImage: backgroundGradient
         }}
       />
 
@@ -110,7 +112,7 @@ export default function BaseLearningLayout({
         
         {/* 가운데 타이틀 */}
         {rawQuestData?.title && (
-          <h1 className="text-xl font-bold text-gray-900 text-center flex-1">{rawQuestData.title}</h1>
+          <h1 className="text-xl font-bold text-Gray-99 text-base font-semibold font-['Pretendard'] leading-6 text-center flex-1">{rawQuestData.title}</h1>
         )}
         
         {/* 우측 나가기 버튼 */}
@@ -167,7 +169,7 @@ export default function BaseLearningLayout({
             {/* 확인 버튼 */}
             <button
               onClick={handleConfirm}
-              className={`w-full h-[53px] ${submitButtonClassName} text-white font-bold transition-colors text-[16px]`}
+              className={`w-full px-6 pt-4 pb-3.5 ${submitButtonClassName} gap-2 text-white font-bold transition-colors font-['Pretendard'] leading-6 rounded-full`}
             >
               확인
             </button>
@@ -181,7 +183,7 @@ export default function BaseLearningLayout({
             <button
               onClick={handleSubmit}
               disabled={!selectedAnswer || !currentQuestionData}
-              className={`w-full h-[53px] ${submitButtonClassName} text-white font-bold disabled:bg-gray-300 transition-colors text-[16px]`}
+              className={`w-full px-6 pt-4 pb-3.5 ${submitButtonClassName} gap-2 text-white font-bold disabled:bg-gray-200 transition-colors font-['Pretendard'] leading-6 rounded-full`}
             >
               정답 제출
             </button>
@@ -228,7 +230,7 @@ export default function BaseLearningLayout({
             <div className="px-5 pb-4">
               <button
                 onClick={handleNext}
-                className={`w-full h-[53px] ${isCorrect ? submitButtonClassName : 'bg-red-400 hover:bg-red-500 rounded-[999px]'} text-white font-bold transition-colors text-[16px]`}
+                className={`w-full px-6 pt-4 pb-3.5 ${isCorrect ? submitButtonClassName : 'bg-red-400 hover:bg-red-500 rounded-[999px]'} gap-2 text-white font-bold transition-colors font-['Pretendard'] leading-6 rounded-full`}
               >
                 다음
               </button>
