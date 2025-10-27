@@ -13,7 +13,7 @@ export default function WaterDropModal({ isOpen, waterDropCount, onConfirm }: Wa
       <div className="absolute inset-0 bg-black/80" onClick={onConfirm} />
 
       {/* 모달 컨텐츠 */}
-      <div className="relative rounded-3xl shadow-2xl p-8 flex flex-col items-center max-w-sm w-[90%] mx-4">
+      <div className="relative p-8 flex flex-col items-center max-w-sm w-[90%] mx-4">
         {/* 물방울 이미지 */}
         <div className="">
           <img

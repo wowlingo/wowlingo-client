@@ -16,7 +16,7 @@ export default function ExitConfirmModal({ isOpen, onContinue, onExit }: ExitCon
       />
 
       {/* 모달 콘텐츠 */}
-      <div className="relative p-8 max-w-sm w-full shadow-2xl">
+      <div className="relative p-8 max-w-sm w-full">
         {/* 제목 */}
         <h2 className="text-center text-xl font-bold text-white mb-3">
           학습을 중단하시겠습니까?
