@@ -117,55 +117,82 @@ const Home: React.FC = () => {
                         {isLoading ? (
                             <div className="text-gray-500">로딩 중...</div>
                         ) : Array.isArray(userQuestProgress) && userQuestProgress.length > 0 ? (
-                            userQuestProgress.map((quest) => (
-                                <Link
-                                    to={`/learning/intro/${quest.questId}`}
-                                    key={quest.questId}
-                                    className={`flex-shrink-0 w-64 snap-center block rounded-2xl p-6 shadow-md transition-all ${
-                                        quest.questId === activeQuestId
-                                            ? 'bg-blue-500 text-white'
-                                            : quest.isStarted
-                                            ? 'bg-blue-50 text-blue-900'
-                                            : 'bg-gray-50 text-gray-700'
-                                    }`}
-                                >
-                                    {/* 진행 상태 */}
-                                    <div className="flex items-center justify-between mb-3">
-                                        <span className="text-sm font-semibold">
-                                            {quest.correctCount}/{quest.totalCount}
-                                        </span>
-                                        {quest.isCompleted && (
-                                            <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full">
-                                                완료
+                            userQuestProgress.map((quest) => {
+                                // 퀘스트 상태 결정
+                                const isCompleted = quest.isCompleted;
+                                const isActive = quest.questId === activeQuestId;
+                                const isLocked = !isCompleted && !isActive;
+
+                                // 공통 컨텐츠
+                                const questContent = (
+                                    <>
+                                        {/* 진행 상태 */}
+                                        <div className="flex items-center justify-between mb-3">
+                                            <span className={`text-sm font-semibold ${isLocked ? 'text-gray-400' : ''}`}>
+                                                {quest.correctCount}/{quest.totalCount}
                                             </span>
-                                        )}
-                                    </div>
+                                            {isCompleted && (
+                                                <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full">
+                                                    완료
+                                                </span>
+                                            )}
+                                        </div>
 
-                                    {/* 퀘스트 제목 */}
-                                    <h4 className="text-xl font-bold mb-3">
-                                        {quest.title}
-                                    </h4>
+                                        {/* 퀘스트 제목 */}
+                                        <h4 className={`text-xl font-bold mb-3 ${isLocked ? 'text-gray-400' : ''}`}>
+                                            {quest.title}
+                                        </h4>
 
-                                    {/* 태그 */}
-                                    <div className="flex flex-wrap gap-1.5 mb-3">
-                                        {quest.tags.map((tag, index) => (
-                                            <span
-                                                key={index}
-                                                className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                                                    quest.questId === activeQuestId
-                                                        ? 'bg-blue-600 text-white'
-                                                        : quest.isStarted
-                                                        ? 'bg-blue-200 text-blue-800'
-                                                        : 'bg-gray-200 text-gray-600'
-                                                }`}
-                                            >
-                                                {tag}
-                                            </span>
-                                        ))}
-                                    </div>
+                                        {/* 태그 */}
+                                        <div className="flex flex-wrap gap-1.5 mb-3">
+                                            {quest.tags.map((tag, index) => (
+                                                <span
+                                                    key={index}
+                                                    className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                                                        isLocked
+                                                            ? 'bg-gray-200 text-gray-400'
+                                                            : isActive
+                                                            ? 'bg-blue-600 text-white'
+                                                            : quest.isStarted
+                                                            ? 'bg-blue-200 text-blue-800'
+                                                            : 'bg-gray-200 text-gray-600'
+                                                    }`}
+                                                >
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </>
+                                );
 
-                                </Link>
-                            ))
+                                // 잠긴 퀘스트는 div로, 활성/완료 퀘스트는 Link로 렌더링
+                                if (isLocked) {
+                                    return (
+                                        <div
+                                            key={quest.questId}
+                                            className="flex-shrink-0 w-64 snap-center block rounded-2xl p-6 shadow-md transition-all relative cursor-not-allowed bg-gray-100 text-gray-400"
+                                        >
+                                            {questContent}
+                                        </div>
+                                    );
+                                }
+
+                                return (
+                                    <Link
+                                        key={quest.questId}
+                                        to={`/learning/intro/${quest.questId}`}
+                                        className={`flex-shrink-0 w-64 snap-center block rounded-2xl p-6 shadow-md transition-all relative ${
+                                            isActive
+                                                ? 'bg-blue-500 text-white'
+                                                : quest.isStarted
+                                                ? 'bg-blue-50 text-blue-900'
+                                                : 'bg-gray-50 text-gray-700'
+                                        }`}
+                                    >
+                                        {questContent}
+                                    </Link>
+                                );
+                            })
                         ) : Array.isArray(questList) && questList.length > 0 ? (
                             questList.map((quest) => (
                                 <Link
