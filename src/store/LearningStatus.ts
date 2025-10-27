@@ -19,7 +19,7 @@ export const useLearningStatusStore = create<LearningStatus>((set) => ({
         set({ isLoading: true, error: null });
         try {
             const response = await fetch(
-                `http://localhost:8080/api/users/${userId}/quest-attempts?year=${year}&month=${month}`
+                `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/quest-attempts?year=${year}&month=${month}`
             );
             const json = await response.json();
 

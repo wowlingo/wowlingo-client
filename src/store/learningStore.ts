@@ -192,7 +192,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
     set({ isLoading: true });
 
     try {
-      const response = await fetch(`http://localhost:8080/api/quests`);
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/quests`);
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
@@ -219,7 +219,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
 
     set({ isLoading: true, currentQuestId: questId, learningData: {}, rawQuestData: null, correctImageStack: [BASE_IMAGE_LAYER] }); // 새 퀘스트 로드 시 데이터 초기화
     try {
-      const response = await fetch(`http://localhost:8080/api/quests/${questId}`);
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/quests/${questId}`);
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
@@ -463,7 +463,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
 
     try {
       console.log('Sending learning result:', resultData);
-      const response = await fetch(`http://localhost:8080/api/user-quests/1/${currentQuestId}/submit`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user-quests/1/${currentQuestId}/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -491,7 +491,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
     set({ isLoading: true });
 
     try {
-      const response = await fetch(`http://localhost:8080/api/user-quests/${userId}`);
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user-quests/${userId}`);
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }

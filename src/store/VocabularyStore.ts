@@ -40,7 +40,7 @@ export const useVocabularyStore = create<VocabularyState>((set) => ({
     fetchHashtags: async () => {
         set({ isLoading: true, error: null });
         try {
-            const response = await fetch('http://localhost:8080/api/vocabulary/hashtags?userId=1');
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/vocabulary/hashtags?userId=1`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
@@ -67,7 +67,7 @@ export const useVocabularyStore = create<VocabularyState>((set) => ({
             hashtagIds.forEach(id => params.append('hashtags', id.toString()));
             if (sort) params.append('sort', sort);
 
-            const response = await fetch(`http://localhost:8080/api/vocabulary?${params.toString()}`);
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/vocabulary?${params.toString()}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }

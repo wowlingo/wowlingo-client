@@ -48,7 +48,7 @@ export const useReviewStore = create<ReviewState>((set) => ({
                 params.append('date', formatDate(date));//'2025-09-25');
             }
 
-            const response = await fetch(`http://localhost:8080/api/user-quests/review-notes/hashtags?${params.toString()}`);
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user-quests/review-notes/hashtags?${params.toString()}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
@@ -79,7 +79,7 @@ export const useReviewStore = create<ReviewState>((set) => ({
             }
             // if (sort) params.append('sort', sort);
 
-            const response = await fetch(`http://localhost:8080/api/user-quests/review-notes?${params.toString()}`);
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user-quests/review-notes?${params.toString()}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
