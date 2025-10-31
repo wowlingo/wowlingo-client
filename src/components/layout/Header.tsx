@@ -2,10 +2,10 @@ import { NavLink } from '../ui/NavLink';
 
 const Header = () => {
     return (
-        <header className="sticky top-0 bg-white shadow-sm z-10">
-            <div className="bg-gray-100">
+        <header className="sticky top-0 bg-white z-10">
+            <div className="">
                 <nav className="flex items-center justify-between h-14 px-4 max-w-md mx-auto">
-                    <div className="flex space-x-4 text-gray-500">
+                    <div className="flex space-x-4 text-black-500">
                         <NavLink to="/">홈</NavLink>
                         <NavLink to="/learning-status">학습현황</NavLink>
                         <NavLink to="/review-notes">오답노트</NavLink>
