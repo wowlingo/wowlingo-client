@@ -37,7 +37,7 @@ const VocabularyPage = () => {
 
     return (
         <div className="h-full w-full">
-            <div className="p-4 flex flex-col h-full">
+            <div className="flex flex-col h-full">
                 {/* 전체 개수 및 전체 듣기 */}
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
