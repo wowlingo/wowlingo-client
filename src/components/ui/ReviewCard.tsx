@@ -1,20 +1,33 @@
 import React from 'react';
 import { ImageButton } from '../ui/ImageButton';
-import { playAudio } from '../common/AudioService';
+import { playAudio } from '../common/AudioService'
+import { toast } from 'sonner';
+import { ToastBlueIcon } from './WordCard';
 
-export const addVocabulary = (audioUrl: string) => {
-    // 단어장 추가
-    console.log(audioUrl);
-};
 
 interface ReviewCardProps {
+    unitId: number;
     quest: string;
     unit: string;
     urlNormal: string;
     urlSlow: string;
+    onAddVoca: () => void;
 }
 
-export const ReviewCard: React.FC<ReviewCardProps> = ({ quest, unit, urlNormal, urlSlow }) => {
+export const ReviewCard: React.FC<ReviewCardProps> = ({ unitId, quest, unit, urlNormal, urlSlow, onAddVoca }) => {
+
+    const addVocabulary = (unitId: number) => {
+        console.log(unitId);
+
+        onAddVoca();
+
+        toast("단어장에 추가 되었습니다", {
+            icon: <ToastBlueIcon />,
+            duration: 3000,
+        });
+
+    };
+
     return (
         <article
             className="rounded-lg overflow-hidden flex flex-col transform transition-transform duration-300 bg-white border border-gray-200"
@@ -39,7 +52,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({ quest, unit, urlNormal, 
                         onClick={() => playAudio(urlSlow)} />
                     <div className="w-[1px] h-[67px] bg-[#E5E7EB]" />
                     <ImageButton image='review' label="단어장 추가"
-                        onClick={() => addVocabulary(urlNormal)} />
+                        onClick={() => addVocabulary(unitId)} />
                 </div>
                 {/* <div className="flex-shrink-0 px-5 pt-2 flex justify-center">
                     <Question key={mockSounds[0].id} sounds={mockSounds} />

@@ -30,6 +30,7 @@ interface VocabularyState {
     fetchHashtags: () => Promise<void>;
     fetchVocabulary: (hashtagIds?: number[], sort?: string) => Promise<void>;
     deleteVocabulary: (vocabId: number) => Promise<void>;
+    addVocabulary: (questItemUnitId: number) => Promise<void>;
 }
 
 export const useVocabularyStore = create<VocabularyState>((set) => ({
@@ -102,4 +103,35 @@ export const useVocabularyStore = create<VocabularyState>((set) => ({
             set({ error: errorMessage });
         }
     },
+
+    addVocabulary: async (questItemUnitId: number) => {
+        try {
+            const resultData = {
+                userId: 1,
+                questItemUnitId: questItemUnitId,
+            };
+
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/vocabulary`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(resultData),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete vocabulary item.');
+            }
+
+            // set(state => ({
+            //     vocabulary: state.vocabulary.filter(v => v.vocabId !== vocabId)
+            // }));
+
+            set({ error: null });
+
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+            set({ error: errorMessage });
+        }
+    }
 }));

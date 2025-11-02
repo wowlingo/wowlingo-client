@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useReviewStore } from '../store/ReviewStore';
 import { ReviewCard } from '../components/ui/ReviewCard';
+import { useVocabularyStore } from '@/store/VocabularyStore';
 
 
 const ReviewNotesPage = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const { hashtags, isLoading, error, questItemUnits, fetchHashtags, fetchQuestItemUnits } = useReviewStore();
+    const { addVocabulary } = useVocabularyStore();
 
     useEffect(() => {
         fetchHashtags();
@@ -126,10 +128,12 @@ const ReviewNotesPage = () => {
                     {questItemUnits.map(item => (
                         <ReviewCard
                             key={item.questItemUnitId}
+                            unitId={item.questItemUnitId}
                             quest='길이가 같은 낱말 변별'
                             unit={item.str}
                             urlNormal={item.urlNormal}
                             urlSlow={item.urlSlow}
+                            onAddVoca={() => addVocabulary(item.questItemUnitId)}
                         />
                     ))}
                 </div>

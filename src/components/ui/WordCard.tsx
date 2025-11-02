@@ -12,7 +12,7 @@ interface WordCardProps {
     onDeleteVoca: () => void;
 }
 
-const ToastBlueIcon = () => (
+export const ToastBlueIcon = () => (
     <div style={{
         background: '#3182F7',
         borderRadius: '50%',
