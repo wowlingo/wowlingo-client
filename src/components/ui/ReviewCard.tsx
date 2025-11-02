@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { CheckCircle } from 'lucide-react';
+import React from 'react';
 import { ImageButton } from '../ui/ImageButton';
-import { playAudio, playLoopAudio } from '../common/AudioService';
+import { playAudio } from '../common/AudioService';
 
 export const addVocabulary = (audioUrl: string) => {
     // 단어장 추가
+    console.log(audioUrl);
 };
 
 interface ReviewCardProps {

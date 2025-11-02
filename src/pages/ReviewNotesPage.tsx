@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useReviewStore } from '../store/ReviewStore';
 import { ReviewCard } from '../components/ui/ReviewCard';
 

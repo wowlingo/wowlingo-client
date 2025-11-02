@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import { CheckCircle } from 'lucide-react';
 import { ImageButton } from '../ui/ImageButton';
 import { playAudio, playLoopAudio } from '../common/AudioService';

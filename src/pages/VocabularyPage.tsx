@@ -1,6 +1,4 @@
 // src/pages/VocabularyPage.tsx
-import { Play, ChevronDown } from 'lucide-react';
-import VocaCard from '../components/vocabulary/VocaCard';
 import { useEffect, useState } from 'react';
 import { useVocabularyStore } from '../store/VocabularyStore';
 import { SortDropdown, SortOptionKey } from '../components/ui/SortDropdown';

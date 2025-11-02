@@ -1,6 +1,6 @@
 // src/components/learning-status/Calendar.tsx
 import { useState } from 'react';
-import { Check, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import React from 'react';
 
 interface CalendarProps {
@@ -11,7 +11,7 @@ interface CalendarProps {
     attemptedDates: number[]; // 학습 시도한 날(day)
 }
 
-const Calendar = ({ selectedDate, onDateSelect, onMonthChange, loginedDates, attemptedDates }: CalendarProps) => {
+const Calendar = ({ selectedDate, onDateSelect, onMonthChange, loginedDates }: CalendarProps) => {
     // 현재 클라이언트 날짜를 기준으로 달력 상태 관리
     const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -91,13 +91,13 @@ const Calendar = ({ selectedDate, onDateSelect, onMonthChange, loginedDates, att
 
                     // 날짜 비교 로직 수정
                     const isSelected = selectedDate.toDateString() === fullDate.toDateString();
-                    const isLogined = loginedDates.includes(date);
+                    // const isLogined = loginedDates.includes(date);
                     const isAttempted = loginedDates.includes(date);
                     const isToday = today.toDateString() === fullDate.toDateString();
 
-                    const dayIndex = index % 7;
-                    const isSunday = dayIndex === 0;
-                    const isSaturday = dayIndex === 6;
+                    // const dayIndex = index % 7;
+                    // const isSunday = dayIndex === 0;
+                    // const isSaturday = dayIndex === 6;
 
                     let dateColorClass = 'text-[#8E8E93]';
                     // if (isSunday) dateColorClass = 'text-red-500';
