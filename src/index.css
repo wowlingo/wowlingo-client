@@ -3,6 +3,20 @@
 @tailwind components;
 @tailwind utilities;
 
+.custom-toast-title {
+  margin-left: 10px;
+}
+
+.custom-toast-action-button {
+  background: none !important;
+  border: none !important;
+  color: white !important;
+  text-decoration: underline !important;
+  opacity: 0.9 !important;
+  font-size: 18px !important;
+  margin-left: 12px !important;
+}
+
 /* 3D 카드 뒤집기 애니메이션 */
 .rotate-y-180 {
   transform: rotateY(180deg);

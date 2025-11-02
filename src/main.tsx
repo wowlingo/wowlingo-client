@@ -2,6 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
+import 'sonner/dist/styles.css';
+import { Toaster } from "sonner";
 import RandomLearningLayout from './layouts/RandomLearningLayout';
 import LearningStepPage from './pages/LearningStepPage';
 import LearningIntroPage from './pages/LearningIntroPage';
@@ -50,7 +52,31 @@ const router = createBrowserRouter([
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>,
+  <>
+    <React.StrictMode>
+      <RouterProvider router={router} />
+    </React.StrictMode>
+    <Toaster
+      theme="dark"
+      position="bottom-center"
+      richColors
+      toastOptions={{
+        style: {
+          // width: '335px',
+          height: '63px',
+          padding: '18px 20px',
+          background: 'rgba(0, 0, 0, 0.6)',
+          color: '#fff',
+          borderRadius: '999px',
+          boxSizing: 'border-box',
+          fontSize: '18px',
+        },
+        className: 'shadow-lg',
+        classNames: {
+          actionButton: 'custom-toast-action-button',
+          title: 'custom-toast-title'
+        }
+      }}
+    />
+  </>
 );
