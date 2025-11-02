@@ -50,7 +50,7 @@ const ReviewNotesPage = () => {
 
     return (
         <div className=" h-full w-full">
-            <div className="p-4">
+            <div className="">
                 <div className="flex items-center justify-between mb-4">
                     <button
                         className="p-2 text-gray-600 hover:text-black"
@@ -59,7 +59,7 @@ const ReviewNotesPage = () => {
                         <ChevronLeft size={24} />
                     </button>
 
-                    <span className="font-bold text-lg tabular-nums">
+                    <span className="text-xl">
                         {formatDate(currentDate)}
                     </span>
 

@@ -8,7 +8,7 @@ const LearningStatusPage = () => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const { loginedDates, attemptedDates, fetchQuestAttempts } = useLearningStatusStore();
 
-    const userId = 4;
+    const userId = 1;
 
     useEffect(() => {
         const year = selectedDate.getFullYear();
@@ -26,7 +26,7 @@ const LearningStatusPage = () => {
     };
 
     return (
-        <div className="p-4 space-y-6">
+        <div className="">
             <Calendar
                 selectedDate={selectedDate}
                 onDateSelect={setSelectedDate}
@@ -38,6 +38,10 @@ const LearningStatusPage = () => {
                 loginedDates={loginedDates}
                 attemptedDates={attemptedDates}
             />
+            <div className='mb-6' />
+            <div className="w-full h-[6px] bg-[#F2F2F7]" />
+            <div className='mb-6' />
+
             <DailySummary data={summaryData} />
         </div>
     );
