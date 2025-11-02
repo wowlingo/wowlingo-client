@@ -1,5 +1,6 @@
 import React from 'react';
 import { CheckCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import { ImageButton } from '../ui/ImageButton';
 import { playAudio, playLoopAudio } from '../common/AudioService';
 
@@ -8,9 +9,54 @@ interface WordCardProps {
     unit: string;
     urlNormal: string;
     urlSlow: string;
+    onDeleteVoca: () => void;
 }
 
-export const WordCard: React.FC<WordCardProps> = ({ quest, unit, urlNormal, urlSlow }) => {
+const ToastBlueIcon = () => (
+    <div style={{
+        background: '#3182F7',
+        borderRadius: '50%',
+        width: '24px',
+        height: '24px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white',
+        fontSize: '14px',
+        flexShrink: 0,
+        marginRight: '10px',
+    }}>
+        &#10003;
+    </div>
+);
+
+export const WordCard: React.FC<WordCardProps> = ({ quest, unit, urlNormal, urlSlow, onDeleteVoca }) => {
+
+    const handleComplete = () => {
+        console.log("handleComplete")
+        let isCancelled = false;
+
+        const toastId = toast("완료한 카드는 사라집니다", {
+            icon: <ToastBlueIcon />,
+            action: {
+                label: "취소하기",
+                onClick: () => {
+                    isCancelled = true;
+                    toast.dismiss(toastId);
+                },
+            },
+            duration: 3000, // 3초 뒤 자동으로 닫힘
+        });
+
+        // 토스트가 닫힐 때 실행되도록 타이머로 제어
+        setTimeout(() => {
+            console.log("toast setTimeout")
+            if (!isCancelled) {
+                onDeleteVoca();
+            }
+        }, 5000);
+    };
+
     return (
         <article
             className="rounded-lg overflow-hidden flex flex-col transform transition-transform duration-300 bg-white border border-gray-200"
@@ -23,7 +69,7 @@ export const WordCard: React.FC<WordCardProps> = ({ quest, unit, urlNormal, urlS
                     {unit}
                 </h3>
 
-                {/* <div className="grid grid-cols-3 gap-4 text-center"> 
+                {/* <div className="grid grid-cols-3 gap-4 text-center"> */}
                 {/* <div className="flex items-center bg-white rounded-xl overflow-hidden shadow-sm"></div> */}
                 <div className="flex items-center justify-center rounded-xl overflow-hidden">
                     <ImageButton
@@ -51,7 +97,7 @@ export const WordCard: React.FC<WordCardProps> = ({ quest, unit, urlNormal, urlS
                 >
                     학습을 완료했어요
                 </span>
-                <button>
+                <button onClick={handleComplete}>
                     <CheckCircle className="text-gray-500" size={20} />
                 </button>
             </div>

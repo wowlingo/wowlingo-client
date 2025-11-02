@@ -4,11 +4,8 @@ import { useVocabularyStore } from '../store/VocabularyStore';
 import { SortDropdown, SortOptionKey } from '../components/ui/SortDropdown';
 import { WordCard } from '../components/ui/WordCard';
 
-
-
-
 const VocabularyPage = () => {
-    const { hashtags, isLoading, error, vocabulary, fetchHashtags, fetchVocabulary } = useVocabularyStore();
+    const { hashtags, isLoading, error, vocabulary, fetchHashtags, fetchVocabulary, deleteVocabulary } = useVocabularyStore();
 
     const [sortBy, setSortBy] = useState<SortOptionKey>('newest'); // 타입 변경
     // const [filterTags, setFilterTags] = useState<string[]>([]);
@@ -86,6 +83,7 @@ const VocabularyPage = () => {
                             unit={item.str} 
                             urlNormal={item.urlNormal}
                             urlSlow={item.slowNormal}
+                            onDeleteVoca={() => deleteVocabulary(item.vocabId)}
                         />
                     ))}
                 </div>
