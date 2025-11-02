@@ -6,7 +6,7 @@ type QuestItemUnit = {
     type: string;
     str: string;
     urlNormal: string;
-    slowNormal: string;
+    urlSlow: string;
     remark: string;
 };
 
@@ -43,7 +43,7 @@ export const useReviewStore = create<ReviewState>((set) => ({
         set({ isLoading: true, error: null });
         try {
             const params = new URLSearchParams();
-            params.append('userId', "4");
+            params.append('userId', "1");
             if (date) {
                 params.append('date', formatDate(date));//'2025-09-25');
             }
@@ -72,7 +72,7 @@ export const useReviewStore = create<ReviewState>((set) => ({
         set({ isLoading: true, error: null });
         try {
             const params = new URLSearchParams();
-            params.append('userId', "4");
+            params.append('userId', "1");
             hashtagIds.forEach(id => params.append('hashtags', id.toString()));
             if (date) {
                 params.append('date', formatDate(date));//'2025-09-25');

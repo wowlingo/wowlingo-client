@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
-import ReviewCard from '../components/review-notes/ReviewCard';
 import { useReviewStore } from '../store/ReviewStore';
+import { ReviewCard } from '../components/ui/ReviewCard';
 
 
 const ReviewNotesPage = () => {
@@ -81,37 +81,55 @@ const ReviewNotesPage = () => {
                     </button>
                 </div> */}
                 <div className="flex items-center mb-5 overflow-hidden">
-                    <button className="flex items-center text-sm font-medium flex-shrink-0 mr-2">
-                        최신순 <ChevronDown size={16} className="ml-1" />
-                    </button>
-                    <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar">
-                        {/* {isLoading && <p>태그 로딩 중...</p>} */}
-                        {/* {error && <p>오류: {error}</p>} */}
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <p className="text-[16px] text-gray-500">틀린 문제</p>
+                            <p className="text-[16px] text-black">4</p>
+                        </div>
+                    </div>
 
-                        {!isLoading && !error && hashtags.map((tag) => {
-                            const isSelected = selectedTags.includes(tag.hashtagId);
-                            return (
-                                <button key={tag.hashtagId}
-                                    className={`px-3 py-1 text-sm rounded-full flex-shrink-0
-                                    ${isSelected ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}
+                    <div className="flex items-center mb-5 overflow-hidden">
+                        <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar">
+                            {/* {isLoading && <p>태그 로딩 중...</p>} bg-[#DBEAFE]*/}
+                            {/* {error && <p>오류: {error}</p>} */}
+
+                            {!isLoading && !error && hashtags.map((tag) => {
+                                const isSelected = selectedTags.includes(tag.hashtagId);
+                                return (
+                                    <button key={tag.hashtagId}
+                                        className={`px-3 py-1 text-[14px] rounded-full flex-shrink-0
+                                    ${isSelected ? 'bg-blue-100 text-blue-500 hover:bg-blue-200' : 'border border-gray-200 text-gray-500 hover:bg-gray-200'}
                                     `}
-                                    onClick={() => handleClick(tag.hashtagId)}>
-                                    #{tag.name}
-                                </button>
-                            )
-                        })
-                        }
+                                        onClick={() => handleClick(tag.hashtagId)}>
+                                        #{tag.name}
+                                    </button>
+                                )
+                            })
+                            }
+                        </div>
                     </div>
                 </div>
 
                 {/* 오답 문제 리스트 */}
-                <div className="space-y-3">
+                {/* <div className="space-y-3">
                     {questItemUnits.map(item => (
                         <ReviewCard
                             key={item.questItemUnitId}
                             word={item.str}
                             description='학습 타이틀명'
                             urlNormal={item.urlNormal}
+                        />
+                    ))}
+                </div> */}
+
+                <div className="flex-1 space-y-3 overflow-y-auto no-scrollbar">
+                    {questItemUnits.map(item => (
+                        <ReviewCard
+                            key={item.questItemUnitId}
+                            quest='길이가 같은 낱말 변별'
+                            unit={item.str}
+                            urlNormal={item.urlNormal}
+                            urlSlow={item.urlSlow}
                         />
                     ))}
                 </div>
