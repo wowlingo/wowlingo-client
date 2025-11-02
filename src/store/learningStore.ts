@@ -70,7 +70,7 @@ type ApiUserQuestResponse = {
 // 학습 데이터 타입 (기존 QuestionData와 유사)
 export type QuestionData = {
   questItemId: number; // API로부터 받은 실제 questItemId
-  sounds: { id: number; type: string; url: string; label?: string }[];
+  sounds: { index: number; id: number; type: string; url: string; label?: string }[];
   options: { id?: string | number; type: string; label: string }[];
   stackImage: string;
   correctAnswer: string | number;
@@ -233,6 +233,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
         transformedLearningData[index + 1] = { // 1-based index
           questItemId: item.questItemId, // 실제 questItemId 저장
           sounds: item.units.map(unit => ({
+            index: index,
             id: unit.id, // [TODO] string으로 변환해야하는지 확인
             url: unit.url,
             type: unit.type,  // 'normal' 또는 'slow'

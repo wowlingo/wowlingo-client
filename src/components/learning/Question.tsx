@@ -8,14 +8,32 @@ interface Sound {
 
 // 컴포넌트가 받을 props 타입 정의
 interface QuestionProps {
+  isDouble: boolean | null;
   sounds: Sound[];
 }
 
-export default function Question({ sounds }: QuestionProps) {
+export default function Question({ sounds, isDouble }: QuestionProps) {
   // 사운드를 재생하는 함수
   const handlePlaySound = (audioUrl: string) => {
     const audio = new Audio(audioUrl);
     audio.play().catch(e => console.error("오디오 재생 오류:", e));
+  };
+
+  const handlePlaySounds = (audioUrls: string[]) => {
+    if (audioUrls.length === 0) return;
+
+    const playAudio = (index: number) => {
+      if (index >= audioUrls.length) return;
+
+      const audio = new Audio(audioUrls[index]);
+      audio.play()
+        .then(() => {
+          audio.onended = () => playAudio(index + 1);
+        })
+        .catch(e => console.error("오디오 재생 오류:", e));
+    };
+
+    playAudio(0);
   };
 
   // 단어장 추가 함수
@@ -29,8 +47,14 @@ export default function Question({ sounds }: QuestionProps) {
       {/* 문제 듣기 버튼 */}
       <button
         onClick={() => {
-          const normalSound = sounds.find(s => s.type === 'normal');
-          if (normalSound) handlePlaySound(normalSound.url);
+          if (isDouble) {
+            const soundUrls = sounds.filter(s => s.type === 'normal').map(s => s.url);
+            if (soundUrls && soundUrls.length > 0)
+              handlePlaySounds(soundUrls);
+          } else {
+            const normalSound = sounds.find(s => s.type === 'normal');
+            if (normalSound) handlePlaySound(normalSound.url);
+          }
         }}
         className="w-[100px] h-[99px] flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] hover:bg-gray-50 transition-colors"
         aria-label="문제 듣기"
@@ -49,8 +73,15 @@ export default function Question({ sounds }: QuestionProps) {
       {/* 천천히 듣기 버튼 */}
       <button
         onClick={() => {
-          const slowSound = sounds.find(s => s.type === 'slow');
-          if (slowSound) handlePlaySound(slowSound.url);
+          if (isDouble) {
+            const soundUrls = sounds.filter(s => s.type === 'slow').map(s => s.url);
+            if (soundUrls && soundUrls.length > 0)
+              handlePlaySounds(soundUrls);
+          } else {
+            const normalSound = sounds.find(s => s.type === 'slow');
+            if (normalSound) handlePlaySound(normalSound.url);
+          }
+
         }}
         className="w-[100px] h-[99px] flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] hover:bg-gray-50 transition-colors"
         aria-label="천천히 듣기"
