@@ -31,6 +31,23 @@ export const playAudio = (audioUrl: string) => {
     });
 };
 
+export const playAudios = (audioUrls: string[]) => {
+    if (audioUrls.length === 0) return;
+
+    const playAudio = (index: number) => {
+        if (index >= audioUrls.length) return;
+
+        const audio = new Audio(audioUrls[index]);
+        audio.play()
+            .then(() => {
+                audio.onended = () => playAudio(index + 1);
+            })
+            .catch(e => console.error("오디오 재생 오류:", e));
+    };
+
+    playAudio(0);
+};
+
 /**
  * 오디오를 반복 재생합니다.
  * @param audioUrl 반복 재생할 오디오 파일의 URL

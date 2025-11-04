@@ -1,13 +1,15 @@
 import { create } from 'zustand';
 
 
-type QuestItemUnit = {
-    questItemUnitId: number;
-    type: string;
-    str: string;
-    urlNormal: string;
-    urlSlow: string;
-    remark: string;
+type ReviewQuestItem = {
+    // questId: number;
+    // type: string;
+    title: string;
+    questItemId: number;
+    sounds: any[];
+    units: string[];
+    answer?: string | number | null;
+    options?: any[];
 };
 
 type HashtagData = {
@@ -20,7 +22,7 @@ interface ReviewState {
     hashtags: HashtagData[];
     isLoading: boolean;
     error: string | null;
-    questItemUnits: QuestItemUnit[];
+    reviewQuestItems: ReviewQuestItem[];
     fetchHashtags: (date?: Date) => Promise<void>;
     fetchQuestItemUnits: (hashtagIds?: number[], date?: Date, sort?: string) => Promise<void>;
 }
@@ -37,7 +39,7 @@ export const useReviewStore = create<ReviewState>((set) => ({
     hashtags: [],
     isLoading: false,
     error: null,
-    questItemUnits: [],
+    reviewQuestItems: [],
 
     fetchHashtags: async (date?: Date) => {
         set({ isLoading: true, error: null });
@@ -84,11 +86,11 @@ export const useReviewStore = create<ReviewState>((set) => ({
                 throw new Error('Network response was not ok');
             }
 
-            const jsonResponse: { data: QuestItemUnit[] } = await response.json();
+            const jsonResponse: { data: ReviewQuestItem[] } = await response.json();
 
-            const newQuestItemUnits = jsonResponse.data;
+            const newDatas = jsonResponse.data;
 
-            set({ questItemUnits: newQuestItemUnits, isLoading: false });
+            set({ reviewQuestItems: newDatas, isLoading: false });
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
             set({ isLoading: false, error: errorMessage });

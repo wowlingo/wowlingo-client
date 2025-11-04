@@ -7,7 +7,7 @@ import { useVocabularyStore } from '@/store/VocabularyStore';
 
 const ReviewNotesPage = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
-    const { hashtags, isLoading, error, questItemUnits, fetchHashtags, fetchQuestItemUnits } = useReviewStore();
+    const { hashtags, isLoading, error, reviewQuestItems, fetchHashtags, fetchQuestItemUnits } = useReviewStore();
     const { addVocabulary } = useVocabularyStore();
 
     useEffect(() => {
@@ -78,7 +78,7 @@ const ReviewNotesPage = () => {
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                             <p className="text-[16px] text-gray-500">틀린 문제</p>
-                            <p className="text-[16px] text-black">{questItemUnits?.length}</p>
+                            <p className="text-[16px] text-black">{reviewQuestItems?.length}</p>
                         </div>
                     </div>
 
@@ -117,15 +117,15 @@ const ReviewNotesPage = () => {
                 </div> */}
 
                 <div className="flex-1 space-y-3 overflow-y-auto no-scrollbar">
-                    {questItemUnits.map(item => (
+                    {reviewQuestItems.map(item => (
                         <ReviewCard
-                            key={item.questItemUnitId}
-                            unitId={item.questItemUnitId}
-                            quest='길이가 같은 낱말 변별'
-                            unit={item.str}
-                            urlNormal={item.urlNormal}
-                            urlSlow={item.urlSlow}
-                            onAddVoca={() => addVocabulary(item.questItemUnitId)}
+                            // title, questItemId, sounds, units, onAddVoca
+                            key={item.questItemId}
+                            questItemId={item.questItemId}
+                            title={item.title}
+                            sounds={item.sounds}
+                            units={item.units}
+                            onAddVoca={() => addVocabulary(item.questItemId)}
                         />
                     ))}
                 </div>
