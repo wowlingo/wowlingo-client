@@ -47,6 +47,7 @@ const ReviewNotesPage = () => {
         console.log(newDate);
 
         setCurrentDate(newDate);
+        fetchHashtags(newDate);
         fetchQuestItemUnits(selectedTags, newDate, 'latest');
     };
 
@@ -73,20 +74,11 @@ const ReviewNotesPage = () => {
                     </button>
                 </div>
 
-                {/* <div className="flex items-center space-x-2 mb-5">
-                    <h2 className="font-semibold">틀린 문제 {mockProblems.length}개</h2>
-                    <button className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300">
-                        #환경음
-                    </button>
-                    <button className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300">
-                        #말소리
-                    </button>
-                </div> */}
-                <div className="flex items-center mb-5 overflow-hidden">
+                <div className="flex flex-col h-full">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                             <p className="text-[16px] text-gray-500">틀린 문제</p>
-                            <p className="text-[16px] text-black">4</p>
+                            <p className="text-[16px] text-black">{questItemUnits?.length}</p>
                         </div>
                     </div>
 
