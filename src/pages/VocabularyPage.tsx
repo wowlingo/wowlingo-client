@@ -7,17 +7,15 @@ import { WordCard } from '../components/ui/WordCard';
 const VocabularyPage = () => {
     const { hashtags, isLoading, error, vocabulary, fetchHashtags, fetchVocabulary, deleteVocabulary } = useVocabularyStore();
 
-    const [sortBy, setSortBy] = useState<SortOptionKey>('newest'); // 타입 변경
-    // const [filterTags, setFilterTags] = useState<string[]>([]);
-    // const [isLoading, setIsLoading] = useState(true);
-    // const [error, setError] = useState<string | null>(null);
+    const [sortBy, setSortBy] = useState<SortOptionKey>('latest');
+    const [selectedTags, setSelectedTags] = useState<number[]>([]);
 
     useEffect(() => {
         fetchHashtags();
-        fetchVocabulary();
+        fetchVocabulary(selectedTags, sortBy);
     }, [fetchHashtags, fetchVocabulary]);
 
-    const [selectedTags, setSelectedTags] = useState<number[]>([]);
+    
 
     const handleClick = (tagId: number) => {
         let newSelected;
@@ -27,8 +25,14 @@ const VocabularyPage = () => {
             newSelected = [...selectedTags, tagId]; // 추가 선택
         }
         setSelectedTags(newSelected);
-        fetchVocabulary(newSelected, 'latest');
+        fetchVocabulary(newSelected, sortBy);
     };
+
+    const handleSortChange = (newSort: SortOptionKey) => {
+        setSortBy(newSort);
+        fetchVocabulary(selectedTags, newSort);
+    };
+
 
     return (
         <div className="h-full w-full">
@@ -41,7 +45,7 @@ const VocabularyPage = () => {
                     </div>
                     <div className="flex items-center gap-4">
                         {/* 분리된 SortDropdown 컴포넌트 사용 */}
-                        <SortDropdown selected={sortBy} onSelect={setSortBy} />
+                        <SortDropdown selected={sortBy} onSelect={handleSortChange} />
                     </div>
                 </div>
 

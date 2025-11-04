@@ -2,10 +2,10 @@ import { ChevronDown } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 
 
-export type SortOptionKey = 'newest' | 'oldest' | 'asc' | 'desc';
+export type SortOptionKey = 'latest' | 'oldest' | 'asc' | 'desc';
 
 const SORT_OPTIONS: Record<SortOptionKey, string> = {
-    newest: '최신순',
+    latest: '최신순',
     oldest: '오래된순',
     asc: '가-하순',
     desc: '하-가순',
