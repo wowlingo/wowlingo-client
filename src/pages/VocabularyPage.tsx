@@ -83,7 +83,6 @@ const VocabularyPage = () => {
                         // />
                         <WordCard 
                             key={item.vocabId} 
-                            quest='소리의 감지' 
                             unit={item.str} 
                             urlNormal={item.urlNormal}
                             urlSlow={item.slowNormal}

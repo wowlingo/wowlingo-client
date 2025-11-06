@@ -88,11 +88,12 @@ const Home: React.FC = () => {
                 {/* 이번 주 출석 체크 섹션 */}
                 <section className="bg-white rounded-3xl p-6 mb-6 shadow-sm border border-gray-100">
                     <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-sm font-semibold text-gray-900">이번주 출석 체크</h2>
-                        <button className="text-gray-400 text-xs flex items-center">
+                        <h2 className="text-sm font-semibold text-gray-900">이번주 학습현황</h2>
+                        <Link className="text-gray-400 text-xs flex items-center"
+                            to = "/learning-status">
                             전체보기
                             <ChevronRight size={14} className="ml-1" />
-                        </button>
+                        </Link>
                     </div>
                     <div className="grid grid-cols-7 gap-2">
                         {weeklyAttendance.map((item, index) => (
@@ -121,7 +122,7 @@ const Home: React.FC = () => {
                                 // 퀘스트 상태 결정
                                 const isCompleted = quest.isCompleted;
                                 const isActive = quest.questId === activeQuestId;
-                                const isLocked = !isCompleted && !isActive;
+                                const isLocked = false;//!isCompleted && !isActive;
 
                                 // 공통 컨텐츠
                                 const questContent = (

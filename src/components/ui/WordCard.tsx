@@ -5,7 +5,6 @@ import { ImageButton } from '../ui/ImageButton';
 import { playAudio, playLoopAudio } from '../common/AudioService';
 
 interface WordCardProps {
-    quest: string;
     unit: string;
     urlNormal: string;
     urlSlow: string;
@@ -30,7 +29,7 @@ export const ToastBlueIcon = () => (
     </div>
 );
 
-export const WordCard: React.FC<WordCardProps> = ({ quest, unit, urlNormal, urlSlow, onDeleteVoca }) => {
+export const WordCard: React.FC<WordCardProps> = ({ unit, urlNormal, urlSlow, onDeleteVoca }) => {
 
     const handleComplete = () => {
         console.log("handleComplete")
@@ -62,9 +61,9 @@ export const WordCard: React.FC<WordCardProps> = ({ quest, unit, urlNormal, urlS
             className="rounded-lg overflow-hidden flex flex-col transform transition-transform duration-300 bg-white border border-gray-200"
         >
             <div className="p-5 sm:p-6 text-left">
-                <p className="text-sm text-gray-600 font-medium mb-2">
+                {/* <p className="text-sm text-gray-600 font-medium mb-2">
                     {quest}
-                </p>
+                </p> */}
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
                     {unit}
                 </h3>
