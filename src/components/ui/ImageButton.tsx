@@ -10,6 +10,7 @@ const imageMap: Record<ImageButtonProps['image'], string> = {
     slow: '/images/ic_set_slowly.png',
     repeat: '/images/ic_set_repeat.png',
     review: '/images/ic_set_add.png',
+    pause: '/images/ic_set_pause.png',
 };
 
 export const ImageButton: React.FC<ImageButtonProps> = ({ image, label, onClick }) => {

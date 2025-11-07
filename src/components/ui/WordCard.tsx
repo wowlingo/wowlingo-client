@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { ImageButton } from '../ui/ImageButton';
-import { playAudio, playLoopAudio } from '../common/AudioService';
+import { playAudio, playLoopAudio, stopAudio } from '../common/AudioService';
 
 interface WordCardProps {
     unit: string;
@@ -30,6 +30,7 @@ export const ToastBlueIcon = () => (
 );
 
 export const WordCard: React.FC<WordCardProps> = ({ unit, urlNormal, urlSlow, onDeleteVoca }) => {
+    const [isLooping, setIsLooping] = useState(false);
 
     const handleComplete = () => {
         console.log("handleComplete")
@@ -56,6 +57,18 @@ export const WordCard: React.FC<WordCardProps> = ({ unit, urlNormal, urlSlow, on
         }, 5000);
     };
 
+    const handleLoopClick = () => {
+        if (isLooping) {
+            // 현재 반복 중(pause 버튼 보임) -> 클릭 시 정지
+            stopAudio();
+            setIsLooping(false);
+        } else {
+            // 현재 정지 중(repeat 버튼 보임) -> 클릭 시 반복 재생
+            playLoopAudio(urlNormal);
+            setIsLooping(true);
+        }
+    };
+
     return (
         <article
             className="rounded-lg overflow-hidden flex flex-col transform transition-transform duration-300 bg-white border border-gray-200"
@@ -79,8 +92,9 @@ export const WordCard: React.FC<WordCardProps> = ({ unit, urlNormal, urlSlow, on
                     <ImageButton image='slow' label="천천히 듣기"
                         onClick={() => playAudio(urlSlow)} />
                     <div className="w-[1px] h-[67px] bg-[#E5E7EB]" />
-                    <ImageButton image='repeat' label="반복 듣기"
-                        onClick={() => playLoopAudio(urlNormal)} />
+                    <ImageButton image={isLooping ? 'pause' : 'repeat'} 
+                        label={isLooping ? '반복 정지' : '반복 듣기'}
+                        onClick={handleLoopClick} />
                 </div>
                 {/* <div className="flex-shrink-0 px-5 pt-2 flex justify-center">
                     <Question key={mockSounds[0].id} sounds={mockSounds} />
