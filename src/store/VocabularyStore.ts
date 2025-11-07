@@ -30,7 +30,7 @@ interface VocabularyState {
     fetchHashtags: () => Promise<void>;
     fetchVocabulary: (hashtagIds?: number[], sort?: string) => Promise<void>;
     deleteVocabulary: (vocabId: number) => Promise<void>;
-    addVocabulary: (questItemUnitId: number) => Promise<void>;
+    addVocabulary: (questItemId: number) => Promise<void>;
 }
 
 export const useVocabularyStore = create<VocabularyState>((set) => ({
@@ -104,11 +104,11 @@ export const useVocabularyStore = create<VocabularyState>((set) => ({
         }
     },
 
-    addVocabulary: async (questItemUnitId: number) => {
+    addVocabulary: async (questItemId?: number) => {
         try {
             const resultData = {
                 userId: 1,
-                questItemUnitId: questItemUnitId,
+                questItemId: questItemId,
             };
 
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/vocabulary`, {
