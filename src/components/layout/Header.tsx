@@ -1,8 +1,12 @@
 import { NavLink } from '../ui/NavLink';
 
-const Header = () => {
+type HeaderProps = {
+    bgColor?: string;
+}
+
+const Header: React.FC<HeaderProps> = ({ bgColor = 'bg-white' }) => {
     return (
-        <header className="sticky top-0 bg-white z-10">
+        <header className={`sticky top-0 ${bgColor} z-10`}>
             <div className="">
                 <nav className="flex items-center justify-between h-14 px-4 max-w-md mx-auto">
                     <div className="flex space-x-4 text-black-500">
