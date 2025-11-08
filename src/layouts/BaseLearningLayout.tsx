@@ -6,6 +6,7 @@ import Question from '../components/learning/Question';
 import IntroHeader from '../components/intro/IntroHeader';
 import ExitConfirmModal from '../components/modals/ExitConfirmModal';
 import WaterDropModal from '../components/modals/WaterDropModal';
+import { useVocabularyStore } from '@/store/VocabularyStore';
 
 // 각 레이아웃에서 커스터마이징할 수 있는 props
 interface BaseLearningLayoutProps {
@@ -20,6 +21,7 @@ export default function BaseLearningLayout({
   backgroundGradient = "linear-gradient(to bottom, rgba(219, 234, 254, 0.5), rgba(239, 246, 255, 0.5))"
 }: BaseLearningLayoutProps) {
   const navigate = useNavigate();
+  const { addVocabulary } = useVocabularyStore();
   const { questId, stepId } = useParams<{ questId: string; stepId: string }>();
   const urlQuestId = parseInt(questId || '1', 10);
   const currentStep = parseInt(stepId || '1', 10); // URL에서 직접 가져옴
@@ -149,6 +151,7 @@ export default function BaseLearningLayout({
           <Question key={currentStep} 
               sounds={currentQuestionData.sounds} 
               isDouble={currentQuestionData.correctAnswer == 'same' || currentQuestionData.correctAnswer == 'different'} // ox 문제만 사운드 2개 재생.
+              onAddVoca={() => addVocabulary(currentQuestionData.questItemId)}
           />}
         </div>
       ) : (

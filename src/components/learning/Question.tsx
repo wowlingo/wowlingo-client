@@ -1,3 +1,6 @@
+import { toast } from 'sonner';
+import { ToastBlueIcon } from '../ui/WordCard';
+
 // 하나의 사운드에 대한 타입 정의
 interface Sound {
   id: number | string; // key로 사용될 고유 ID
@@ -10,9 +13,10 @@ interface Sound {
 interface QuestionProps {
   isDouble: boolean | null;
   sounds: Sound[];
+  onAddVoca: () => void;
 }
 
-export default function Question({ sounds, isDouble }: QuestionProps) {
+export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps) {
   // 사운드를 재생하는 함수
   const handlePlaySound = (audioUrl: string) => {
     const audio = new Audio(audioUrl);
@@ -37,9 +41,16 @@ export default function Question({ sounds, isDouble }: QuestionProps) {
   };
 
   // 단어장 추가 함수
-  const handleAddToVocabulary = () => {
-    // TODO: 단어장 추가 로직 구현
-    console.log("단어장에 추가");
+  const handleAddToVocabulary = (questItemId: number) => {
+    console.log(questItemId);
+
+    onAddVoca();
+
+    toast("단어장에 추가 되었습니다", {
+      icon: <ToastBlueIcon />,
+      duration: 3000,
+    });
+
   };
 
   return (

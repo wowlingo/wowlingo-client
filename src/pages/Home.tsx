@@ -10,20 +10,6 @@ type WeeklyAttendance = {
     attended: boolean;
 }[];
 
-// 임시 퀘스트 타입 (API 연동 시 교체 예정)
-interface Quest {
-    questId: number;
-    title: string;
-    description: string;
-    type: string;
-    tags: string[];
-    questItemCount: number;
-    correctCount: number;
-    totalCount: number;
-    isCompleted: boolean;
-    isStarted: boolean;
-}
-
 type LearningItemProps = {
     tags: string[];
     title: string;
@@ -101,7 +87,7 @@ const LearningItem = ({ tags, title, progress, total, isEnable }: LearningItemPr
                 <ProgressIcon progress={progress} total={total} />
             </div>
             <div className="flex items-center justify-between">
-            <h3 className={`text-[16px] font-semibold ${textColor}`}>{title}</h3>
+                <h3 className={`text-[16px] font-semibold ${textColor}`}>{title}</h3>
                 {completeTag}
             </div>
         </div>
@@ -110,7 +96,7 @@ const LearningItem = ({ tags, title, progress, total, isEnable }: LearningItemPr
 
 
 const Home: React.FC = () => {
-    const { fetchUserQuestProgress, userQuestProgress, isLoading, fetchQuestList, questList, activeQuestId } = useLearningStore();
+    const { fetchUserQuestProgress, userQuestProgress, isLoading, fetchQuestList, questList } = useLearningStore();
     const navigate = useNavigate();
 
     // 임시 주간 출석 데이터 (API 연동 시 교체 예정)
@@ -243,8 +229,8 @@ const Home: React.FC = () => {
                             <div className="text-gray-500">로딩 중...</div>
                         ) : Array.isArray(userQuestProgress) && userQuestProgress.length > 0 ? (
                             userQuestProgress.map((quest) => {
-                                const isCompleted = quest.isCompleted;
-                                const isActive = quest.questId === activeQuestId;
+                                // const isCompleted = quest.isCompleted;
+                                // const isActive = quest.questId === activeQuestId;
                                 const isLocked = false;//!isCompleted && !isActive;
 
                                 if (isLocked) {
