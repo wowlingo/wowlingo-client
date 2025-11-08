@@ -41,8 +41,7 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
   };
 
   // 단어장 추가 함수
-  const handleAddToVocabulary = (questItemId: number) => {
-    console.log(questItemId);
+  const handleAddToVocabulary = () => {
 
     onAddVoca();
 
@@ -71,7 +70,7 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
         aria-label="문제 듣기"
       >
         <div className="w-10 h-10 flex items-center justify-center">
-            <img src="/images/ic_set_sound.png" alt="문제 듣기" className="w-10 h-10" />
+          <img src="/images/ic_set_sound.png" alt="문제 듣기" className="w-10 h-10" />
         </div>
         <span className="text-[16px] font-semibold text-[#4A5564] leading-[22.4px] tracking-[-0.32px]">
           문제 듣기
