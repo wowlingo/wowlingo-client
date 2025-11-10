@@ -81,7 +81,7 @@ const LearningItem = ({ tags, title, progress, total, isEnable }: LearningItemPr
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-1.5">
                     {tags.map((tag) => (
-                        <Tag key={tag} text={tag} />
+                        <Tag key={tag} text={`#${tag}`} />
                     ))}
                 </div>
                 <ProgressIcon progress={progress} total={total} />
