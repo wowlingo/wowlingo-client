@@ -9,60 +9,60 @@ const getDescriptionByType = (type: string): { description_a: React.ReactNode; d
     case 'statement-question':
       return {
         description_a: (
-        <>
-          문장을 듣고, 평서문과 의문문 중{'\n'}
-          맞는 보기를 고르세요.
-        </>
+          <>
+            문장을 듣고, 평서문과 의문문 중{'\n'}
+            맞는 보기를 고르세요.
+          </>
         ),
         description_b: (
-        <>
-          문제를 맞춰 물방울을 모아보세요.{'\n'}
-          70개를 모으면 열매를 수확할 수 있어요!
-        </>
+          <>
+            문제를 맞춰 물방울을 모아보세요.{'\n'}
+            70개를 모으면 열매를 수확할 수 있어요!
+          </>
         )
       }
     case 'choice':
       return {
         description_a: (
-        <>
-          들려준 문장과{'\n'}
-          일치하는 보기를 고르세요
-        </>
+          <>
+            들려준 문장과{'\n'}
+            일치하는 보기를 고르세요
+          </>
         ),
         description_b: (
-        <>
-          문제를 맞춰 물방울을 모아보세요.{'\n'}
-          70개를 모으면 열매를 수확할 수 있어요!
-        </>
+          <>
+            문제를 맞춰 물방울을 모아보세요.{'\n'}
+            70개를 모으면 열매를 수확할 수 있어요!
+          </>
         )
       }
     case 'same-different':
       return {
         description_a: (
-        <>
-          들려준 2개의 단어가{'\n'}
-          일치하는지 구분해 주세요
-        </>
+          <>
+            들려준 2개의 단어가{'\n'}
+            일치하는지 구분해 주세요
+          </>
         ),
         description_b: (
-        <>
-          문제를 맞춰 물방울을 모아보세요.{'\n'}
-          70개를 모으면 열매를 수확할 수 있어요!
-        </>
+          <>
+            문제를 맞춰 물방울을 모아보세요.{'\n'}
+            70개를 모으면 열매를 수확할 수 있어요!
+          </>
         )
       }
     default:
       return {
         description_a: (
-        <>
+          <>
 
-        </>
+          </>
         ),
         description_b: (
-        <>
-          문제를 맞춰 물방울을 모아보세요.{'\n'}
-          70개를 모으면 열매를 수확할 수 있어요!
-        </>
+          <>
+            문제를 맞춰 물방울을 모아보세요.{'\n'}
+            70개를 모으면 열매를 수확할 수 있어요!
+          </>
         )
       }
   }
@@ -150,7 +150,7 @@ export default function PracticeIntroPage() {
               key={tag}
               className="bg-blue-100 text-blue-500 rounded-full px-2 py-1 text-sm font-semibold text-center font-semibold font-['Pretendard'] leading-5"
             >
-              {tag}
+              {`#${tag}`}
             </span>
           ))}
         </div>

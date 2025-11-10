@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useLearningStore } from '../store/learningStore';
 import Header from '../components/layout/Header';
 import { useNavigate } from "react-router-dom";
+import { useLearningStatusStore } from '../store/LearningStatus';
+
 
 // 임시 주간 출석 데이터 (나중에 API로 교체)
 type WeeklyAttendance = {
@@ -95,19 +97,24 @@ const LearningItem = ({ tags, title, progress, total, isEnable }: LearningItemPr
 };
 
 
+interface WeeklyAttendanceItem {
+    day: string;
+    attended: boolean;
+}
+
 const Home: React.FC = () => {
     const { fetchUserQuestProgress, userQuestProgress, isLoading, fetchQuestList, questList } = useLearningStore();
     const navigate = useNavigate();
+    const { attemptedDays, fetchQuestAttemptsThisWeek } = useLearningStatusStore();
 
-    // 임시 주간 출석 데이터 (API 연동 시 교체 예정)
-    const [weeklyAttendance] = useState<WeeklyAttendance>([
-        { day: '월', attended: true },
-        { day: '화', attended: true },
-        { day: '수', attended: true },
+    const [weeklyAttendance, setWeeklyAttendance] = useState<WeeklyAttendanceItem[]>([
+        { day: '월', attended: false },
+        { day: '화', attended: false },
+        { day: '수', attended: false },
         { day: '목', attended: false },
         { day: '금', attended: false },
         { day: '토', attended: false },
-        { day: '일', attended: true }, // Added '일' as attended to match the image
+        { day: '일', attended: false }, // Added '일' as attended to match the image
     ]);
 
     // 임시 식물 레벨 (나중에 유저 데이터로 교체)
@@ -118,11 +125,24 @@ const Home: React.FC = () => {
         console.log('Home useEffect - fetchUserQuestProgress called');
         fetchUserQuestProgress(1); // 사용자 ID 1의 퀘스트 진행 상태 요청
 
+        const userId = 1;
+        fetchQuestAttemptsThisWeek(userId);
+
+        console.log(attemptedDays);
+
+        const days = ["월", "화", "수", "목", "금", "토", "일"];
+        const updated = days.map((day, index) => ({
+            day,
+            attended: attemptedDays[index] != null
+        }));
+
+        setWeeklyAttendance(updated);
+
         // API가 아직 구현되지 않은 경우를 위한 fallback
         if (questList.length === 0) {
             fetchQuestList();
         }
-    }, [fetchUserQuestProgress, fetchQuestList, questList.length]);
+    }, [fetchUserQuestProgress, fetchQuestList, questList.length, fetchQuestAttemptsThisWeek]);
 
     // 페이지 포커스 및 학습 완료 시 진행 상태 새로고침
     useEffect(() => {
@@ -209,7 +229,7 @@ const Home: React.FC = () => {
                                 <div className="w-8 h-8 flex items-center justify-center">
                                     <img
                                         src={item.attended ? '/images/attempt_date_drop.png' : '/images/attempt_date_drop_default.png'}
-                                        alt={item.attended ? '출석완료' : '미출석'}
+                                        alt={item.attended ? '학습' : '미학습'}
                                         className="w-full h-full object-contain"
                                     />
                                 </div>
