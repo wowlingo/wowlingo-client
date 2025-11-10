@@ -189,7 +189,7 @@ const Home: React.FC = () => {
                         <img
                             src={plantImage}
                             alt={`Level ${plantLevel} plant`}
-                            className="relative w-[250px] h-[250px] object-contain z-10"
+                            className="relative w-[250px] h-[250px] object-contain"
                         />
                     </div>
 
