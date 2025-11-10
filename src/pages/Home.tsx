@@ -6,12 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { useLearningStatusStore } from '../store/LearningStatus';
 
 
-// 임시 주간 출석 데이터 (나중에 API로 교체)
-type WeeklyAttendance = {
-    day: string;
-    attended: boolean;
-}[];
-
 type LearningItemProps = {
     tags: string[];
     title: string;
