@@ -240,7 +240,11 @@ export default function BaseLearningLayout({
                 <div className="justify-start text-gray-600 text-lg font-semibold font-['Pretendard'] leading-7">
                   정답: {currentQuestionData.answerDetail.label}
                   <br />
-                  "{currentQuestionData.answerDetail.units.join(', ')}"
+                    {currentQuestionData.answerDetail.type !== 'choice' && (
+                      <span>
+                        "{currentQuestionData.answerDetail.units.join(', ')}"
+                      </span>
+                    )}
                 </div>
               )}
             </div>
