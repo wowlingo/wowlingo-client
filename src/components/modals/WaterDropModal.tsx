@@ -33,7 +33,7 @@ export default function WaterDropModal({ isOpen, waterDropCount, onConfirm }: Wa
           onClick={onConfirm}
           className="w-full bg-blue-500 text-white font-bold text-lg py-4 px-6 rounded-full hover:bg-blue-600 transition-colors shadow-lg"
         >
-          확인
+          받기
         </button>
       </div>
     </div>

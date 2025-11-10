@@ -101,12 +101,13 @@ export default function BaseLearningLayout({
   // 학습 완료 시 모달 표시
   React.useEffect(() => {
     if (isCompleted) {
-      setShowWaterDropModal(true);
+      // setShowWaterDropModal(true);
     }
   }, [isCompleted]);
 
   const handleConfirm = () => {
-    navigate('/');
+    setShowWaterDropModal(true);
+    // navigate('/');
   };
 
   const handleModalConfirm = () => {
@@ -238,13 +239,9 @@ export default function BaseLearningLayout({
               {/* 정답 설명 */}
               {currentQuestionData && (
                 <div className="justify-start text-gray-600 text-lg font-semibold font-['Pretendard'] leading-7">
-                  정답: {currentQuestionData.answerDetail.label}
+                  정답: {currentQuestionData.answerDetail.type !== 'choice' && (<span>{currentQuestionData.answerDetail.label}</span>)}
                   <br />
-                    {currentQuestionData.answerDetail.type !== 'choice' && (
-                      <span>
-                        "{currentQuestionData.answerDetail.units.join(', ')}"
-                      </span>
-                    )}
+                    "{currentQuestionData.answerDetail.units.join(', ')}"
                 </div>
               )}
             </div>
