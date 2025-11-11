@@ -25,13 +25,13 @@ export default function GameTypeCBg() {
   return (
     <>
       {/* 배경 이미지 레이어 */}
-      <div className="absolute bottom-0 left-0 right-0 top-10 z-0 pointer-events-none">
+      {/* <div className="absolute bottom-0 left-0 right-0 top-10 z-0 pointer-events-none">
         <img
           src="/images/img_learning_bg_c.png"
           alt="Learning background"
           className="w-full h-full object-cover object-top"
         />
-      </div>
+      </div> */}
 
       {/* 중앙 Pickup 이미지 - Figma 기준: 132x198px, 중앙 배치 */}
       <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">

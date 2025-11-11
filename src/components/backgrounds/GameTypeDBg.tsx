@@ -36,13 +36,13 @@ export default function GameTypeDBg() {
   return (
     <>
       {/* 배경 이미지 레이어 - 부모 컨텐츠 영역 전체를 덮고 하단에서 시작 */}
-      <div className="absolute bottom-0 left-0 right-0 top-10 z-0 pointer-events-none">
+      {/* <div className="absolute bottom-0 left-0 right-0 top-10 z-0 pointer-events-none">
         <img
           src="/images/img_learning_bg_d.png"
           alt="Learning background"
           className="w-full h-full object-cover object-top"
         />
-      </div>
+      </div> */}
 
       {/* 중앙 카드 이미지 - absolute로 중앙 배치 */}
       <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">

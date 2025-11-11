@@ -15,6 +15,7 @@ export default function LearningLayout3() {
     <BaseLearningLayout
       submitButtonClassName="bg-blue-500 hover:bg-[#2265CC] rounded-[999px]"
       backgroundGradient="linear-gradient(180deg, #D8DCFB 0%, #FFF 100%)"
+      learningBg="/images/img_learning_bg_c.png"
     >
       <GameTypeCBg />
     </BaseLearningLayout>

@@ -13,12 +13,14 @@ interface BaseLearningLayoutProps {
   children?: React.ReactNode; // 중앙 배경 영역 (이미지 스택 또는 배경 컴포넌트)
   submitButtonClassName?: string; // 제출 버튼 스타일 커스터마이징
   backgroundGradient?: string; // 배경 그라디언트 커스터마이징 (CSS gradient 문자열)
+  learningBg?: string | null;
 }
 
 export default function BaseLearningLayout({
   children,
   submitButtonClassName = "bg-blue-500 hover:bg-[#2265CC] rounded-[999px]",
-  backgroundGradient = "linear-gradient(to bottom, rgba(219, 234, 254, 0.5), rgba(239, 246, 255, 0.5))"
+  backgroundGradient = "linear-gradient(to bottom, rgba(219, 234, 254, 0.5), rgba(239, 246, 255, 0.5))",
+  learningBg,
 }: BaseLearningLayoutProps) {
   const navigate = useNavigate();
   const { addVocabulary } = useVocabularyStore();
@@ -128,6 +130,16 @@ export default function BaseLearningLayout({
           backgroundImage: backgroundGradient
         }}
       />
+
+      {learningBg && (
+      <div className="absolute bottom-0 left-0 right-0 top-80 z-0 pointer-events-none">
+        <img
+          src={learningBg}
+          alt="Learning background"
+          className="w-full h-full object-cover object-top"
+        />
+      </div>
+      )}
 
       {/* 메인 컨텐츠 */}
       <div className="relative z-10 flex flex-col h-full">
