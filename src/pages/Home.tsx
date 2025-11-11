@@ -75,12 +75,20 @@ const LearningItem = ({ tags, title, progress, total, isEnable }: LearningItemPr
     return (
         <div className={`p-4 rounded-[16px] border border-gray-200 mb-4 ${bgColor}`}>
             <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-1.5">
-                    {tags.map((tag) => (
-                        <Tag key={tag} text={`#${tag}`} />
-                    ))}
+                <div
+                    className="flex-1 overflow-x-auto whitespace-nowrap no-scrollbar relative 
+                    [-webkit-mask-image:linear-gradient(to_right,transparent,black_0.0rem,black_calc(100%-0.5rem),transparent)]"
+                >
+                    <div className="flex items-center gap-1.5">
+                        {tags.map((tag) => (
+                            <Tag key={tag} text={`#${tag}`} />
+                        ))}
+                    </div>
                 </div>
-                <ProgressIcon progress={progress} total={total} />
+
+                <div className="flex-shrink-0 ml-2">
+                    <ProgressIcon progress={progress} total={total} />
+                </div>
             </div>
             <div className="flex items-center justify-between">
                 <h3 className={`text-[16px] font-semibold ${textColor}`}>{title}</h3>
