@@ -7,8 +7,10 @@ interface LearningStatus {
     loginedDates: number[];
     attemptedDates: number[];
     attemptedDays: any[];
+    aiFeedbacks: any[];
     fetchQuestAttempts: (userId: number, year: number, month: number) => Promise<void>;
     fetchQuestAttemptsThisWeek: (userId: number) => Promise<void>;
+    fetchQuestAttemptAiFeedbacks: (userId: number, year: number, month: number) => Promise<void>;
 }
 
 export const useLearningStatusStore = create<LearningStatus>((set) => ({
@@ -17,6 +19,7 @@ export const useLearningStatusStore = create<LearningStatus>((set) => ({
     loginedDates: [],
     attemptedDates: [],
     attemptedDays: [],
+    aiFeedbacks: [],
 
     fetchQuestAttempts: async (userId: number, year: number, month: number) => {
         set({ isLoading: true, error: null });
@@ -78,6 +81,34 @@ export const useLearningStatusStore = create<LearningStatus>((set) => ({
                 // setLoginedDates([...new Set(logins)]); // 중복 제거
                 // setAttemptedDates([...new Set(attempts)]);
                 set({ loginedDates: logins, attemptedDates: attempts, isLoading: false, attemptedDays: days });
+            } else {
+                console.error("데이터 없음:", json);
+            }
+        }
+        catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+            set({ isLoading: false, error: errorMessage });
+        }
+    },
+
+    fetchQuestAttemptAiFeedbacks: async (userId: number, year: number, month: number) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetch(
+                `${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}/quest-attempts/ai-feedbacks?year=${year}&month=${month}`
+            );
+            const json = await response.json();
+
+            if (json.result && Array.isArray(json.data)) {
+                const data = json.data;
+
+                // createdDateKST 에서 '일(day)' 추출
+                // const aiDays = data
+                //     .filter((d: { createdDateKST: any; }) => d.createdDateKST)
+                //     .map((d: { createdDateKST: any; }) => new Date(d.createdDateKST).getDate());
+                // map[day] = {title:"title", message:"message"}
+
+                set({ aiFeedbacks: data, isLoading: false });
             } else {
                 console.error("데이터 없음:", json);
             }
