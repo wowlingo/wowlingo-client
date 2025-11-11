@@ -25,11 +25,11 @@ export default function GameTypeCBg() {
   return (
     <>
       {/* 배경 이미지 레이어 */}
-      <div className="absolute bottom-0 left-0 right-0 top-0 z-0 pointer-events-none">
+      <div className="absolute bottom-0 left-0 right-0 top-10 z-0 pointer-events-none">
         <img
           src="/images/img_learning_bg_c.png"
           alt="Learning background"
-          className="w-full h-full object-cover object-bottom"
+          className="w-full h-full object-cover object-top"
         />
       </div>
 
