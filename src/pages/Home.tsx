@@ -4,6 +4,7 @@ import { useLearningStore } from '../store/learningStore';
 import Header from '../components/layout/Header';
 import { useNavigate } from "react-router-dom";
 import { useLearningStatusStore } from '../store/LearningStatus';
+import HomeGuideModal from '../components/modals/HomeGuideModal';
 
 
 type LearningItemProps = {
@@ -170,6 +171,18 @@ const Home: React.FC = () => {
         navigate(`/learning/intro/1`);
     };
 
+    const [isHomeGuideModalOpen, setIsHomeGuideModalOpen] = useState(false);
+
+    // 4. 모달을 여는 함수
+    const openHomeGuideModal = () => {
+        setIsHomeGuideModalOpen(true);
+    };
+
+    // 5. 모달을 닫는 함수 (이 함수를 HomeGuideModal의 onConfirm으로 전달)
+    const closeHomeGuideModal = () => {
+        setIsHomeGuideModalOpen(false);
+    };
+
     return (
         <div className="flex flex-col min-h-screen max-w-lg mx-auto font-sans"
             style={{ background: 'linear-gradient(180deg, #DBEEFD 0%, #FFFFFF 60.00%)' }}>
@@ -186,7 +199,7 @@ const Home: React.FC = () => {
                                 LV.{plantLevel}
                             </span>
                         </div>
-                        <button className="p-2 rounded-full bg-transparent">
+                        <button className="p-2 rounded-full bg-transparent" onClick={openHomeGuideModal}>
                             <img src="/images/ic_co_book.png" alt="Bookmark" className="w-[24px] h-[24px]" />
                         </button>
                     </div>
@@ -419,7 +432,14 @@ const Home: React.FC = () => {
                         )}
                     </div>
                 </section> */}
+
+
             </div>
+
+            <HomeGuideModal
+                isOpen={isHomeGuideModalOpen}
+                onConfirm={closeHomeGuideModal}
+            />
         </div>
     );
 };
