@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { toast } from 'sonner';
 import { ToastBlueIcon } from '../ui/WordCard';
 
@@ -17,19 +18,34 @@ interface QuestionProps {
 }
 
 export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps) {
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const stopCurrentAudio = () => {
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current.currentTime = 0;
+      currentAudioRef.current = null;
+    }
+  };
+
   // 사운드를 재생하는 함수
   const handlePlaySound = (audioUrl: string) => {
+    stopCurrentAudio(); 
     const audio = new Audio(audioUrl);
+    currentAudioRef.current = audio;
     audio.play().catch(e => console.error("오디오 재생 오류:", e));
   };
 
   const handlePlaySounds = (audioUrls: string[]) => {
     if (audioUrls.length === 0) return;
 
+    stopCurrentAudio();
+
     const playAudio = (index: number) => {
       if (index >= audioUrls.length) return;
 
       const audio = new Audio(audioUrls[index]);
+      currentAudioRef.current = audio;
       audio.play()
         .then(() => {
           audio.onended = () => playAudio(index + 1);
