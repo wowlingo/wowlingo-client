@@ -124,48 +124,51 @@ export default function PracticeIntroPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen max-w-lg mx-auto font-sans bg-gradient-to-b from-white to-white">
+    <div className="flex flex-col h-[100dvh] max-w-lg mx-auto font-sans bg-gradient-to-b from-white to-white">
+
       {/* 1. 헤더 (이전 버튼) */}
       <IntroHeader groupName={introData.title} />
 
-      <main className="flex-grow flex flex-col items-center justify-center text-center px-5">
+      <main className="flex-grow flex flex-col text-center px-5 overflow-y-auto min-h-0">
 
-        {/* 3. 물뿌리개 이미지와 물방울 개수 */}
-        <div className="relative mb-4">
-          <img
-            src={introData.wateringCanImage}
-            alt="Watering Can"
-            className="w-60 h-60 object-contain"
-          />
-          {/* 물방울 개수 표시 */}
-          <div className="absolute top-4 right-4 bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg shadow-lg">
-            {introData.waterDropCount}
+        <div className="flex flex-col items-center my-auto py-8">
+          {/* 3. 물뿌리개 이미지와 물방울 개수 */}
+          <div className="relative mb-4">
+            <img
+              src={introData.wateringCanImage}
+              alt="Watering Can"
+              className="w-60 h-60 object-contain"
+            />
+            {/* 물방울 개수 표시 */}
+            <div className="absolute top-4 right-4 bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg shadow-lg">
+              {introData.waterDropCount}
+            </div>
           </div>
-        </div>
 
-        {/* 4. #해시태그 */}
-        <div className="flex flex-wrap justify-center gap-2.5 mb-5">
-          {introData.hashtags.map((tag) => (
-            <span
-              key={tag}
-              className="bg-blue-100 text-blue-500 rounded-full px-2 py-1 text-sm font-semibold text-center font-semibold font-['Pretendard'] leading-5"
-            >
-              {`#${tag}`}
-            </span>
-          ))}
-        </div>
+          {/* 4. #해시태그 */}
+          <div className="flex flex-wrap justify-center gap-2.5 mb-5">
+            {introData.hashtags.map((tag) => (
+              <span
+                key={tag}
+                className="bg-blue-100 text-blue-500 rounded-full px-2 py-1 text-sm font-semibold text-center font-semibold font-['Pretendard'] leading-5"
+              >
+                {`#${tag}`}
+              </span>
+            ))}
+          </div>
 
-        {/* 5. 문제 설명 */}
-        <p className="mb-3 self-stretch text-center justify-start text-slate-800 text-xl font-semibold font-['Pretendard'] leading-8 whitespace-pre-line">
-          {introData.description_a}
-        </p>
-        <p className="text-gray-600 text-base whitespace-pre-line leading-relaxed whitespace-pre-line">
-          {introData.description_b}
-        </p>
+          {/* 5. 문제 설명 */}
+          <p className="mb-3 self-stretch text-center justify-start text-slate-800 text-xl font-semibold font-['Pretendard'] leading-8 whitespace-pre-line">
+            {introData.description_a}
+          </p>
+          <p className="text-gray-600 text-base whitespace-pre-line leading-relaxed whitespace-pre-line">
+            {introData.description_b}
+          </p>
+        </div>
       </main>
 
       {/* 6. START 버튼 */}
-      <div className="px-5 pb-6">
+      <div className="px-5 pb-6 flex-shrink-0">
         <button
           onClick={handleStart}
           disabled={isFetching || isLoading}
