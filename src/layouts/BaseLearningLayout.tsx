@@ -122,7 +122,7 @@ export default function BaseLearningLayout({
 
 
   return (
-    <div className="relative h-screen max-w-lg mx-auto font-sans overflow-hidden">
+    <div className="relative h-[100dvh] max-w-lg mx-auto font-sans overflow-hidden">
       {/* 배경 그라디언트 */}
       <div
         className="absolute inset-0"
@@ -177,7 +177,7 @@ export default function BaseLearningLayout({
       )}
 
       {/* 4. 중앙 배경 영역 - Cake */}
-      <div className="flex-grow flex items-center justify-center px-5 relative min-h-[270px]">
+        <div className="flex-grow flex items-center justify-center px-5 relative min-h-0 overflow-y-auto">
         {children}
       </div>
 

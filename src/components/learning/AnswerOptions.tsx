@@ -76,7 +76,7 @@ export default function AnswerOptions({ options, questType }: AnswerOptionsProps
 
     // 사각형 가로 두개 배치 스타일 (statement-question, same-different 타입)
     // Figma 디자인: 높이 120px, 가로 배치
-    const baseClasses = "flex flex-col items-center justify-center gap-2 rounded-2xl transition-all h-[120px]";
+    const baseClasses = "flex flex-col items-center justify-center gap-2 rounded-2xl transition-all h-[15vh] min-h-[90px] max-h-[120px]";
     const textClasses = "text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px]";
 
     return `${baseClasses} ${textClasses} ${
