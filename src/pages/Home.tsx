@@ -106,7 +106,13 @@ interface WeeklyAttendanceItem {
 }
 
 const Home: React.FC = () => {
-    const { fetchUserQuestProgress, userQuestProgress, isLoading, fetchQuestList, questList } = useLearningStore();
+    const { fetchUserQuestProgress,
+        activeQuestId,
+        fruit,
+        fruitLevel,
+        nextLevelCount,
+        userQuestProgress, isLoading,
+        fetchQuestList, questList } = useLearningStore();
     const navigate = useNavigate();
     const { attemptedDays, fetchQuestAttemptsThisWeek } = useLearningStatusStore();
 
@@ -121,8 +127,12 @@ const Home: React.FC = () => {
     ]);
 
     // 임시 식물 레벨 (나중에 유저 데이터로 교체)
-    const [plantLevel] = useState(3); // Changed to level 3 to match the image
-    const [plantImage] = useState('/images/tree.png'); // Placeholder image for level 3 plant
+    // const [plantLevel] = useState(3); // Changed to level 3 to match the image
+    // const [plantImage] = useState('/images/tree.png'); // Placeholder image for level 3 plant
+    const [plantImage, setPlantImage] = useState('');
+    const [fruitLevelBgClass, setFruitLevelBgClass] = useState('');
+    const [fruitTitle, setFruitTitle] = useState('');
+    const [progressRate, setProgressRate] = useState(0);
 
     useEffect(() => {
         console.log('Home useEffect - fetchUserQuestProgress called');
@@ -166,9 +176,59 @@ const Home: React.FC = () => {
         };
     }, [fetchUserQuestProgress]);
 
+    const levelImages: Record<number, string> = {
+        1: '/images/seed.png',
+        2: '/images/plant.png',
+        3: '/images/tree.png',
+        4: '/images/flower.png',
+    }
+    const levelStyles: Record<number, string> = {
+        1: 'bg-[#00A63E]', // LV.1: 녹색
+        2: 'bg-[#2B7FFF]', // LV.2: 파란색
+        3: 'bg-[#615FFF]', // LV.3: 남색
+        4: 'bg-[#8E51FF]', // LV.4: 보라
+        5: 'bg-[#F6339A]', // LV.5: 분홍색
+    };
+
+    const levelTitles: Record<number, string> = {
+        1: '성장의 씨앗',
+        2: '성장의 새싹',
+        3: '성장의 나무',
+        4: '성장의 꽃',
+        5: '성장의 열매',
+    };
+
+    useEffect(() => {
+        console.log(fruitLevel);
+        let currentImagePath = levelImages[fruitLevel] || levelImages[1];
+        if (fruitLevel == 5) {
+            currentImagePath = `/images/${fruit}.png`;
+        }
+        setPlantImage(currentImagePath);
+
+        const currentBgClass = levelStyles[fruitLevel] || levelStyles[1];
+        console.log(currentBgClass);
+        setFruitLevelBgClass(currentBgClass);
+
+        const currentTitle = levelTitles[fruitLevel] || levelTitles[1];
+        console.log(currentTitle);
+        setFruitTitle(currentTitle);
+
+        // 학습진행률.
+        const currentQuest = userQuestProgress.find(q => q.questId === activeQuestId);
+        const currentRate = currentQuest?.progressRate ?? 0;
+
+        console.log('activeQuestId= ' + activeQuestId + ' ' + currentRate);
+        console.log('currentQuest= ', currentQuest);
+        setProgressRate(currentRate);
+
+    }, [fruitLevel, fruit, setPlantImage, fruitLevelBgClass, setFruitLevelBgClass,
+        fruitTitle, setFruitTitle, activeQuestId]);
+
+
 
     const handleStartLearning = () => {
-        navigate(`/learning/intro/1`);
+        navigate(`/learning/intro/${activeQuestId}`);
     };
 
     const [isHomeGuideModalOpen, setIsHomeGuideModalOpen] = useState(false);
@@ -194,9 +254,9 @@ const Home: React.FC = () => {
                 <section className="rounded-3xl p-6 relative">
                     <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center">
-                            <h2 className="text-[20px] font-bold text-gray-900 mr-2">성장의 나무</h2>
-                            <span className="bg-[#615FFF] text-white text-[14px] font-semibold px-3 py-1 rounded-full">
-                                LV.{plantLevel}
+                            <h2 className="text-[20px] font-bold text-gray-900 mr-2">{fruitTitle}</h2>
+                            <span className={`${fruitLevelBgClass} text-white text-[14px] font-semibold px-3 py-1 rounded-full`}>
+                                LV.{fruitLevel}
                             </span>
                         </div>
                         <button className="p-2 rounded-full bg-transparent" onClick={openHomeGuideModal}>
@@ -206,7 +266,7 @@ const Home: React.FC = () => {
 
                     <div className="absolute top-[80px] right-[40px] bg-white rounded-xl px-[10px] py-[8px] text-[14px] text-gray-600">
                         <div>
-                            레벨 업까지 <span className="text-blue-600 font-bold">3문제!</span>
+                            레벨 업까지 <span className="text-blue-600 font-bold">{nextLevelCount}문제!</span>
                         </div>
                         {/* 꼬리 */}
                         <div className="absolute top-[25px] right-[90px] w-3 h-5 bg-white rotate-60"></div>
@@ -223,13 +283,29 @@ const Home: React.FC = () => {
                         {/* 나무 이미지 */}
                         <img
                             src={plantImage}
-                            alt={`Level ${plantLevel} plant`}
+                            alt={`Level ${fruitLevel} plant`}
                             className="relative w-[250px] h-[250px] object-contain"
                         />
                     </div>
 
                     <div className="flex justify-center mt-4">
-                        <img src="/images/group_152.png" alt="Level Progress" className="w-[240px] h-[28px]" />
+                        <div className="relative w-[240px] h-[36px]">
+                            <div className="absolute top-[9px] left-0 w-full h-[18px] bg-[#E5E7EB] rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-gradient-to-r from-[#B1D1FF] to-[#3182F7] transition-all duration-500 ease-out rounded-full"
+                                    style={{ width: `${progressRate}%` }}
+                                />
+                            </div>
+
+                            <div className="absolute right-0 ">
+                                <img
+                                    src="/images/ic_learning_crown.png"
+                                    alt="Crown"
+                                    className="object-contain"
+                                />
+                            </div>
+
+                        </div>
                     </div>
                 </section>
 

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { CSSProperties } from 'react'; // CSSProperties 타입을 가져옵니다.
+import { json } from 'react-router-dom';
 
 // 모달 상태를 위한 타입 추가
 type ModalState = 'correct' | 'incorrect' | 'closed';
@@ -65,6 +66,9 @@ type ApiUserQuestProgress = {
 type ApiUserQuestResponse = {
   quests: ApiUserQuestProgress[];
   activeQuestId: number;
+  fruit: FruitType;
+  fruitLevel: number;
+  nextLevelCount: number;
 };
 
 // 학습 데이터 타입 (기존 QuestionData와 유사)
@@ -144,6 +148,9 @@ interface LearningState {
   selectedLayoutType: number; // 선택된 레이아웃 타입 (1, 2, 3, 4)
   userQuestProgress: ApiUserQuestProgress[]; // 사용자 퀘스트 진행 상태
   activeQuestId: number | null; // 현재 활성 퀘스트 ID
+  fruit: FruitType | null; // 현재 열매 타입
+  fruitLevel: number; // 현재 열매 레벨
+  nextLevelCount: number; // 다음 레벨까지 남은 문제 개수
 }
 
 interface LearningActions {
@@ -187,6 +194,9 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
   selectedLayoutType: 1, // 기본값은 1 (푸딩 레이아웃)
   userQuestProgress: [], // 사용자 퀘스트 진행 상태
   activeQuestId: null, // 현재 활성 퀘스트 ID
+  fruit: null, // 현재 열매 타입
+  fruitLevel: 1, // 현재 열매 레벨
+  nextLevelCount: 0, // 다음 레벨까지 남은 문제 개수
 
   fetchQuestList: async () => {
     set({ isLoading: true });
@@ -197,7 +207,11 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
         throw new Error('Network response was not ok');
       }
       const jsonResponse: { data: ApiQuestListData[] } = await response.json();
+      console.log(jsonResponse)
       const questList = jsonResponse.data;
+
+      // console.log(questList)
+
 
       set({
         questList,
@@ -419,7 +433,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
     }
 
     const progressItems = Object.values(stepProgress);
-    
+
     // 전체 학습 통계 계산
     const totalQuestItemCount = totalSteps;
     const correctQuestItemCount = progressItems.filter(item => item.isCorrect === true).length;
@@ -499,11 +513,17 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
       const jsonResponse: { data: ApiUserQuestResponse } = await response.json();
       const userQuestProgress = jsonResponse.data.quests;
       const activeQuestId = jsonResponse.data.activeQuestId;
+      const fruit = jsonResponse.data.fruit;
+      const fruitLevel = jsonResponse.data.fruitLevel;
+      const nextLevelCount = jsonResponse.data.nextLevelCount;
 
       set({
         userQuestProgress,
         activeQuestId,
         isLoading: false,
+        fruit,
+        fruitLevel,
+        nextLevelCount,
       });
 
     } catch (error) {
@@ -518,3 +538,11 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
   },
 
 }));
+
+export enum FruitType {
+  Apple = 'apple',
+  Strawberry = 'strawberry',
+  Peach = 'peach',
+  Cherry = 'cherry',
+  Blueberry = 'blueberry',
+}
