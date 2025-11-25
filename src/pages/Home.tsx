@@ -199,18 +199,20 @@ const Home: React.FC = () => {
     };
 
     useEffect(() => {
-        console.log(fruitLevel);
-        let currentImagePath = levelImages[fruitLevel] || levelImages[1];
-        if (fruitLevel == 5) {
+        const baseLevel = ((activeQuestId ?? 1) - 1) * 5;
+        const localLevel = fruitLevel - baseLevel;
+        console.log(fruitLevel, localLevel);
+        let currentImagePath = levelImages[localLevel] || levelImages[1];
+        if (localLevel == 5) {
             currentImagePath = `/images/${fruit}.png`;
         }
         setPlantImage(currentImagePath);
 
-        const currentBgClass = levelStyles[fruitLevel] || levelStyles[1];
+        const currentBgClass = levelStyles[localLevel] || levelStyles[1];
         console.log(currentBgClass);
         setFruitLevelBgClass(currentBgClass);
 
-        const currentTitle = levelTitles[fruitLevel] || levelTitles[1];
+        const currentTitle = levelTitles[localLevel] || levelTitles[1];
         console.log(currentTitle);
         setFruitTitle(currentTitle);
 
