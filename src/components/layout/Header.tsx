@@ -58,7 +58,7 @@ const Header: React.FC<HeaderProps> = ({ bgColor = 'bg-white' }) => {
                                 /* 로그인 상태일 때: 닉네임 표시 -> 클릭 시 로그아웃 모달 */
                                 <button
                                     onClick={openLogoutModal}
-                                    className="text-gray-900 hover:text-gray-600"
+                                    className="text-gray-900 hover:text-gray-600 text-[14px]"
                                 >
                                     {user.nickname}
                                 </button>
@@ -66,7 +66,7 @@ const Header: React.FC<HeaderProps> = ({ bgColor = 'bg-white' }) => {
                                 /* 비로그인 상태일 때: 로그인 텍스트 -> 클릭 시 로그인 모달 */
                                 <button
                                     onClick={openLoginModal}
-                                    className="text-gray-500 hover:text-gray-900"
+                                    className="text-gray-500 hover:text-gray-900 text-[14px]"
                                 >
                                     로그인
                                 </button>
@@ -79,11 +79,13 @@ const Header: React.FC<HeaderProps> = ({ bgColor = 'bg-white' }) => {
             <LoginModal
                 isOpen={isLoginModalOpen}
                 onConfirm={handleLogin}
+                onClose={closeModals}
             />
 
             <LogoutModal
                 isOpen={isLogoutModalOpen}
                 onConfirm={handleLogout}
+            // onClose={closeModals}
             />
 
         </>
