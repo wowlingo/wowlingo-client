@@ -157,7 +157,7 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
   };
 
   return (
-    <div className="flex items-center bg-white rounded-xl overflow-hidden shadow-sm">
+    <div className="w-90 h-30 flex items-center bg-white rounded-xl overflow-hidden shadow-sm">
       {/* 문제 듣기 버튼 */}
       <button
         onClick={() => {
@@ -173,28 +173,27 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
             if (normalSound) handlePlaySound(normalSound.url);
           }
         }}
-        className="w-[100px] h-[99px] flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] hover:bg-gray-50 transition-colors"
+        className="w-full h-full flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] hover:bg-gray-50 transition-colors"
         aria-label="문제 듣기"
       >
-        <div className="w-10 h-10 flex items-center justify-center">
+        <div className="w-22 h-10 flex items-center justify-center">
           {/* 3. 이미지 렌더링 로직 변경 */}
           {isPlaying ? (
             // 재생 중일 때: 애니메이션 프레임 이미지 표시
             <img
               src={SPEAKER_FRAMES[frameIndex]}
               alt="듣는 중"
-              className="w-10 h-10 object-contain" // object-contain으로 비율 유지
+              className="object-contain" // object-contain으로 비율 유지
             />
           ) : (
             // 정지 상태일 때: 기존 아이콘 표시
             <img
-              src="/images/ic_set_sound.png"
+              src="/images/sound_03.png"
               alt="문제 듣기"
-              className="w-10 h-10"
             />
           )}
         </div>
-        <span className={`text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px] ${isPlaying ? 'text-blue-500' : 'text-[#4A5564]'}`}>
+        <span className={`text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px] text-[#4A5564]`}>
           {/* 재생 중일 때 텍스트 색상 변경 효과도 줄 수 있습니다 (선택) */}
           문제 듣기
         </span>
@@ -219,24 +218,24 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
           }
 
         }}
-        className="w-[100px] h-[99px] flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] hover:bg-gray-50 transition-colors"
+        className="w-full h-full flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] hover:bg-gray-50 transition-colors"
         aria-label="천천히 듣기"
       >
-        <div className="w-10 h-10 flex items-center justify-center">
+        <div className="w-22 h-10 flex items-center justify-center">
           {/* 3. 이미지 렌더링 로직 변경 */}
           {isSlowPlaying ? (
             // 재생 중일 때: 애니메이션 프레임 이미지 표시
             <img
               src={SLOWLY_FRAMES[frameIndex]}
               alt="듣는 중"
-              className="w-10 h-10 object-contain" // object-contain으로 비율 유지
+              className="object-contain" // object-contain으로 비율 유지
             />
           ) : (
             // 정지 상태일 때: 기존 아이콘 표시
             <img
-              src="/images/ic_set_slowly.png"
+              src="/images/slowly_04.png"
               alt="천천히 듣기"
-              className="w-10 h-10"
+              className=""
             />
           )}
         </div>
@@ -245,14 +244,13 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
         </span>
       </button>
 
-      {/* ... 나머지 코드 (단어장 추가 등) ... */}
       <div className="w-[1px] h-[67px] bg-[#E5E7EB]" />
       <button
         onClick={handleAddToVocabulary}
-        className="w-[100px] h-[99px] flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] hover:bg-gray-50 transition-colors"
+        className="w-full h-full flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] hover:bg-gray-50 transition-colors"
         aria-label="단어장 추가"
       >
-        <div className="w-10 h-10 flex items-center justify-center">
+        <div className="w-22 h-10 flex items-center justify-center">
           <img src="/images/ic_set_add.png" alt="단어장 추가" className="w-10 h-10" />
         </div>
         <span className="text-[16px] font-semibold text-[#4A5564] leading-[22.4px] tracking-[-0.32px]">
