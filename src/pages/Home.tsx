@@ -338,7 +338,7 @@ const Home: React.FC = () => {
                             </div>
                         ))}
                     </div>
-                    <button className="w-full mt-6 py-4 bg-blue-500 text-white text-[16px] font-bold rounded-[999px] shadow-md"
+                    <button className="w-full mt-6 py-3 bg-blue-500 text-white text-lg font-bold rounded-full shadow-md"
                         onClick={handleStartLearning}>
                         학습 시작
                     </button>

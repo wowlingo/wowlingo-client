@@ -8,7 +8,7 @@ export default function ExitConfirmModal({ isOpen, onContinue, onExit }: ExitCon
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-full z-[100] flex items-center justify-center px-4">
       {/* 배경 오버레이 */}
       <div
         className="absolute inset-0 bg-black/80"
@@ -32,7 +32,7 @@ export default function ExitConfirmModal({ isOpen, onContinue, onExit }: ExitCon
           {/* 이어서 하기 버튼 (Primary) */}
           <button
             onClick={onContinue}
-            className="w-full px-6 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full transition-colors"
+            className="w-full px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-full transition-colors"
           >
             이어서 하기
           </button>
@@ -40,7 +40,7 @@ export default function ExitConfirmModal({ isOpen, onContinue, onExit }: ExitCon
           {/* 중단하기 버튼 (Secondary) */}
           <button
             onClick={onExit}
-            className="w-full px-6 py-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-full transition-colors"
+            className="w-full px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-600 font-bold rounded-full transition-colors"
           >
             중단하기
           </button>

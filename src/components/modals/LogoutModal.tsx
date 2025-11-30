@@ -28,14 +28,14 @@ export default function LogoutModal({ isOpen, onConfirm, onClose }: LogoutModalP
         <div className="flex w-full gap-3">
           <button
             onClick={onConfirm}
-            className="flex-1 py-4 bg-blue-100 text-blue-600 font-bold text-lg rounded-full hover:bg-blue-200 transition-colors"
+            className="flex-1 py-3 bg-blue-100 text-blue-600 font-bold text-lg rounded-full hover:bg-blue-200 transition-colors"
           >
             아니요
           </button>
 
           <button
             onClick={onConfirm}
-            className="flex-1 py-4 bg-blue-500 text-white font-bold text-lg rounded-full hover:bg-blue-600 transition-colors shadow-md"
+            className="flex-1 py-3 bg-blue-500 text-white font-bold text-lg rounded-full hover:bg-blue-600 transition-colors shadow-md"
           >
             로그아웃
           </button>

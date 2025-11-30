@@ -19,7 +19,7 @@ interface BaseLearningLayoutProps {
 
 export default function BaseLearningLayout({
   children,
-  submitButtonClassName = "bg-blue-500 hover:bg-[#2265CC] rounded-[999px]",
+  submitButtonClassName = "bg-blue-500 hover:bg-[#2265CC] rounded-full",
   backgroundGradient,//= "linear-gradient(to bottom, rgba(219, 234, 254, 0.5), rgba(239, 246, 255, 0.5))",
   learningBg, 
   learningBgClass = "absolute bottom-0 left-0 right-0 top-80 z-0 pointer-events-none",
@@ -207,21 +207,21 @@ export default function BaseLearningLayout({
             {/* 확인 버튼 */}
             <button
               onClick={handleConfirm}
-              className={`w-full px-6 pt-4 pb-3.5 ${submitButtonClassName} gap-2 text-white font-bold transition-colors font-['Pretendard'] leading-6 rounded-full`}
+              className={`w-full px-6 py3 ${submitButtonClassName} gap-2 text-white font-bold transition-colors leading-6 rounded-full`}
             >
               확인
             </button>
           </div>
         ) : isCorrect === null ? (
           // 답 선택 시: Learning Btn (Outlet) + Primary Button
-          <div className="flex-shrink-0 px-5 pb-4 space-y-2 relative z-50">
+          <div className="flex-shrink-0 px-5 pb-5 space-y-2 relative z-50">
             <main className="w-full">
               <Outlet />
             </main>
             <button
               onClick={handleSubmit}
               disabled={!selectedAnswer || !currentQuestionData}
-              className={`w-full px-6 pt-4 pb-3.5 ${submitButtonClassName} gap-2 text-white font-bold disabled:bg-gray-200 transition-colors font-['Pretendard'] leading-6 rounded-full`}
+              className={`w-full px-6 py-3 ${submitButtonClassName} text-white font-bold disabled:bg-gray-200 transition-colors leading-6 rounded-full`}
             >
               정답 제출
             </button>
@@ -268,7 +268,7 @@ export default function BaseLearningLayout({
             <div className="px-5 pb-4">
               <button
                 onClick={handleNext}
-                className={`w-full px-6 pt-4 pb-3.5 ${isCorrect ? submitButtonClassName : 'bg-red-400 hover:bg-red-500 rounded-[999px]'} gap-2 text-white font-bold transition-colors font-['Pretendard'] leading-6 rounded-full`}
+                className={`w-full px-6 py-3 ${isCorrect ? submitButtonClassName : 'bg-red-400 hover:bg-red-500 rounded-full'} gap-2 text-white font-bold transition-colors leading-6 rounded-full`}
               >
                 다음
               </button>

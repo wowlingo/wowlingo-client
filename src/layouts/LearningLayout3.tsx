@@ -13,7 +13,7 @@ export default function LearningLayout3() {
 
   return (
     <BaseLearningLayout
-      submitButtonClassName="bg-blue-500 hover:bg-[#2265CC] rounded-[999px]"
+      submitButtonClassName="bg-blue-500 hover:bg-[#2265CC] rounded-full"
       backgroundGradient="linear-gradient(180deg, #D8DCFB 0%, #FFF 100%)"
       learningBg="/images/img_learning_bg_c.png"
     >
