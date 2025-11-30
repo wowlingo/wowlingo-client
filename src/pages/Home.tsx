@@ -5,6 +5,7 @@ import Header from '../components/layout/Header';
 import { useNavigate } from "react-router-dom";
 import { useLearningStatusStore } from '../store/LearningStatus';
 import HomeGuideModal from '../components/modals/HomeGuideModal';
+import { useAuth } from '../components/common/AuthContext';
 
 
 type LearningItemProps = {
@@ -106,6 +107,7 @@ interface WeeklyAttendanceItem {
 }
 
 const Home: React.FC = () => {
+    const { user } = useAuth();
     const { fetchUserQuestProgress,
         activeQuestId,
         fruit,
@@ -135,7 +137,14 @@ const Home: React.FC = () => {
     const [progressRate, setProgressRate] = useState(0);
 
     useEffect(() => {
-        console.log('Home useEffect - fetchUserQuestProgress called');
+        if (user) {
+            console.log(`현재 로그인한 유저1 ID: ${user.userId}`);
+        }
+    }, [user]);
+
+    useEffect(() => {
+        console.log(`현재 로그인한 유저2 ID: ${user?.userId}`);
+
         fetchUserQuestProgress(1); // 사용자 ID 1의 퀘스트 진행 상태 요청
 
         const userId = 1;

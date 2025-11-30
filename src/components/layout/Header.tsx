@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { jwtDecode } from 'jwt-decode';
+import { useAuth } from '../common/AuthContext';
 import { NavLink } from '../ui/NavLink';
 import LoginModal from '../modals/LoginModal';
 import LogoutModal from '../modals/LogoutModal';
@@ -22,42 +22,43 @@ interface TokenPayload {
 }
 
 const Header: React.FC<HeaderProps> = ({ bgColor = 'bg-white' }) => {
+    const { user, login, logout } = useAuth();
+
     // 상태 관리
-    const [user, setUser] = useState<User | null>(null); // 로그인된 유저 정보
+    // const [user, setUser] = useState<User | null>(null); // 로그인된 유저 정보
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-    // ★ [핵심 로직] 페이지 새로고침 시 쿠키 확인하여 로그인 상태 복구
-    useEffect(() => {
-        const token = Cookies.get('accessToken');
+    // useEffect(() => {
+    //     const token = Cookies.get('accessToken');
 
-        if (token) {
-            try {
-                // 1. 토큰 디코딩
-                const decoded = jwtDecode<TokenPayload>(token);
+    //     if (token) {
+    //         try {
+    //             // 1. 토큰 디코딩
+    //             const decoded = jwtDecode<TokenPayload>(token);
 
-                // 2. 토큰 만료 여부 확인 (선택 사항이지만 권장)
-                // exp는 초 단위이므로 1000을 곱해 밀리초로 변환 후 현재 시간과 비교
-                if (decoded.exp * 1000 < Date.now()) {
-                    console.log("토큰이 만료되었습니다.");
-                    Cookies.remove('accessToken');
-                    setUser(null);
-                    return;
-                }
+    //             // 2. 토큰 만료 여부 확인 (선택 사항이지만 권장)
+    //             // exp는 초 단위이므로 1000을 곱해 밀리초로 변환 후 현재 시간과 비교
+    //             if (decoded.exp * 1000 < Date.now()) {
+    //                 console.log("토큰이 만료되었습니다.");
+    //                 Cookies.remove('accessToken');
+    //                 setUser(null);
+    //                 return;
+    //             }
 
-                // 3. 유저 상태 복구
-                // 주의: Backend 토큰 payload에 userId(sub)와 username이 들어있어야 합니다.
-                setUser({
-                    userId: decoded.sub,
-                    username: decoded.username
-                });
-            } catch (error) {
-                console.error("유효하지 않은 토큰입니다.", error);
-                Cookies.remove('accessToken'); // 잘못된 토큰이면 삭제
-                setUser(null);
-            }
-        }
-    }, []); // 빈 배열([])을 넣어 마운트 시 1회만 실행
+    //             // 3. 유저 상태 복구
+    //             // 주의: Backend 토큰 payload에 userId(sub)와 username이 들어있어야 합니다.
+    //             setUser({
+    //                 userId: decoded.sub,
+    //                 username: decoded.username
+    //             });
+    //         } catch (error) {
+    //             console.error("유효하지 않은 토큰입니다.", error);
+    //             Cookies.remove('accessToken'); // 잘못된 토큰이면 삭제
+    //             setUser(null);
+    //         }
+    //     }
+    // }, []); // 빈 배열([])을 넣어 마운트 시 1회만 실행
 
 
     const openLoginModal = () => setIsLoginModalOpen(true);
@@ -97,7 +98,8 @@ const Header: React.FC<HeaderProps> = ({ bgColor = 'bg-white' }) => {
                 Cookies.set('accessToken', accessToken, { expires: 1 });
 
                 // 4. 상태 업데이트 및 모달 닫기
-                setUser({ userId: userId, username: username });
+                // setUser({ userId: userId, username: username });
+                login(accessToken, username, userId);
                 closeModals();
 
                 console.log('로그인 성공 & 토큰 저장 완료');
@@ -111,7 +113,8 @@ const Header: React.FC<HeaderProps> = ({ bgColor = 'bg-white' }) => {
     const handleLogout = () => {
         Cookies.remove('accessToken');
 
-        setUser(null);
+        // setUser(null);
+        logout()
         closeModals();
     };
 

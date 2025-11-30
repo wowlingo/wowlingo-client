@@ -12,6 +12,7 @@ import LearningStatusPage from './pages/LearningStatusPage';
 import MainLayout from './components/layout/MainLayout';
 import ReviewNotesPage from './pages/ReviewNotesPage';
 import VocabularyPage from './pages/VocabularyPage';
+import { AuthProvider } from './components/common/AuthContext';
 
 const router = createBrowserRouter([
   {
@@ -54,7 +55,9 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <>
     <React.StrictMode>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </React.StrictMode>
     <Toaster
       theme="dark"
