@@ -14,6 +14,7 @@ export default function LearningLayout4() {
   return (
     <BaseLearningLayout
       submitButtonClassName="bg-blue-500 hover:bg-[#2265CC] rounded-[999px]"
+      backgroundGradient="linear-gradient(to bottom, #D8E8FF 0%, #FFFFFF 100%)"
       learningBg="/images/img_learning_bg_d.png"
     >
       {/* 배경 컴포넌트 - 블러 처리된 이미지 스택과 그라데이션 오버레이 */}

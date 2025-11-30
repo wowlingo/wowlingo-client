@@ -12,15 +12,17 @@ import { useVocabularyStore } from '@/store/VocabularyStore';
 interface BaseLearningLayoutProps {
   children?: React.ReactNode; // 중앙 배경 영역 (이미지 스택 또는 배경 컴포넌트)
   submitButtonClassName?: string; // 제출 버튼 스타일 커스터마이징
-  backgroundGradient?: string; // 배경 그라디언트 커스터마이징 (CSS gradient 문자열)
+  backgroundGradient?: string | null; // 배경 그라디언트 커스터마이징 (CSS gradient 문자열)
   learningBg?: string | null;
+  learningBgClass?: string;
 }
 
 export default function BaseLearningLayout({
   children,
   submitButtonClassName = "bg-blue-500 hover:bg-[#2265CC] rounded-[999px]",
-  backgroundGradient = "linear-gradient(to bottom, rgba(219, 234, 254, 0.5), rgba(239, 246, 255, 0.5))",
-  learningBg,
+  backgroundGradient,//= "linear-gradient(to bottom, rgba(219, 234, 254, 0.5), rgba(239, 246, 255, 0.5))",
+  learningBg, 
+  learningBgClass = "absolute bottom-0 left-0 right-0 top-80 z-0 pointer-events-none",
 }: BaseLearningLayoutProps) {
   const navigate = useNavigate();
   const { addVocabulary } = useVocabularyStore();
@@ -124,15 +126,19 @@ export default function BaseLearningLayout({
   return (
     <div className="relative h-[100dvh] max-w-lg mx-auto font-sans overflow-hidden">
       {/* 배경 그라디언트 */}
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: backgroundGradient
-        }}
-      />
+      {backgroundGradient && (
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: backgroundGradient
+          }}
+        />
+      )}
 
       {learningBg && (
-      <div className="absolute bottom-0 left-0 right-0 top-80 z-0 pointer-events-none">
+        <div
+          className= {learningBgClass}
+        >
         <img
           src={learningBg}
           alt="Learning background"
