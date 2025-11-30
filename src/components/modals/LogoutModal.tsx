@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 interface LogoutModalProps {
   isOpen: boolean;
   onConfirm: () => void;
@@ -8,20 +6,6 @@ interface LogoutModalProps {
 
 export default function LogoutModal({ isOpen, onConfirm, onClose }: LogoutModalProps) {
   if (!isOpen) return null;
-
-  const [nickname, setNickname] = useState('');
-
-  const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNickname(e.target.value);
-  };
-
-  // '저장' 버튼 클릭 시 실행될 핸들러
-  const handleSubmit = () => {
-    if (nickname.trim().length > 0) {
-      console.log('저장할 닉네임:', nickname);
-      // TODO: 여기에 닉네임 저장 로직 (API 호출)
-    }
-  };
 
   return (
     <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-full z-[100] flex items-center justify-center px-4">
@@ -34,10 +18,10 @@ export default function LogoutModal({ isOpen, onConfirm, onClose }: LogoutModalP
       />
 
       {/* 모달 컨텐츠 */}
-      <div className="relative z-10 p-8 flex flex-col items-center w-full bg-white rounded-3xl shadow-xl">
+      <div className="relative z-10 p-8 flex flex-col items-center w-100 bg-white rounded-3xl shadow-xl">
 
         {/* 메시지 */}
-        <h2 className="text-[22px] text-gray-800 mb-8 mt-2 text-center">
+        <h2 className="text-xl text-gray-800 mb-8 mt-2 text-center">
           로그아웃 하시겠어요?
         </h2>
 
