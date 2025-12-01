@@ -107,7 +107,7 @@ interface WeeklyAttendanceItem {
 }
 
 const Home: React.FC = () => {
-    const { user } = useAuth();
+    const { user, openLoginModal } = useAuth();
     const { fetchUserQuestProgress,
         activeQuestId,
         fruit,
@@ -143,46 +143,54 @@ const Home: React.FC = () => {
     }, [user]);
 
     useEffect(() => {
-        console.log(`현재 로그인한 유저2 ID: ${user?.userId}`);
+        console.log(`현재 로그인한 유저2`);
+        // 로그인 했을 경우.
+        if (user) {
+            console.log(`현재 로그인한 유저1 ID: ${user.userId}`);
 
-        fetchUserQuestProgress(1); // 사용자 ID 1의 퀘스트 진행 상태 요청
+            fetchUserQuestProgress(user.userId); // 사용자 ID 1의 퀘스트 진행 상태 요청
 
-        const userId = 1;
-        fetchQuestAttemptsThisWeek(userId);
+            fetchQuestAttemptsThisWeek(user.userId);
 
-        console.log(attemptedDays);
+            console.log(attemptedDays);
 
-        const days = ["월", "화", "수", "목", "금", "토", "일"];
-        const updated = days.map((day, index) => ({
-            day,
-            attended: attemptedDays[index] != null
-        }));
+            const days = ["월", "화", "수", "목", "금", "토", "일"];
+            const updated = days.map((day, index) => ({
+                day,
+                attended: attemptedDays[index] != null
+            }));
 
-        setWeeklyAttendance(updated);
+            setWeeklyAttendance(updated);
 
-        // API가 아직 구현되지 않은 경우를 위한 fallback
-        if (questList.length === 0) {
-            fetchQuestList();
+            // API가 아직 구현되지 않은 경우를 위한 fallback
+            if (questList.length === 0) {
+                fetchQuestList();
+            }
         }
-    }, [fetchUserQuestProgress, fetchQuestList, questList.length, fetchQuestAttemptsThisWeek]);
+
+    }, [user, fetchUserQuestProgress, fetchQuestList, questList.length, fetchQuestAttemptsThisWeek]);
 
     // 페이지 포커스 및 학습 완료 시 진행 상태 새로고침
     useEffect(() => {
-        const handleFocus = () => {
-            fetchUserQuestProgress(1);
-        };
+        // 로그인 했을 경우.
+        if (user) {
+            const handleFocus = () => {
+                fetchUserQuestProgress(user.userId);
+            };
 
-        const handleLearningCompleted = () => {
-            fetchUserQuestProgress(1);
-        };
+            const handleLearningCompleted = () => {
+                fetchUserQuestProgress(user.userId);
+            };
 
-        window.addEventListener('focus', handleFocus);
-        window.addEventListener('learningCompleted', handleLearningCompleted);
+            window.addEventListener('focus', handleFocus);
+            window.addEventListener('learningCompleted', handleLearningCompleted);
 
-        return () => {
-            window.removeEventListener('focus', handleFocus);
-            window.removeEventListener('learningCompleted', handleLearningCompleted);
-        };
+            return () => {
+                window.removeEventListener('focus', handleFocus);
+                window.removeEventListener('learningCompleted', handleLearningCompleted);
+            };
+        }
+
     }, [fetchUserQuestProgress]);
 
     const levelImages: Record<number, string> = {
@@ -208,30 +216,41 @@ const Home: React.FC = () => {
     };
 
     useEffect(() => {
-        const baseLevel = ((activeQuestId ?? 1) - 1) * 5;
-        const localLevel = fruitLevel - baseLevel;
-        console.log(fruitLevel, localLevel);
-        let currentImagePath = levelImages[localLevel] || levelImages[1];
-        if (localLevel == 5) {
-            currentImagePath = `/images/${fruit}.png`;
+        // 로그인 했을 경우
+        if (user) {
+            console.log(`현재 로그인한 유저1 ID: ${user.userId}`);
+
+            const baseLevel = ((activeQuestId ?? 1) - 1) * 5;
+            const localLevel = fruitLevel - baseLevel;
+            console.log(fruitLevel, localLevel);
+            let currentImagePath = levelImages[localLevel] || levelImages[1];
+            if (localLevel == 5) {
+                currentImagePath = `/images/${fruit}.png`;
+            }
+            setPlantImage(currentImagePath);
+
+            const currentBgClass = levelStyles[localLevel] || levelStyles[1];
+            console.log(currentBgClass);
+            setFruitLevelBgClass(currentBgClass);
+
+            const currentTitle = levelTitles[localLevel] || levelTitles[1];
+            console.log(currentTitle);
+            setFruitTitle(currentTitle);
+
+            // 학습진행률.
+            const currentQuest = userQuestProgress.find(q => q.questId === activeQuestId);
+            const currentRate = currentQuest?.progressRate ?? 0;
+
+            console.log('activeQuestId= ' + activeQuestId + ' ' + currentRate);
+            console.log('currentQuest= ', currentQuest);
+            setProgressRate(currentRate);
+        } else {
+            // 로그인 안했을 때는 모두 기본값 1
+            setPlantImage(levelImages[1]);
+            setFruitLevelBgClass(levelStyles[1]);
+            setFruitTitle(levelTitles[1]);
+            setProgressRate(0);
         }
-        setPlantImage(currentImagePath);
-
-        const currentBgClass = levelStyles[localLevel] || levelStyles[1];
-        console.log(currentBgClass);
-        setFruitLevelBgClass(currentBgClass);
-
-        const currentTitle = levelTitles[localLevel] || levelTitles[1];
-        console.log(currentTitle);
-        setFruitTitle(currentTitle);
-
-        // 학습진행률.
-        const currentQuest = userQuestProgress.find(q => q.questId === activeQuestId);
-        const currentRate = currentQuest?.progressRate ?? 0;
-
-        console.log('activeQuestId= ' + activeQuestId + ' ' + currentRate);
-        console.log('currentQuest= ', currentQuest);
-        setProgressRate(currentRate);
 
     }, [fruitLevel, fruit, setPlantImage, fruitLevelBgClass, setFruitLevelBgClass,
         fruitTitle, setFruitTitle, activeQuestId]);
@@ -239,7 +258,13 @@ const Home: React.FC = () => {
 
 
     const handleStartLearning = () => {
-        navigate(`/learning/intro/${activeQuestId}`);
+        // 로그인 했을 경우.
+        if (user && activeQuestId) {
+            navigate(`/learning/intro/${activeQuestId}`);
+        } else {
+            // 로그인을 안했다면.
+            openLoginModal();
+        }
     };
 
     const [isHomeGuideModalOpen, setIsHomeGuideModalOpen] = useState(false);
@@ -276,11 +301,24 @@ const Home: React.FC = () => {
                     </div>
 
                     <div className="absolute top-[80px] right-[40px] bg-white rounded-xl px-[10px] py-[8px] text-[14px] text-gray-600">
-                        <div>
-                            레벨 업까지 <span className="text-blue-600 font-bold">{nextLevelCount}문제!</span>
-                        </div>
-                        {/* 꼬리 */}
-                        <div className="absolute top-[25px] right-[90px] w-3 h-5 bg-white rotate-60"></div>
+                        {/* user 정보가 없음 = guest */}
+                        {!user ? (
+                            <>
+                                <div>
+                                    로그인하고 학습하면 <br />
+                                    <span className="text-blue-600 font-bold">성장 기록이 저장돼요!</span>
+                                </div>
+                                <div className="absolute top-[48px] right-[90px] w-3 h-5 bg-white rotate-60"></div>
+                            </>
+                        ) : (
+                            <>
+                                <div>
+                                    레벨 업까지 <span className="text-blue-600 font-bold">{nextLevelCount}문제!</span>
+                                </div>
+                                {/* 꼬리 */}
+                                <div className="absolute top-[25px] right-[90px] w-3 h-5 bg-white rotate-60"></div>
+                            </>
+                        )}
                     </div>
 
                     <div className="w-[300px] h-[300px] mx-auto relative flex items-center justify-center mt-12">
@@ -347,179 +385,79 @@ const Home: React.FC = () => {
                 <section className="p-4">
                     <h2 className="text-[20px] font-semibold text-gray-800 mb-3 px-1">학습 단계</h2>
                     <div className="space-y-3">
-                        {isLoading ? (
-                            <div className="text-gray-500">로딩 중...</div>
-                        ) : Array.isArray(userQuestProgress) && userQuestProgress.length > 0 ? (
-                            userQuestProgress.map((quest) => {
-                                // const isCompleted = quest.isCompleted;
-                                // const isActive = quest.questId === activeQuestId;
-                                const isLocked = false;//!isCompleted && !isActive;
-
-                                if (isLocked) {
-                                    return (
-                                        <div
-                                            key={quest.questId}
-                                        >
-                                            <LearningItem
-                                                key={quest.questId}
-                                                tags={quest.tags}
-                                                title={quest.title}
-                                                progress={0}
-                                                total={quest.totalCount}
-                                                isEnable={false}
-                                            />
-                                        </div>
-                                    );
-                                }
-
-                                return (
-                                    <Link
-                                        key={quest.questId}
-                                        to={`/learning/intro/${quest.questId}`}
-                                    >
-                                        <LearningItem
-                                            key={quest.questId}
-                                            tags={quest.tags}
-                                            title={quest.title}
-                                            progress={quest.correctCount}
-                                            total={quest.totalCount}
-                                            isEnable={true}
-                                        />
-                                    </Link>
-                                );
-                            })
-                        ) : Array.isArray(questList) && questList.length > 0 ? (
-                            questList.map((quest) => {
-                                return (
-                                    <Link
-                                        key={quest.questId}
-                                        to={`/learning/intro/${quest.questId}`}
-                                        className="flex-shrink-0 w-64 snap-center block rounded-2xl p-6 shadow-md transition-all relative bg-gray-50 text-gray-700"
-                                    >
-                                        <LearningItem
-                                            key={quest.questId}
-                                            tags={[]}
-                                            title={quest.title}
-                                            progress={0}
-                                            total={quest.questItemCount}
-                                            isEnable={true}
-                                        />
-                                    </Link>
-                                );
-                            })
+                        {/* user 정보가 없음 = guest */}
+                        {!user ? (
+                            <div className={`p-4 border border-gray-200 rounded-2xl bg-gray-100`}>
+                                <div className="flex items-center justify-between text-base text-gray-400">
+                                    로그인하고 학습을 시작해보세요.
+                                </div>
+                            </div>
                         ) : (
-                            <div className="text-gray-500">퀘스트 데이터를 불러올 수 없습니다.</div>
+                            /* user 정보가 있음 = 로그인 */
+                            <>
+                                {isLoading ? (
+                                    <div className="text-gray-500">로딩 중...</div>
+                                ) : Array.isArray(userQuestProgress) && userQuestProgress.length > 0 ? (
+                                    userQuestProgress.map((quest) => {
+                                        // const isCompleted = quest.isCompleted;
+                                        // const isActive = quest.questId === activeQuestId;
+                                        const isLocked = false; //!isCompleted && !isActive;
+
+                                        if (isLocked) {
+                                            return (
+                                                <div key={quest.questId}>
+                                                    <LearningItem
+                                                        tags={quest.tags}
+                                                        title={quest.title}
+                                                        progress={0}
+                                                        total={quest.totalCount}
+                                                        isEnable={false}
+                                                    />
+                                                </div>
+                                            );
+                                        }
+
+                                        return (
+                                            <Link
+                                                key={quest.questId}
+                                                to={`/learning/intro/${quest.questId}`}
+                                            >
+                                                <LearningItem
+                                                    tags={quest.tags}
+                                                    title={quest.title}
+                                                    progress={quest.correctCount}
+                                                    total={quest.totalCount}
+                                                    isEnable={true}
+                                                />
+                                            </Link>
+                                        );
+                                    })
+                                ) : Array.isArray(questList) && questList.length > 0 ? (
+                                    questList.map((quest) => {
+                                        return (
+                                            <Link
+                                                key={quest.questId}
+                                                to={`/learning/intro/${quest.questId}`}
+                                                // 기존 코드의 스타일 유지 (필요에 따라 수정하세요)
+                                                className="block rounded-2xl p-6 shadow-md transition-all relative bg-gray-50 text-gray-700"
+                                            >
+                                                <LearningItem
+                                                    tags={[]}
+                                                    title={quest.title}
+                                                    progress={0}
+                                                    total={quest.questItemCount}
+                                                    isEnable={true}
+                                                />
+                                            </Link>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="text-gray-500">퀘스트 데이터를 불러올 수 없습니다.</div>
+                                )}
+                            </>
                         )}
                     </div>
                 </section>
-
-                {/* <section>
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">학습 단계</h3>
-                    <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 scrollbar-hide">
-                        {isLoading ? (
-                            <div className="text-gray-500">로딩 중...</div>
-                        ) : Array.isArray(userQuestProgress) && userQuestProgress.length > 0 ? (
-                            userQuestProgress.map((quest) => {
-                                // 퀘스트 상태 결정
-                                const isCompleted = quest.isCompleted;
-                                const isActive = quest.questId === activeQuestId;
-                                const isLocked = false;//!isCompleted && !isActive;
-
-                                // 공통 컨텐츠
-                                const questContent = (
-                                    <>
-                                        <div className="flex items-center justify-between mb-3">
-                                            <span className={`text-sm font-semibold ${isLocked ? 'text-gray-400' : ''}`}>
-                                                {quest.correctCount}/{quest.totalCount}
-                                            </span>
-                                            {isCompleted && (
-                                                <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full">
-                                                    완료
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        <h4 className={`text-xl font-bold mb-3 ${isLocked ? 'text-gray-400' : ''}`}>
-                                            {quest.title}
-                                        </h4>
-
-                                        <div className="flex flex-wrap gap-1.5 mb-3">
-                                            {quest.tags.map((tag, index) => (
-                                                <span
-                                                    key={index}
-                                                    className={`px-2.5 py-1 rounded-full text-xs font-medium ${isLocked
-                                                            ? 'bg-gray-200 text-gray-400'
-                                                            : isActive
-                                                                ? 'bg-blue-600 text-white'
-                                                                : quest.isStarted
-                                                                    ? 'bg-blue-200 text-blue-800'
-                                                                    : 'bg-gray-200 text-gray-600'
-                                                        }`}
-                                                >
-                                                    {tag}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </>
-                                );
-
-                                // 잠긴 퀘스트는 div로, 활성/완료 퀘스트는 Link로 렌더링
-                                if (isLocked) {
-                                    return (
-                                        <div
-                                            key={quest.questId}
-                                            className="flex-shrink-0 w-64 snap-center block rounded-2xl p-6 shadow-md transition-all relative cursor-not-allowed bg-gray-100 text-gray-400"
-                                        >
-                                            {questContent}
-                                        </div>
-                                    );
-                                }
-
-                                return (
-                                    <Link
-                                        key={quest.questId}
-                                        to={`/learning/intro/${quest.questId}`}
-                                        className={`flex-shrink-0 w-64 snap-center block rounded-2xl p-6 shadow-md transition-all relative ${isActive
-                                                ? 'bg-blue-500 text-white'
-                                                : quest.isStarted
-                                                    ? 'bg-blue-50 text-blue-900'
-                                                    : 'bg-gray-50 text-gray-700'
-                                            }`}
-                                    >
-                                        {questContent}
-                                    </Link>
-                                );
-                            })
-                        ) : Array.isArray(questList) && questList.length > 0 ? (
-                            questList.map((quest) => (
-                                <Link
-                                    to={`/learning/intro/${quest.questId}`}
-                                    key={quest.questId}
-                                    className="flex-shrink-0 w-64 snap-center block bg-gray-50 rounded-2xl p-6 shadow-md"
-                                >
-                                    <div className="flex items-center justify-between mb-3">
-                                        <span className="text-sm font-semibold text-gray-600">
-                                            0/{quest.questItemCount}
-                                        </span>
-                                    </div>
-
-                                    <h4 className="text-xl font-bold mb-3 text-gray-900">
-                                        {quest.title}
-                                    </h4>
-
-                                    <div className="flex flex-wrap gap-1.5">
-                                        <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-600">
-                                            #{quest.type}
-                                        </span>
-                                    </div>
-                                </Link>
-                            ))
-                        ) : (
-                            <div className="text-gray-500">퀘스트 데이터를 불러올 수 없습니다.</div>
-                        )}
-                    </div>
-                </section> */}
-
 
             </div>
 

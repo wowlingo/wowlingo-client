@@ -20,6 +20,11 @@ interface AuthContextType {
     isLoading: boolean; // 로딩 상태 (새로고침 시 깜빡임 방지용)
     login: (token: string, username: string, userId: number) => void;
     logout: () => void;
+
+    // 로그인 모달 관리
+    isLoginModalOpen: boolean;
+    openLoginModal: () => void;
+    closeLoginModal: () => void;
 }
 
 // 2. Context 생성
@@ -30,7 +35,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // ★ 초기 로딩 시 쿠키 체크 (기존 로직 이동)
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+    const openLoginModal = () => setIsLoginModalOpen(true);
+    const closeLoginModal = () => setIsLoginModalOpen(false);
+
+    // 초기 로딩 시 쿠키 체크 (기존 로직 이동)
     useEffect(() => {
         const checkLoginStatus = () => {
             const token = Cookies.get('accessToken');
@@ -65,6 +75,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const handleLogin = (token: string, nickname: string, id: number) => {
         Cookies.set('accessToken', token, { expires: 1 });
         setUser({ userId: id, username: nickname });
+
+        closeLoginModal();
     };
 
     // 로그아웃 액션
@@ -76,7 +88,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     return (
-        <AuthContext.Provider value={{ user, isLoading, login: handleLogin, logout: handleLogout }}>
+        <AuthContext.Provider value={{ user, isLoading, login: handleLogin, logout: handleLogout,
+            isLoginModalOpen, openLoginModal, closeLoginModal }}>
             {children}
         </AuthContext.Provider>
     );
