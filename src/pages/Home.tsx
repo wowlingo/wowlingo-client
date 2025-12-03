@@ -5,6 +5,8 @@ import Header from '../components/layout/Header';
 import { useNavigate } from "react-router-dom";
 import { useLearningStatusStore } from '../store/LearningStatus';
 import HomeGuideModal from '../components/modals/HomeGuideModal';
+import WelcomeModal from '../components/modals/WelcomeModal';
+import HelloModal from '../components/modals/HelloModal';
 import { useAuth } from '../components/common/AuthContext';
 
 
@@ -137,8 +139,15 @@ const Home: React.FC = () => {
     const [progressRate, setProgressRate] = useState(0);
 
     useEffect(() => {
-        if (user) {
+        const checked = sessionStorage.getItem('show_welcome');
+        console.log('show_welcome: ', checked);
+        if (user && checked === 'true') {
             console.log(`현재 로그인한 유저1 ID: ${user.userId}`);
+            if (user.isNewUser) {
+                setIsWelcomeModalOpen(true);
+            } else {
+                setIsHelloModalOpen(true);
+            }
         }
     }, [user]);
 
@@ -169,6 +178,7 @@ const Home: React.FC = () => {
         }
 
     }, [user, fetchUserQuestProgress, fetchQuestList, questList.length, fetchQuestAttemptsThisWeek]);
+
 
     // 페이지 포커스 및 학습 완료 시 진행 상태 새로고침
     useEffect(() => {
@@ -260,6 +270,7 @@ const Home: React.FC = () => {
     const handleStartLearning = () => {
         // 로그인 했을 경우.
         if (user && activeQuestId) {
+            console.log('activeQuestId: ', activeQuestId);
             navigate(`/learning/intro/${activeQuestId}`);
         } else {
             // 로그인을 안했다면.
@@ -268,6 +279,8 @@ const Home: React.FC = () => {
     };
 
     const [isHomeGuideModalOpen, setIsHomeGuideModalOpen] = useState(false);
+    const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false);
+    const [isHelloModalOpen, setIsHelloModalOpen] = useState(false);
 
     // 4. 모달을 여는 함수
     const openHomeGuideModal = () => {
@@ -464,6 +477,32 @@ const Home: React.FC = () => {
             <HomeGuideModal
                 isOpen={isHomeGuideModalOpen}
                 onConfirm={closeHomeGuideModal}
+            />
+            <WelcomeModal
+                isOpen={isWelcomeModalOpen}
+                username={user?.username}
+                onConfirm={() => {
+                    sessionStorage.setItem('show_welcome', 'false');
+                    setIsWelcomeModalOpen(false);
+                    handleStartLearning();
+                }}
+                onClose={() => {
+                    sessionStorage.setItem('show_welcome', 'false');
+                    setIsWelcomeModalOpen(false)
+                }}
+            />
+            <HelloModal
+                isOpen={isHelloModalOpen}
+                username={user?.username}
+                onConfirm={() => {
+                    sessionStorage.setItem('show_welcome', 'false');
+                    setIsHelloModalOpen(false);
+                    handleStartLearning();
+                }}
+                onClose={() => {
+                    sessionStorage.setItem('show_welcome', 'false');
+                    setIsHelloModalOpen(false);
+                }}
             />
         </div>
     );

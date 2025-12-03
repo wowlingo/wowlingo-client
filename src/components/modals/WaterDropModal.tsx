@@ -8,7 +8,7 @@ export default function WaterDropModal({ isOpen, waterDropCount, onConfirm }: Wa
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center">
+    <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-full z-[100] flex items-center justify-center px-4">
       {/* 배경 오버레이 - 어두운 색으로 투명하게 처리 */}
       <div className="absolute inset-0 bg-black/80" onClick={onConfirm} />
 

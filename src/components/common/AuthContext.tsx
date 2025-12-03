@@ -2,15 +2,17 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 
-// 1. 타입 정의
+
 interface User {
     userId: number;
     username: string;
+    isNewUser: boolean;
 }
 
 interface TokenPayload {
     userId: number;
     username: string;
+    isNewUser: boolean;
     iat: number;
     exp: number;
 }
@@ -18,7 +20,7 @@ interface TokenPayload {
 interface AuthContextType {
     user: User | null;
     isLoading: boolean; // 로딩 상태 (새로고침 시 깜빡임 방지용)
-    login: (token: string, username: string, userId: number) => void;
+    login: (token: string, username: string, userId: number, isNewUser: boolean) => void;
     logout: () => void;
 
     // 로그인 모달 관리
@@ -54,10 +56,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         console.log("토큰이 만료되었습니다.");
                         handleLogout();
                     } else {
-                        // 유저 상태 복구
                         setUser({
                             userId: decoded.userId,
-                            username: decoded.username
+                            username: decoded.username,
+                            isNewUser: decoded.isNewUser,
                         });
                     }
                 } catch (error) {
@@ -72,9 +74,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, []);
 
     // 로그인 액션
-    const handleLogin = (token: string, nickname: string, id: number) => {
+    const handleLogin = (token: string, nickname: string, id: number, isNewUser: boolean) => {
         Cookies.set('accessToken', token, { expires: 1 });
-        setUser({ userId: id, username: nickname });
+        setUser({ userId: id, username: nickname, isNewUser });
+
+        sessionStorage.setItem('show_welcome', 'true');
 
         closeLoginModal();
     };

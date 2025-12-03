@@ -45,14 +45,14 @@ const Header: React.FC<HeaderProps> = ({ bgColor = 'bg-white' }) => {
             const data = await response.json();
             console.log('로그인 성공', data);
 
-            const { accessToken, userId, username } = data.data;
+            const { accessToken, userId, username, isNewUser } = data.data;
             if (accessToken) {
                 // 3. 쿠키에 토큰 저장 (예: 만료 1일)
                 Cookies.set('accessToken', accessToken, { expires: 1 });
 
                 // 4. 상태 업데이트 및 모달 닫기
                 // setUser({ userId: userId, username: username });
-                login(accessToken, username, userId);
+                login(accessToken, username, userId, isNewUser);
                 closeModals();
 
                 console.log('로그인 성공 & 토큰 저장 완료');
