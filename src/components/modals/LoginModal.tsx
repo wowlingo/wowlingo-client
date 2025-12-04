@@ -25,7 +25,7 @@ export default function LoginModal({ isOpen, onConfirm, onClose }: LoginModalPro
         onClick={onClose}
       />
 
-      {/* 모달 컨텐츠 - 배경 위에 떠야 하므로 relative와 z-index 필요 */}
+      {/* 모달 컨텐츠*/}
       <div className="relative z-10 p-8 flex flex-col items-center w-100 bg-white rounded-3xl shadow-xl">
 
         {/* 메시지 */}

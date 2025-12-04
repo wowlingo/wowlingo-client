@@ -4,7 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 import 'sonner/dist/styles.css';
 import { Toaster } from "sonner";
-import RandomLearningLayout from './layouts/RandomLearningLayout';
+import LearningFlow from './layouts/LearningFlow';
 import LearningStepPage from './pages/LearningStepPage';
 import LearningIntroPage from './pages/LearningIntroPage';
 import Home from './pages/Home';
@@ -42,7 +42,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/learning/:questId",
-    element: <RandomLearningLayout />, // 랜덤 레이아웃.
+    element: <LearningFlow />, // 랜덤 레이아웃.
     children: [
       {
         path: ':stepId', // 동적 경로 파라미터 사용
