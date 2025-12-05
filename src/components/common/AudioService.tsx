@@ -1,10 +1,4 @@
-/**
- * 이 모듈 내부에서만 관리되는 오디오 인스턴스입니다.
- */
 let currentAudio: HTMLAudioElement | null = null;
-/**
- * 오디오 재생이 완료되었을 때 호출될 콜백 함수입니다.
- */
 let onEndedCallback: (() => void) | null = null;
 
 /**
@@ -19,7 +13,7 @@ export const stopAudio = () => {
         currentAudio.onended = null; // onended 이벤트 리스너 제거
         currentAudio = null;
     }
-    
+
     onEndedCallback = null;
 };
 
@@ -31,21 +25,34 @@ export const stopAudio = () => {
 export const playAudio = (audioUrl: string, onEnded?: () => void) => {
     stopAudio(); // 1. 기존 오디오가 있다면 정지
 
-    currentAudio = new Audio(audioUrl);
-    onEndedCallback = onEnded || null;
+    const audio = new Audio(audioUrl);
+    currentAudio = audio;
 
-    currentAudio.onended = () => {
-        if (onEndedCallback) {
-            onEndedCallback();
-        }
-        // 한 번 호출된 콜백은 초기화
-        onEndedCallback = null;
-    };
+    if (onEnded) {
+        audio.onended = onEnded;
+    }
 
-    currentAudio.play().catch(e => {
-        console.error("오디오 재생 오류:", e);
-        stopAudio(); // 재생 실패 시 완전 초기화
-    });
+    // play()는 Promise를 반환합니다.
+    const playPromise = audio.play();
+
+    if (playPromise !== undefined) {
+        playPromise
+            .then(() => {
+                // 재생이 성공적으로 시작됨
+                // 필요하다면 여기서 로직 처리
+            })
+            .catch((error) => {
+                // 재생이 시작되기 전에 pause()가 호출되면 AbortError가 발생합니다.
+                if (error.name === 'AbortError') {
+                    // 의도된 중단이므로 에러 로그를 무시하거나 가볍게 처리
+                    console.log('Audio play aborted cleanly');
+                    playAudio(audioUrl, onEnded);
+                } else {
+                    // 그 외 진짜 재생 에러 처리
+                    console.error('Audio play failed:', error);
+                }
+            });
+    }
 };
 
 /**
@@ -94,18 +101,26 @@ export const playAudios = (audioUrls: string[], onEnded?: () => void) => {
  * @param audioUrl 반복 재생할 오디오 파일의 URL
  */
 export const playLoopAudio = (audioUrl: string) => {
-    // 이미 같은 오디오가 반복 재생 중이면 정지
-    if (currentAudio?.loop && currentAudio.src.endsWith(audioUrl)) {
-        stopAudio();
-        return;
-    }
-
     stopAudio();
 
-    currentAudio = new Audio(audioUrl);
-    currentAudio.loop = true;
-    currentAudio.play().catch(e => {
-        console.error("오디오 반복 재생 오류:", e);
-        currentAudio = null; // 재생 실패 시 참조 해제
-    });
+    const audio = new Audio(audioUrl);
+    audio.loop = true;
+    currentAudio = audio;
+
+    const playPromise = audio.play();
+
+    if (playPromise !== undefined) {
+        playPromise
+            .then(() => {
+                // 재생 성공
+            })
+            .catch((error) => {
+                if (error.name === 'AbortError') {
+                    console.log('Loop audio aborted cleanly');
+                    playLoopAudio(audioUrl);
+                } else {
+                    console.error('Loop audio failed:', error);
+                }
+            });
+    }
 };

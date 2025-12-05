@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useVocabularyStore } from '../store/VocabularyStore';
 import { SortDropdown, SortOptionKey } from '../components/ui/SortDropdown';
 import { WordCard } from '../components/ui/WordCard';
+import { usePlayAnimation } from '../shared/hooks/usePlayAnimation';
 
 const VocabularyPage = () => {
     const { hashtags, isLoading, error, vocabulary, fetchHashtags, fetchVocabulary, deleteVocabulary } = useVocabularyStore();
@@ -14,8 +15,6 @@ const VocabularyPage = () => {
         fetchHashtags();
         fetchVocabulary(selectedTags, sortBy);
     }, [fetchHashtags, fetchVocabulary]);
-
-    
 
     const handleClick = (tagId: number) => {
         let newSelected;
@@ -52,8 +51,6 @@ const VocabularyPage = () => {
                 {/* 정렬 및 필터 */}
                 <div className="flex items-center mb-5 overflow-hidden">
                     <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar">
-                        {/* {isLoading && <p>태그 로딩 중...</p>} bg-[#DBEAFE]*/}
-                        {/* {error && <p>오류: {error}</p>} */}
 
                         {!isLoading && !error && hashtags.map((tag) => {
                             const isSelected = selectedTags.includes(tag.hashtagId);
@@ -74,15 +71,9 @@ const VocabularyPage = () => {
                 {/* 단어 리스트 */}
                 <div className="flex-1 space-y-3 overflow-y-auto no-scrollbar">
                     {vocabulary.map(item => (
-                        // <VocaCard
-                        //     key={item.vocabId}
-                        //     word={item.str}
-                        //     savedDate={item.createdAtKST}
-                        //     urlNormal={item.urlNormal}
-                        //     urlSlow={item.slowNormal}
-                        // />
                         <WordCard 
                             key={item.vocabId} 
+                            id={item.vocabId}
                             unit={item.str} 
                             urlNormal={item.urlNormal}
                             urlSlow={item.slowNormal}
