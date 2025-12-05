@@ -78,7 +78,7 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
 
   // 화면 진입 시 자동 재생
   useEffect(() => {
-    const timer = setTimeout(playNormal, 500);
+    const timer = setTimeout(playNormal, 400);
     return () => clearTimeout(timer);
   }, []);
 

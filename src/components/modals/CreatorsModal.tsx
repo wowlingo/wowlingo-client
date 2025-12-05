@@ -45,7 +45,7 @@ export default function CreatorsModal({ isOpen, onConfirm }: CreatorsModalProps)
               />
             </div>
             <div className="flex flex-col text-left">
-              <span className="text-slate-400 mb-0.5">백엔드 개발</span>
+              <span className="text-slate-400 mb-0.5">백&프론트엔드 개발</span>
               <span className="text-slate-700 font-semibold">
                 김보란 장예진
               </span>
