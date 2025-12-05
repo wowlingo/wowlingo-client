@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import CreatorsModal from './CreatorsModal'
+
 interface HomeGuideModalProps {
   isOpen: boolean;
   onConfirm: () => void;
@@ -6,12 +9,15 @@ interface HomeGuideModalProps {
 export default function HomeGuideModal({ isOpen, onConfirm }: HomeGuideModalProps) {
   if (!isOpen) return null;
 
+  const [isCreatorsModalOpen, setIsCreatorsModalOpen] = useState(false);
+
   const fruitDefaultImages = ['/images/apple_silhouette.png', '/images/strawberry_ silhouette.png', '/images/peach_silhouette.png', '/images/cherry_silhouette.png', '/images/blueberry_silhouette.png',];
 
   const fruitImages = fruitDefaultImages;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center">
+    <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-full z-[100] flex items-center justify-center px-4">
+      
       {/* 배경 오버레이 - 어두운 색으로 투명하게 처리 */}
       <div className="absolute inset-0 bg-black/80" onClick={onConfirm} />
 
@@ -56,12 +62,21 @@ export default function HomeGuideModal({ isOpen, onConfirm }: HomeGuideModalProp
 
         {/* 확인 버튼 */}
         <button
-          onClick={onConfirm}
+          onClick={() => setIsCreatorsModalOpen(true)}
           className="w-full bg-blue-500 text-white font-bold text-lg py-4 px-6 rounded-full hover:bg-blue-600 transition-colors shadow-lg"
         >
           확인
         </button>
       </div>
+
+      <CreatorsModal
+        isOpen={isCreatorsModalOpen}
+        onConfirm={() => {
+          onConfirm();
+          setIsCreatorsModalOpen(false)
+        }}
+      />
+
     </div>
   );
 }
