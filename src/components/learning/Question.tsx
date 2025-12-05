@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'; // React Hook 추가
+import { useState, useEffect, useCallback } from 'react'; // React Hook 추가
 import { toast } from 'sonner';
 import { ToastBlueIcon } from '../ui/WordCard';
 
@@ -53,15 +53,36 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
       animationInterval = setInterval(() => {
         setFrameIndex((prev) => (prev + 1) % SLOWLY_FRAMES.length); // 0, 1, 2, 3 반복
       }, 200); // 200ms마다 이미지 변경 (속도 조절 가능)
-    } 
-    // else {
-    //   setSlowFrameIndex(0); // 멈추면 첫 번째 이미지로 초기화
-    // }
+    }
+    else {
+      setFrameIndex(0); // 멈추면 첫 번째 이미지로 초기화
+    }
 
     return () => {
       if (animationInterval) clearInterval(animationInterval);
     };
   }, [isPlaying, isSlowPlaying]);
+
+  const playNormal = useCallback(() => {
+    if (isPlaying || isSlowPlaying) return; // 이미 재생 중이면 실행 안 함
+
+    if (isDouble) {
+      const soundUrls = sounds.filter(s => s.type === 'normal').map(s => s.url);
+      if (soundUrls && soundUrls.length > 0) handlePlaySounds(soundUrls);
+    } else {
+      const normalSound = sounds.find(s => s.type === 'normal');
+      if (normalSound) handlePlaySound(normalSound.url);
+    }
+  }, [isDouble, sounds, isPlaying, isSlowPlaying]);
+
+  // 화면 진입 시 자동 재생 (Mount 시 1회 실행)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      playNormal();
+    }, 500);// 약간의 딜레이
+
+    return () => clearTimeout(timer);
+  }, []);
 
 
   // 단일 사운드 재생 수정
@@ -160,20 +181,9 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
     <div className="w-90 h-30 flex items-center bg-white rounded-xl overflow-hidden shadow-sm">
       {/* 문제 듣기 버튼 */}
       <button
-        onClick={() => {
-          // 이미 재생 중이면 중복 클릭 방지 (선택 사항)
-          if (isPlaying) return;
-
-          if (isDouble) {
-            const soundUrls = sounds.filter(s => s.type === 'normal').map(s => s.url);
-            if (soundUrls && soundUrls.length > 0)
-              handlePlaySounds(soundUrls);
-          } else {
-            const normalSound = sounds.find(s => s.type === 'normal');
-            if (normalSound) handlePlaySound(normalSound.url);
-          }
-        }}
-        className="w-full h-full flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] hover:bg-gray-50 transition-colors"
+        onClick={playNormal}
+        disabled={isSlowPlaying}
+        className={`w-full h-full flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] transition-colors ${isSlowPlaying ? 'cursor-not-allowed opacity-40 grayscale' : 'hover:bg-gray-50'}`}
         aria-label="문제 듣기"
       >
         <div className="w-22 h-10 flex items-center justify-center">
@@ -193,14 +203,15 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
             />
           )}
         </div>
-        <span className={`text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px] text-[#4A5564]`}>
-          {/* 재생 중일 때 텍스트 색상 변경 효과도 줄 수 있습니다 (선택) */}
+        <span className={`text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px]
+          ${isSlowPlaying ? 'text-gray-300' : 'text-[#4A5564]'}
+        `}>
           문제 듣기
         </span>
       </button>
 
       {/* 구분선 */}
-      <div className="w-[1px] h-[67px] bg-[#E5E7EB]" />
+      <div className="w-[1px] h-[67px] bg-[#E5E7EB] relative z-10" />
 
       {/* 천천히 듣기 버튼 (거북이도 동일한 방식으로 적용 가능) */}
       <button
@@ -218,7 +229,10 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
           }
 
         }}
-        className="w-full h-full flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] hover:bg-gray-50 transition-colors"
+        disabled={isPlaying}
+        className={`w-full h-full flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] transition-colors
+          ${isPlaying ? 'cursor-not-allowed opacity-40 grayscale' : 'hover:bg-gray-50'}
+        `}
         aria-label="천천히 듣기"
       >
         <div className="w-22 h-10 flex items-center justify-center">
@@ -239,12 +253,15 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
             />
           )}
         </div>
-        <span className="text-[16px] font-semibold text-[#4A5564] leading-[22.4px] tracking-[-0.32px]">
+        <span className={`text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px] 
+          ${isPlaying ? 'text-gray-300' : 'text-[#4A5564]'}
+        `}>
           천천히 듣기
         </span>
       </button>
 
-      <div className="w-[1px] h-[67px] bg-[#E5E7EB]" />
+      <div className="w-[1px] h-[67px] bg-[#E5E7EB] relative z-10" />
+
       <button
         onClick={handleAddToVocabulary}
         className="w-full h-full flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] hover:bg-gray-50 transition-colors"
