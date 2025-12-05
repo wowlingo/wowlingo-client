@@ -1,4 +1,5 @@
 import { Volume2, Turtle, Trash2 } from 'lucide-react';
+import { playAudio } from '../common/AudioService';
 
 interface VocaCardProps {
     word: string;
@@ -7,33 +8,6 @@ interface VocaCardProps {
     savedDate: string;
 }
 
-// const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
-
-// const handlePlaySound = (audioUrl: string) => {
-//     if (audio) {
-//         audio.pause();
-//         audio.currentTime = 0;
-//     }
-//     const newAudio = new Audio(audioUrl);
-//     setAudio(newAudio);
-//     newAudio.play().catch(e => console.error(e));
-// };
-
-let currentAudio: HTMLAudioElement | null = null;
-
-const handlePlaySound = (audioUrl: string) => {
-    // 이전 오디오가 재생 중이면 정지
-    if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-    }
-
-    // 새로운 오디오 생성
-    currentAudio = new Audio(audioUrl);
-    currentAudio.play().catch(e => console.error("오디오 재생 오류:", e));
-};
-
-
 const VocaCard = ({ word, savedDate, urlNormal, urlSlow }: VocaCardProps) => {
     return (
         <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
@@ -41,12 +15,12 @@ const VocaCard = ({ word, savedDate, urlNormal, urlSlow }: VocaCardProps) => {
                 <h3 className="text-xl font-bold">{word}</h3>
                 <div className="flex items-center space-x-4 text-gray-700">
                     <button className="w-10 h-10 flex items-center justify-center bg-gray-600 text-white rounded-full hover:bg-black"
-                        onClick={() => handlePlaySound(urlNormal)}
+                        onClick={() => playAudio(urlNormal)}
                     >
                         <Volume2 size={22} />
                     </button>
                     <button className="w-10 h-10 flex items-center justify-center bg-gray-600 text-white rounded-full hover:bg-black"
-                        onClick={() => handlePlaySound(urlSlow)}
+                        onClick={() => playAudio(urlSlow)}
                     >
                         <Turtle size={22} />
                     </button>

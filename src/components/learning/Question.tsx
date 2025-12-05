@@ -1,21 +1,21 @@
-import { useState, useEffect, useCallback } from 'react'; // React Hook 추가
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { ToastBlueIcon } from '../ui/WordCard';
+import { playAudio, playAudios, stopAudio } from '../common/AudioService';
 
-// 애니메이션을 위한 이미지 경로 배열 (실제 파일 경로로 변경 필요)
-// motion.png의 스피커 이미지를 4개로 잘라서 저장했다고 가정합니다.
+// 애니메이션을 위한 이미지 경로 배열
 const SPEAKER_FRAMES = [
-  '/images/sound_04.png', // 정지 상태 (또는 입 다문 상태)
-  '/images/sound_01.png', // 입 조금 벌린 상태
-  '/images/sound_02.png', // 입 벌린 상태
-  '/images/sound_03.png', // 소리 파장 있는 상태
+  '/images/sound_04.png',
+  '/images/sound_01.png',
+  '/images/sound_02.png',
+  '/images/sound_03.png',
 ];
 
 const SLOWLY_FRAMES = [
-  '/images/slowly_04.png', // 정지 상태 (또는 입 다문 상태)
-  '/images/slowly_01.png', // 입 조금 벌린 상태
-  '/images/slowly_02.png', // 입 벌린 상태
-  '/images/slowly_03.png', // 소리 파장 있는 상태
+  '/images/slowly_04.png',
+  '/images/slowly_01.png',
+  '/images/slowly_02.png',
+  '/images/slowly_03.png',
 ];
 
 interface Sound {
@@ -32,30 +32,23 @@ interface QuestionProps {
 }
 
 export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps) {
-  // 1. 상태 관리 추가
-  const [isPlaying, setIsPlaying] = useState(false); // 재생 중 여부
-  const [frameIndex, setFrameIndex] = useState(0);   // 현재 보여줄 이미지 인덱스
-  const [isSlowPlaying, setIsSlowPlaying] = useState(false); // 재생 중 여부
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isSlowPlaying, setIsSlowPlaying] = useState(false);
+  const [frameIndex, setFrameIndex] = useState(0);
 
-  // 2. 애니메이션 효과 (isPlaying이 true일 때만 작동)
+  // 애니메이션 효과
   useEffect(() => {
     let animationInterval: ReturnType<typeof setInterval> | undefined;
 
-    if (isPlaying) {
-      animationInterval = setInterval(() => {
-        setFrameIndex((prev) => (prev + 1) % SPEAKER_FRAMES.length); // 0, 1, 2, 3 반복
-      }, 200); // 200ms마다 이미지 변경 (속도 조절 가능)
-    } else {
-      setFrameIndex(0); // 멈추면 첫 번째 이미지로 초기화
-    }
+    const active = isPlaying || isSlowPlaying;
+    const frames = isPlaying ? SPEAKER_FRAMES : SLOWLY_FRAMES;
 
-    if (isSlowPlaying) {
+    if (active) {
       animationInterval = setInterval(() => {
-        setFrameIndex((prev) => (prev + 1) % SLOWLY_FRAMES.length); // 0, 1, 2, 3 반복
-      }, 200); // 200ms마다 이미지 변경 (속도 조절 가능)
-    }
-    else {
-      setFrameIndex(0); // 멈추면 첫 번째 이미지로 초기화
+        setFrameIndex((prev) => (prev + 1) % frames.length);
+      }, 200);
+    } else {
+      setFrameIndex(0);
     }
 
     return () => {
@@ -63,111 +56,64 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
     };
   }, [isPlaying, isSlowPlaying]);
 
+  // 컴포넌트 언마운트 시 오디오 정지
+  useEffect(() => {
+    return () => {
+      stopAudio();
+    };
+  }, []);
+
   const playNormal = useCallback(() => {
-    if (isPlaying || isSlowPlaying) return; // 이미 재생 중이면 실행 안 함
+    if (isPlaying || isSlowPlaying) return;
+
+    setIsPlaying(true);
+    const onPlayEnd = () => setIsPlaying(false);
+
+    const soundUrls = sounds.filter(s => s.type === 'normal').map(s => s.url);
 
     if (isDouble) {
-      const soundUrls = sounds.filter(s => s.type === 'normal').map(s => s.url);
-      if (soundUrls && soundUrls.length > 0) handlePlaySounds(soundUrls);
+      if (soundUrls.length > 0) {
+        playAudios(soundUrls, onPlayEnd);
+      } else {
+        setIsPlaying(false);
+      }
     } else {
-      const normalSound = sounds.find(s => s.type === 'normal');
-      if (normalSound) handlePlaySound(normalSound.url);
+      if (soundUrls.length > 0) {
+        playAudio(soundUrls[0], onPlayEnd);
+      } else {
+        setIsPlaying(false);
+      }
     }
   }, [isDouble, sounds, isPlaying, isSlowPlaying]);
 
-  // 화면 진입 시 자동 재생 (Mount 시 1회 실행)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      playNormal();
-    }, 500);// 약간의 딜레이
+  const playSlow = () => {
+    if (isPlaying || isSlowPlaying) return;
 
+    setIsSlowPlaying(true);
+    const onPlayEnd = () => setIsSlowPlaying(false);
+
+    const soundUrls = sounds.filter(s => s.type === 'slow').map(s => s.url);
+
+    if (isDouble) {
+      if (soundUrls.length > 0) {
+        playAudios(soundUrls, onPlayEnd);
+      } else {
+        setIsSlowPlaying(false);
+      }
+    } else {
+      if (soundUrls.length > 0) {
+        playAudio(soundUrls[0], onPlayEnd);
+      } else {
+        setIsSlowPlaying(false);
+      }
+    }
+  };
+
+  // 화면 진입 시 자동 재생
+  useEffect(() => {
+    const timer = setTimeout(playNormal, 500);
     return () => clearTimeout(timer);
   }, []);
-
-
-  // 단일 사운드 재생 수정
-  const handlePlaySound = (audioUrl: string) => {
-    setIsPlaying(true); // 재생 시작 상태 설정
-
-    const audio = new Audio(audioUrl);
-    audio.play()
-      .then(() => {
-        // 재생이 끝나면 상태 변경
-        audio.onended = () => setIsPlaying(false);
-      })
-      .catch(e => {
-        console.error("오디오 재생 오류:", e);
-        setIsPlaying(false); // 에러 시에도 상태 복구
-      });
-  };
-
-  const handleSlowPlaySound = (audioUrl: string) => {
-    setIsSlowPlaying(true); // 재생 시작 상태 설정
-
-    const audio = new Audio(audioUrl);
-    audio.play()
-      .then(() => {
-        // 재생이 끝나면 상태 변경
-        audio.onended = () => setIsSlowPlaying(false);
-      })
-      .catch(e => {
-        console.error("오디오 재생 오류:", e);
-        setIsSlowPlaying(false); // 에러 시에도 상태 복구
-      });
-  };
-
-  // 연속 사운드 재생 수정
-  const handlePlaySounds = (audioUrls: string[]) => {
-    if (audioUrls.length === 0) return;
-
-    setIsPlaying(true); // 재생 시작
-
-    const playAudio = (index: number) => {
-      // 모든 재생이 끝났을 때
-      if (index >= audioUrls.length) {
-        setIsPlaying(false);
-        return;
-      }
-
-      const audio = new Audio(audioUrls[index]);
-      audio.play()
-        .then(() => {
-          audio.onended = () => playAudio(index + 1);
-        })
-        .catch(e => {
-          console.error("오디오 재생 오류:", e);
-          setIsPlaying(false);
-        });
-    };
-
-    playAudio(0);
-  };
-
-  const handleSlowPlaySounds = (audioUrls: string[]) => {
-    if (audioUrls.length === 0) return;
-
-    setIsSlowPlaying(true); // 재생 시작
-
-    const playAudio = (index: number) => {
-      // 모든 재생이 끝났을 때
-      if (index >= audioUrls.length) {
-        setIsSlowPlaying(false);
-        return;
-      }
-
-      const audio = new Audio(audioUrls[index]);
-      audio.play()
-        .then(() => {
-          audio.onended = () => playAudio(index + 1);
-        })
-        .catch(e => {
-          console.error("오디오 재생 오류:", e);
-          setIsSlowPlaying(false);
-        });
-    };
-
-    playAudio(0);
-  };
 
   const handleAddToVocabulary = () => {
     onAddVoca();
@@ -187,25 +133,13 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
         aria-label="문제 듣기"
       >
         <div className="w-22 h-10 flex items-center justify-center">
-          {/* 3. 이미지 렌더링 로직 변경 */}
-          {isPlaying ? (
-            // 재생 중일 때: 애니메이션 프레임 이미지 표시
-            <img
-              src={SPEAKER_FRAMES[frameIndex]}
-              alt="듣는 중"
-              className="object-contain" // object-contain으로 비율 유지
-            />
-          ) : (
-            // 정지 상태일 때: 기존 아이콘 표시
-            <img
-              src="/images/sound_03.png"
-              alt="문제 듣기"
-            />
-          )}
+          <img
+            src={isPlaying ? SPEAKER_FRAMES[frameIndex] : '/images/sound_03.png'}
+            alt={isPlaying ? "듣는 중" : "문제 듣기"}
+            className="object-contain"
+          />
         </div>
-        <span className={`text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px]
-          ${isSlowPlaying ? 'text-gray-300' : 'text-[#4A5564]'}
-        `}>
+        <span className={`text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px] ${isSlowPlaying ? 'text-gray-300' : 'text-[#4A5564]'}`}>
           문제 듣기
         </span>
       </button>
@@ -213,49 +147,21 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
       {/* 구분선 */}
       <div className="w-[1px] h-[67px] bg-[#E5E7EB] relative z-10" />
 
-      {/* 천천히 듣기 버튼 (거북이도 동일한 방식으로 적용 가능) */}
+      {/* 천천히 듣기 버튼 */}
       <button
-        onClick={() => {
-          if (isSlowPlaying) return;
-
-          // 현재는 기존 로직 유지
-          if (isDouble) {
-            const soundUrls = sounds.filter(s => s.type === 'slow').map(s => s.url);
-            if (soundUrls && soundUrls.length > 0)
-              handleSlowPlaySounds(soundUrls);
-          } else {
-            const normalSound = sounds.find(s => s.type === 'slow');
-            if (normalSound) handleSlowPlaySound(normalSound.url);
-          }
-
-        }}
+        onClick={playSlow}
         disabled={isPlaying}
-        className={`w-full h-full flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] transition-colors
-          ${isPlaying ? 'cursor-not-allowed opacity-40 grayscale' : 'hover:bg-gray-50'}
-        `}
+        className={`w-full h-full flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] transition-colors ${isPlaying ? 'cursor-not-allowed opacity-40 grayscale' : 'hover:bg-gray-50'}`}
         aria-label="천천히 듣기"
       >
         <div className="w-22 h-10 flex items-center justify-center">
-          {/* 3. 이미지 렌더링 로직 변경 */}
-          {isSlowPlaying ? (
-            // 재생 중일 때: 애니메이션 프레임 이미지 표시
-            <img
-              src={SLOWLY_FRAMES[frameIndex]}
-              alt="듣는 중"
-              className="object-contain" // object-contain으로 비율 유지
-            />
-          ) : (
-            // 정지 상태일 때: 기존 아이콘 표시
-            <img
-              src="/images/slowly_04.png"
-              alt="천천히 듣기"
-              className=""
-            />
-          )}
+          <img
+            src={isSlowPlaying ? SLOWLY_FRAMES[frameIndex] : '/images/slowly_04.png'}
+            alt={isSlowPlaying ? "듣는 중" : "천천히 듣기"}
+            className="object-contain"
+          />
         </div>
-        <span className={`text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px] 
-          ${isPlaying ? 'text-gray-300' : 'text-[#4A5564]'}
-        `}>
+        <span className={`text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px] ${isPlaying ? 'text-gray-300' : 'text-[#4A5564]'}`}>
           천천히 듣기
         </span>
       </button>
