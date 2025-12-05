@@ -359,7 +359,7 @@ const Home: React.FC = () => {
                                 />
                             </div>
 
-                            <div className="absolute right-0 ">
+                            <div className="absolute right-0 w-8 h-8">
                                 <img
                                     src="/images/ic_learning_crown.png"
                                     alt="Crown"
