@@ -71,10 +71,7 @@ export const WordCard: React.FC<WordCardProps> = ({ id, unit, urlNormal, urlSlow
     }, [id, playingCardId, setPlayingCardId]);
 
     const playNormal = useCallback(() => {
-        console.log('1) playingCardId: ', playingCardId, ' id: ', id)
         if (isPlaying || isSlowPlaying || isLooping) return;
-
-        console.log('2) playingCardId: ', playingCardId, ' id: ', id)
 
         setPlayingCardId(id);
         setIsPlaying(true);
@@ -167,7 +164,7 @@ export const WordCard: React.FC<WordCardProps> = ({ id, unit, urlNormal, urlSlow
                         className="w-full h-full"
                     />
 
-                    <div className="w-[1px] h-[67px] bg-[#E5E7EB]" />
+                    <div className="w-[1px] h-[67px] bg-[#E5E7EB] relative z-10" />
 
                     <ImageButton
                         image='slow'
@@ -179,7 +176,7 @@ export const WordCard: React.FC<WordCardProps> = ({ id, unit, urlNormal, urlSlow
                         className="w-full h-full"
                     />
 
-                    <div className="w-[1px] h-[67px] bg-[#E5E7EB]" />
+                    <div className="w-[1px] h-[67px] bg-[#E5E7EB] relative z-10" />
 
                     <ImageButton
                         image={isLooping ? 'pause' : 'repeat'}

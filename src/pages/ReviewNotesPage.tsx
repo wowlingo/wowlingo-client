@@ -120,6 +120,7 @@ const ReviewNotesPage = () => {
                     {reviewQuestItems.map(item => (
                         <ReviewCard
                             // title, questItemId, sounds, units, onAddVoca
+                            id={item.questItemId}
                             key={item.questItemId}
                             questItemId={item.questItemId}
                             title={item.title}

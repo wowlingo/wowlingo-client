@@ -62,6 +62,7 @@ export const playAudio = (audioUrl: string, onEnded?: () => void) => {
  */
 export const playAudios = (audioUrls: string[], onEnded?: () => void) => {
     stopAudio();
+
     if (audioUrls.length === 0) {
         onEnded?.();
         return;
@@ -86,10 +87,27 @@ export const playAudios = (audioUrls: string[], onEnded?: () => void) => {
             currentIndex++;
             playNext();
         };
-        currentAudio.play().catch(e => {
-            console.error("오디오 시퀀스 재생 오류:", e);
-            stopAudio(); // 재생 실패 시 완전 초기화
-        });
+
+        const playPromise = currentAudio.play();
+
+        if (playPromise !== undefined) {
+            playPromise
+                .then(() => {
+                    // 재생이 성공적으로 시작됨
+                    // 필요하다면 여기서 로직 처리
+                })
+                .catch((error) => {
+                    // 재생이 시작되기 전에 pause()가 호출되면 AbortError가 발생합니다.
+                    if (error.name === 'AbortError') {
+                        // 의도된 중단이므로 에러 로그를 무시하거나 가볍게 처리
+                        console.log('Audio plays aborted cleanly', currentIndex);
+                        playAudios(audioUrls, onEnded);
+                    } else {
+                        // 그 외 진짜 재생 에러 처리
+                        console.error('Audio plays failed:', error);
+                    }
+                });
+        }
     };
 
     playNext();
