@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Cookies from 'js-cookie';
 import { useAuth } from '../common/AuthContext';
 import { NavLink } from '../ui/NavLink';

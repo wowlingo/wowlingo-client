@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'; // React Hook 추가
+import { useState, useEffect } from 'react'; // React Hook 추가
 import { toast } from 'sonner';
 import { ToastBlueIcon } from '../ui/WordCard';
 
@@ -36,7 +36,6 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
   const [isPlaying, setIsPlaying] = useState(false); // 재생 중 여부
   const [frameIndex, setFrameIndex] = useState(0);   // 현재 보여줄 이미지 인덱스
   const [isSlowPlaying, setIsSlowPlaying] = useState(false); // 재생 중 여부
-  const [slowframeIndex, setSlowFrameIndex] = useState(0);   // 현재 보여줄 이미지 인덱스
 
   // 2. 애니메이션 효과 (isPlaying이 true일 때만 작동)
   useEffect(() => {
@@ -54,9 +53,10 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
       animationInterval = setInterval(() => {
         setFrameIndex((prev) => (prev + 1) % SLOWLY_FRAMES.length); // 0, 1, 2, 3 반복
       }, 200); // 200ms마다 이미지 변경 (속도 조절 가능)
-    } else {
-      setSlowFrameIndex(0); // 멈추면 첫 번째 이미지로 초기화
-    }
+    } 
+    // else {
+    //   setSlowFrameIndex(0); // 멈추면 첫 번째 이미지로 초기화
+    // }
 
     return () => {
       if (animationInterval) clearInterval(animationInterval);

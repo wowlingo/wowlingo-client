@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import type { CSSProperties } from 'react'; // CSSProperties 타입을 가져옵니다.
-import { json } from 'react-router-dom';
 
 // 모달 상태를 위한 타입 추가
 type ModalState = 'correct' | 'incorrect' | 'closed';

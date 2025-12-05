@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import LearningLayout1 from './LearningLayout1';
 import LearningLayout2 from './LearningLayout2';
 import LearningLayout3 from './LearningLayout3';

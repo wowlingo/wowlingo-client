@@ -1,4 +1,3 @@
-import React from 'react';
 import { X } from 'lucide-react';
 
 
@@ -13,7 +12,7 @@ export default function HelloModal({ isOpen, onConfirm, onClose, username = '' }
   if (!isOpen) return null;
 
   return (
-    <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-full z-[100] flex flex-col h-full w-full bg-black">
+    <div className="fixed top-0 left-1/2 px-4 -translate-x-1/2 w-full max-w-lg h-full z-[100] flex flex-col h-full w-full bg-black">
 
       {/* 1. 상단 오른쪽 X 버튼 영역 */}
       <div className="absolute top-0 right-0 p-6 z-50 mt-4 mr-2">
