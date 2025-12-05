@@ -484,7 +484,7 @@ const Home: React.FC = () => {
                 onConfirm={() => {
                     sessionStorage.setItem('show_welcome', 'false');
                     setIsWelcomeModalOpen(false);
-                    handleStartLearning();
+                    navigate(`/`);
                 }}
                 onClose={() => {
                     sessionStorage.setItem('show_welcome', 'false');
@@ -497,7 +497,7 @@ const Home: React.FC = () => {
                 onConfirm={() => {
                     sessionStorage.setItem('show_welcome', 'false');
                     setIsHelloModalOpen(false);
-                    handleStartLearning();
+                    navigate(`/`);
                 }}
                 onClose={() => {
                     sessionStorage.setItem('show_welcome', 'false');
