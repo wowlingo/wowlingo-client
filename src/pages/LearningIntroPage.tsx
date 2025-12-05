@@ -26,7 +26,7 @@ const getDescriptionByType = (type: string): { description_a: React.ReactNode; d
         description_a: (
           <>
             들려준 문장과{'\n'}
-            일치하는 보기를 고르세요
+            일치하는 보기를 고르세요.
           </>
         ),
         description_b: (
@@ -41,7 +41,7 @@ const getDescriptionByType = (type: string): { description_a: React.ReactNode; d
         description_a: (
           <>
             들려준 2개의 단어가{'\n'}
-            일치하는지 구분해 주세요
+            일치하는 지 구분해 주세요.
           </>
         ),
         description_b: (
@@ -132,17 +132,39 @@ export default function PracticeIntroPage() {
       <main className="flex-grow flex flex-col text-center px-5 overflow-y-auto min-h-0">
 
         <div className="flex flex-col items-center my-auto py-8">
-          {/* 3. 물뿌리개 이미지와 물방울 개수 */}
+          {/* 3. 물뿌리개 이미지와 말풍선 */}
           <div className="relative mb-4">
+
+            {/* 말풍선 UI */}
+            <div className="absolute -top-8 -left-20 z-10 animate-bounce-slow">
+              <div className="relative bg-gray-100 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                {/* 물방울 아이콘 (SVG) */}
+                <img
+                  src="/images/ic_possession_waterdrop.png"
+                  width={30}
+                  height={30}
+                  alt="물방울"
+                  className="object-contain" // object-contain으로 비율 유지
+                />
+
+                {/* 텍스트 */}
+                <span className="text-slate-500 font-bold text-sm">물방울</span>
+                <span className="text-blue-500 font-extrabold text-sm">{introData.waterDropCount}개</span>
+
+                {/* 말풍선 꼬리 (삼각형) */}
+                <div className="absolute -bottom-2 left-20 w-5 h-5 bg-[#EFF6FF] transform rotate-45"></div>
+              </div>
+            </div>
+
             <img
               src={introData.wateringCanImage}
               alt="Watering Can"
               className="w-60 h-60 object-contain"
             />
             {/* 물방울 개수 표시 */}
-            <div className="absolute top-4 right-4 bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg shadow-lg">
+            {/* <div className="absolute top-4 right-4 bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg shadow-lg">
               {introData.waterDropCount}
-            </div>
+            </div> */}
           </div>
 
           {/* 4. #해시태그 */}
@@ -172,7 +194,7 @@ export default function PracticeIntroPage() {
         <button
           onClick={handleStart}
           disabled={isFetching || isLoading}
-          className="w-full px-6 pt-4 pb-3.5 bg-blue-500 gap-2 text-white font-bold text-lg rounded-full hover:bg-blue-600 transition-colors shadow-lg disabled:bg-gray-400"
+          className="w-full px-6 pt-4 pb-3.5 bg-blue-500 gap-2 text-white font-bold text-lg rounded-full hover:bg-blue-600 transition-colors disabled:bg-gray-400"
         >
           {isFetching ? '로딩 중...' : '학습 시작'}
         </button>
