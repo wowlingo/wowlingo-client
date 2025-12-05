@@ -2,21 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { ToastBlueIcon } from '../ui/WordCard';
 import { playAudio, playAudios, stopAudio } from '../common/AudioService';
-
-// 애니메이션을 위한 이미지 경로 배열
-const SPEAKER_FRAMES = [
-  '/images/sound_04.png',
-  '/images/sound_01.png',
-  '/images/sound_02.png',
-  '/images/sound_03.png',
-];
-
-const SLOWLY_FRAMES = [
-  '/images/slowly_04.png',
-  '/images/slowly_01.png',
-  '/images/slowly_02.png',
-  '/images/slowly_03.png',
-];
+import { usePlayAnimation } from '../../shared/hooks/usePlayAnimation';
 
 interface Sound {
   id: number | string;
@@ -34,27 +20,8 @@ interface QuestionProps {
 export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isSlowPlaying, setIsSlowPlaying] = useState(false);
-  const [frameIndex, setFrameIndex] = useState(0);
 
-  // 애니메이션 효과
-  useEffect(() => {
-    let animationInterval: ReturnType<typeof setInterval> | undefined;
-
-    const active = isPlaying || isSlowPlaying;
-    const frames = isPlaying ? SPEAKER_FRAMES : SLOWLY_FRAMES;
-
-    if (active) {
-      animationInterval = setInterval(() => {
-        setFrameIndex((prev) => (prev + 1) % frames.length);
-      }, 200);
-    } else {
-      setFrameIndex(0);
-    }
-
-    return () => {
-      if (animationInterval) clearInterval(animationInterval);
-    };
-  }, [isPlaying, isSlowPlaying]);
+  const currentPlayAnimation = usePlayAnimation(isPlaying, isSlowPlaying);
 
   // 컴포넌트 언마운트 시 오디오 정지
   useEffect(() => {
@@ -133,11 +100,17 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
         aria-label="문제 듣기"
       >
         <div className="w-22 h-10 flex items-center justify-center">
-          <img
-            src={isPlaying ? SPEAKER_FRAMES[frameIndex] : '/images/sound_03.png'}
-            alt={isPlaying ? "듣는 중" : "문제 듣기"}
-            className="object-contain"
-          />
+          {isPlaying ? (
+            // 재생 중일 때: 훅에서 받아온 이미지 사용 (훅이 알아서 SLOWLY 프레임을 줌)
+            <img
+              src={currentPlayAnimation}
+              alt="듣는 중"
+              className="object-contain"
+            />
+          ) : (
+            // 정지 상태: 고정 이미지
+            <img src="/images/sound_03.png" alt="문제 듣기" />
+          )}
         </div>
         <span className={`text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px] ${isSlowPlaying ? 'text-gray-300' : 'text-[#4A5564]'}`}>
           문제 듣기
@@ -155,11 +128,17 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
         aria-label="천천히 듣기"
       >
         <div className="w-22 h-10 flex items-center justify-center">
-          <img
-            src={isSlowPlaying ? SLOWLY_FRAMES[frameIndex] : '/images/slowly_04.png'}
-            alt={isSlowPlaying ? "듣는 중" : "천천히 듣기"}
-            className="object-contain"
-          />
+          {isSlowPlaying ? (
+            // 재생 중일 때: 훅에서 받아온 이미지 사용 (훅이 알아서 SLOWLY 프레임을 줌)
+            <img
+              src={currentPlayAnimation}
+              alt="듣는 중"
+              className="object-contain"
+            />
+          ) : (
+            // 정지 상태: 고정 이미지
+            <img src="/images/slowly_04.png" alt="천천히 듣기" />
+          )}
         </div>
         <span className={`text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px] ${isPlaying ? 'text-gray-300' : 'text-[#4A5564]'}`}>
           천천히 듣기
