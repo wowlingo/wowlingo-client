@@ -3,20 +3,22 @@ import { useEffect, useState } from 'react';
 import Calendar from '../components/learning-status/Calendar';
 import DailySummary from '../components/learning-status/DailySummary';
 import { useLearningStatusStore } from '../store/LearningStatus';
+import { useAuth } from '../components/common/AuthContext';
 
 const LearningStatusPage = () => {
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const { user } = useAuth();
     const { loginedDates, attemptedDates, aiFeedbacks,
         fetchQuestAttempts, fetchQuestAttemptAiFeedbacks } = useLearningStatusStore();
 
-    const userId = 1;
-
     useEffect(() => {
-        const year = selectedDate.getFullYear();
-        const month = selectedDate.getMonth();
-        fetchQuestAttempts(userId, year, month + 1);
-        fetchQuestAttemptAiFeedbacks(userId, year, month + 1);
-    }, [fetchQuestAttempts, fetchQuestAttemptAiFeedbacks]);
+        if (user) {
+            const year = selectedDate.getFullYear();
+            const month = selectedDate.getMonth();
+            fetchQuestAttempts(user.userId, year, month + 1);
+            fetchQuestAttemptAiFeedbacks(user.userId, year, month + 1);
+        }
+    }, [user, selectedDate, fetchQuestAttempts, fetchQuestAttemptAiFeedbacks]);
 
     const y = selectedDate.getFullYear();
     const m = String(selectedDate.getMonth() + 1).padStart(2, '0');
@@ -55,10 +57,12 @@ const LearningStatusPage = () => {
                 selectedDate={selectedDate}
                 onDateSelect={setSelectedDate}
                 onMonthChange={(newDate) => {
-                    const year = newDate.getFullYear();
-                    const month = newDate.getMonth() + 1;
-                    fetchQuestAttempts(userId, year, month);
-                    fetchQuestAttemptAiFeedbacks(userId, year, month);
+                    if (user) {
+                        const year = newDate.getFullYear();
+                        const month = newDate.getMonth() + 1;
+                        fetchQuestAttempts(user.userId, year, month);
+                        fetchQuestAttemptAiFeedbacks(user.userId, year, month);
+                    }
                 }}
                 loginedDates={loginedDates}
                 attemptedDates={attemptedDates}
