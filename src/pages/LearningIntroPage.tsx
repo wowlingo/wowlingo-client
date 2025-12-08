@@ -2,6 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useLearningStore } from '../store/learningStore';
 import IntroHeader from '../components/intro/IntroHeader';
 import { useState, useEffect } from 'react';
+import { useAuth } from '../components/common/AuthContext';
 
 // quest type에 따른 설명 매핑
 const getDescriptionByType = (type: string): { description_a: React.ReactNode; description_b: React.ReactNode } => {
@@ -82,18 +83,19 @@ const getWateringCanImage = (correctCount: number): string => {
 export default function PracticeIntroPage() {
   const navigate = useNavigate();
   const { questId } = useParams<{ questId: string }>();
+  const { user } = useAuth();
   const { reset, startLearning, fetchQuestData, isLoading, userQuestProgress, fetchUserQuestProgress } = useLearningStore();
   const [isFetching, setIsFetching] = useState(false); // 로딩 상태 추가
 
   // URL에서 questId가 없으면 기본값 1 사용
   const selectedQuestId = parseInt(questId || '1', 10);
 
-  // userQuestProgress가 비어있으면 가져오기 (userId는 임시로 1 사용)
+  // userQuestProgress가 비어있으면 가져오기
   useEffect(() => {
-    if (userQuestProgress.length === 0) {
-      fetchUserQuestProgress(1); // TODO: 실제 userId로 변경
+    if (user && userQuestProgress.length === 0) {
+      fetchUserQuestProgress(user.userId);
     }
-  }, [userQuestProgress.length, fetchUserQuestProgress]);
+  }, [user, userQuestProgress.length, fetchUserQuestProgress]);
 
   // 현재 quest 정보 찾기
   const currentQuest = userQuestProgress.find(q => q.questId === selectedQuestId);

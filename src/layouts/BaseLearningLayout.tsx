@@ -7,6 +7,7 @@ import IntroHeader from '../components/intro/IntroHeader';
 import ExitConfirmModal from '../components/modals/ExitConfirmModal';
 import WaterDropModal from '../components/modals/WaterDropModal';
 import { useVocabularyStore } from '@/store/VocabularyStore';
+import { useAuth } from '../components/common/AuthContext';
 
 // 각 레이아웃에서 커스터마이징할 수 있는 props
 interface BaseLearningLayoutProps {
@@ -21,10 +22,11 @@ export default function BaseLearningLayout({
   children,
   submitButtonClassName = "bg-blue-500 hover:bg-[#2265CC] rounded-full",
   backgroundGradient,//= "linear-gradient(to bottom, rgba(219, 234, 254, 0.5), rgba(239, 246, 255, 0.5))",
-  learningBg, 
+  learningBg,
   learningBgClass = "absolute bottom-0 left-0 right-0 top-80 z-0 pointer-events-none",
 }: BaseLearningLayoutProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { addVocabulary } = useVocabularyStore();
   const { questId, stepId } = useParams<{ questId: string; stepId: string }>();
   const urlQuestId = parseInt(questId || '1', 10);
@@ -97,7 +99,11 @@ export default function BaseLearningLayout({
     } else {
       // 마지막 문제일 경우
       endLearning();
-      sendLearningResult();
+      if (user) {
+        sendLearningResult(user.userId);
+      } else {
+        console.error('User not logged in. Cannot send learning result.');
+      }
       // navigate('/result'); // 더 이상 결과 페이지로 이동하지 않음
     }
   };

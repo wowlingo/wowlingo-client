@@ -163,7 +163,7 @@ interface LearningActions {
   endLearning: () => void;
   startStep: (stepNumber: number) => void; // 단계별 시작 시간 기록
   endStep: (stepNumber: number, userAnswer: string | number, correctAnswer: string | number) => void; // string | number로 변경
-  sendLearningResult: () => Promise<void>; // 학습 결과 전송 액션
+  sendLearningResult: (userId: number) => Promise<void>; // 학습 결과 전송 액션
   fetchQuestData: (questId: number) => Promise<void>; // 퀘스트 전체를 가져오는 액션
   fetchQuestList: () => Promise<void>;
   fetchUserQuestProgress: (userId: number) => Promise<void>; // 사용자 퀘스트 진행 상태 조회
@@ -422,7 +422,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
   }),
 
   // 학습 정보 API 전송
-  sendLearningResult: async () => {
+  sendLearningResult: async (userId: number) => {
     const { currentQuestId, stepProgress, startTime, endTime, totalSteps } = get();
 
     // 데이터가 없으면 전송하지 않음
@@ -477,7 +477,7 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
 
     try {
       console.log('Sending learning result:', resultData);
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user-quests/1/${currentQuestId}/submit`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user-quests/${userId}/${currentQuestId}/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

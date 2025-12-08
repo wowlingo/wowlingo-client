@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { useLearningStore } from '../store/learningStore';
 import Header from '../components/layout/Header';
+import { useAuth } from '../components/common/AuthContext';
 
 // 임시 주간 출석 데이터 (나중에 API로 교체)
 type WeeklyAttendance = {
@@ -11,6 +12,7 @@ type WeeklyAttendance = {
 }[];
 
 const Home: React.FC = () => {
+    const { user } = useAuth();
     const { fetchUserQuestProgress, userQuestProgress, isLoading, fetchQuestList, questList, activeQuestId } = useLearningStore();
 
     // 임시 주간 출석 데이터 (API 연동 시 교체 예정)
@@ -29,33 +31,37 @@ const Home: React.FC = () => {
     const [plantImage] = useState('/images/seed.png');
 
     useEffect(() => {
-        console.log('Home useEffect - fetchUserQuestProgress called');
-        fetchUserQuestProgress(1); // 사용자 ID 1의 퀘스트 진행 상태 요청
+        if (user) {
+            console.log('Home useEffect - fetchUserQuestProgress called');
+            fetchUserQuestProgress(user.userId);
 
-        // API가 아직 구현되지 않은 경우를 위한 fallback
-        if (questList.length === 0) {
-            fetchQuestList();
+            // fallback
+            if (questList.length === 0) {
+                fetchQuestList();
+            }
         }
-    }, [fetchUserQuestProgress, fetchQuestList, questList.length]);
+    }, [user, fetchUserQuestProgress, fetchQuestList, questList.length]);
 
     // 페이지 포커스 및 학습 완료 시 진행 상태 새로고침
     useEffect(() => {
-        const handleFocus = () => {
-            fetchUserQuestProgress(1);
-        };
+        if (user) {
+            const handleFocus = () => {
+                fetchUserQuestProgress(user.userId);
+            };
 
-        const handleLearningCompleted = () => {
-            fetchUserQuestProgress(1);
-        };
+            const handleLearningCompleted = () => {
+                fetchUserQuestProgress(user.userId);
+            };
 
-        window.addEventListener('focus', handleFocus);
-        window.addEventListener('learningCompleted', handleLearningCompleted);
+            window.addEventListener('focus', handleFocus);
+            window.addEventListener('learningCompleted', handleLearningCompleted);
 
-        return () => {
-            window.removeEventListener('focus', handleFocus);
-            window.removeEventListener('learningCompleted', handleLearningCompleted);
-        };
-    }, [fetchUserQuestProgress]);
+            return () => {
+                window.removeEventListener('focus', handleFocus);
+                window.removeEventListener('learningCompleted', handleLearningCompleted);
+            };
+        }
+    }, [user, fetchUserQuestProgress]);
 
 
     return (
