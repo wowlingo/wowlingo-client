@@ -161,14 +161,15 @@ const Home: React.FC = () => {
 
             fetchQuestAttemptsThisWeek(user.userId);
 
-            console.log(attemptedDays);
+            console.log('attemptedDays: ', attemptedDays);
 
             const days = ["월", "화", "수", "목", "금", "토", "일"];
             const updated = days.map((day, index) => ({
                 day,
-                attended: attemptedDays[index] != null
+                attended: attemptedDays.includes(index + 1)
             }));
 
+            console.log('updated: ', updated);
             setWeeklyAttendance(updated);
 
             // API가 아직 구현되지 않은 경우를 위한 fallback
@@ -230,8 +231,11 @@ const Home: React.FC = () => {
         if (user) {
             console.log(`현재 로그인한 유저1 ID: ${user.userId}`);
 
-            const baseLevel = ((activeQuestId ?? 1) - 1) * 5;
-            const localLevel = fruitLevel - baseLevel;
+            // 이전 퀘스트들의 만렙(5) 누적 계산
+            // 다시 레벨 초기화가 맞습니다.
+            // const baseLevel = ((activeQuestId ?? 1) - 1) * 5;
+            // const localLevel = fruitLevel - baseLevel;
+            const localLevel = fruitLevel;
             console.log(fruitLevel, localLevel);
             let currentImagePath = levelImages[localLevel] || levelImages[1];
             if (localLevel == 5) {

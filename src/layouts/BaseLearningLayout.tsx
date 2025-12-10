@@ -213,7 +213,7 @@ export default function BaseLearningLayout({
             {/* 확인 버튼 */}
             <button
               onClick={handleConfirm}
-              className={`w-full px-6 py3 ${submitButtonClassName} gap-2 text-white font-bold transition-colors leading-6 rounded-full`}
+                className={`w-full px-6 py-3 ${submitButtonClassName} gap-2 text-white font-bold transition-colors leading-6 rounded-full`}
             >
               확인
             </button>

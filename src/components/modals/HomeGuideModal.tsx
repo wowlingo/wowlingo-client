@@ -63,7 +63,7 @@ export default function HomeGuideModal({ isOpen, onConfirm }: HomeGuideModalProp
         {/* 확인 버튼 */}
         <button
           onClick={() => setIsCreatorsModalOpen(true)}
-          className="w-full bg-blue-500 text-white font-bold text-lg py-4 px-6 rounded-full hover:bg-blue-600 transition-colors shadow-lg"
+          className="w-full bg-blue-500 text-white font-bold text-lg py-3 px-6 rounded-full hover:bg-blue-600 transition-colors shadow-lg"
         >
           확인
         </button>
