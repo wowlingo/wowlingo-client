@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useVocabularyStore } from '../store/VocabularyStore';
 import { SortDropdown, SortOptionKey } from '../components/ui/SortDropdown';
 import { WordCard } from '../components/ui/WordCard';
-import { usePlayAnimation } from '../shared/hooks/usePlayAnimation';
 
 const VocabularyPage = () => {
     const { hashtags, isLoading, error, vocabulary, fetchHashtags, fetchVocabulary, deleteVocabulary } = useVocabularyStore();
