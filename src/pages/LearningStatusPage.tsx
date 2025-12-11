@@ -4,6 +4,7 @@ import Calendar from '../components/learning-status/Calendar';
 import DailySummary from '../components/learning-status/DailySummary';
 import { useLearningStatusStore } from '../store/LearningStatus';
 import { useAuth } from '../components/common/AuthContext';
+import ClarityTracker from '../hooks/useClarityTracking';
 
 const LearningStatusPage = () => {
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -12,6 +13,8 @@ const LearningStatusPage = () => {
         fetchQuestAttempts, fetchQuestAttemptAiFeedbacks } = useLearningStatusStore();
 
     useEffect(() => {
+        ClarityTracker.learningStatusViewed();
+
         if (user) {
             const year = selectedDate.getFullYear();
             const month = selectedDate.getMonth();
