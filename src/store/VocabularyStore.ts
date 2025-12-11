@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import ClarityTracker from '../hooks/useClarityTracking';
 
 
 type VocabularyData = {

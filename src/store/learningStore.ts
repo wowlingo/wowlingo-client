@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { CSSProperties } from 'react'; // CSSProperties 타입을 가져옵니다.
+import ClarityTracker from '../hooks/useClarityTracking';
 
 // 모달 상태를 위한 타입 추가
 type ModalState = 'correct' | 'incorrect' | 'closed';
@@ -356,6 +357,16 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
   startLearning: () => set((state) => {
     // 이미 시작했다면 다시 기록하지 않음
     if (state.startTime) return {};
+
+    // Track quest started
+    if (state.currentQuestId && state.rawQuestData) {
+      ClarityTracker.questStarted(
+        state.currentQuestId,
+        state.rawQuestData.title,
+        state.rawQuestData.type
+      );
+    }
+
     return { startTime: Date.now() };
   }),
 
@@ -414,6 +425,15 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
       correctAnswer,
       isCorrect,
     };
+
+    // Track answer submission
+    if (state.rawQuestData) {
+      ClarityTracker.answerSubmitted(
+        isCorrect,
+        updatedStepProgress.attemptCount,
+        state.rawQuestData.type
+      );
+    }
 
     return {
       stepProgress: {
@@ -494,11 +514,21 @@ export const useLearningStore = create<LearningState & LearningActions>((set, ge
       const responseData = await response.json();
       console.log('학습 결과가 성공적으로 전송되었습니다:', responseData);
 
+      // Track quest completion
+      ClarityTracker.questCompleted(
+        currentQuestId,
+        accuracyRate,
+        totalTimeSpent
+      );
+
       // 학습 완료 후 진행 상태 새로고침을 위해 홈 페이지에 알림
       window.dispatchEvent(new CustomEvent('learningCompleted'));
 
     } catch (error) {
       console.error('학습 결과 전송 중 오류가 발생했습니다:', error);
+
+      // Track error
+      ClarityTracker.errorOccurred('learning_result_submit', String(error));
     }
   },
 

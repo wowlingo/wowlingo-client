@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
 import 'sonner/dist/styles.css';
 import { Toaster } from "sonner";
+import clarity from '@microsoft/clarity';
 import LearningFlow from './layouts/LearningFlow';
 import LearningStepPage from './pages/LearningStepPage';
 import LearningIntroPage from './pages/LearningIntroPage';
@@ -13,6 +14,10 @@ import MainLayout from './components/layout/MainLayout';
 import ReviewNotesPage from './pages/ReviewNotesPage';
 import VocabularyPage from './pages/VocabularyPage';
 import { AuthProvider } from './components/common/AuthContext';
+
+if (typeof window !== 'undefined' && import.meta.env.VITE_CLARITY_PROJECT_ID) {
+  clarity.init(import.meta.env.VITE_CLARITY_PROJECT_ID);
+}
 
 const router = createBrowserRouter([
   {
