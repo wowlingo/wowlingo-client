@@ -172,11 +172,11 @@ export default function BaseLearningLayout({
       {/* 3. Question (Learning Set) or 완료 텍스트 - 상단 고정 */}
       {!isCompleted ? (
         <div className="flex-shrink-0 px-5 pt-2 flex justify-center">
-          {currentQuestionData && 
-          <Question key={currentStep} 
-              sounds={currentQuestionData.sounds} 
+          {currentQuestionData && user &&
+          <Question key={currentStep}
+              sounds={currentQuestionData.sounds}
               isDouble={currentQuestionData.correctAnswer == 'same' || currentQuestionData.correctAnswer == 'different'} // ox 문제만 사운드 2개 재생.
-              onAddVoca={() => addVocabulary(currentQuestionData.questItemId)}
+              onAddVoca={() => addVocabulary(user.userId, currentQuestionData.questItemId)}
           />}
         </div>
       ) : (
