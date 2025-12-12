@@ -38,6 +38,15 @@ const VocabularyPage = () => {
         fetchVocabulary(user.userId, selectedTags, newSort);
     };
 
+    // 선택된 태그를 앞으로 정렬
+    const sortedHashtags = [...hashtags].sort((a, b) => {
+        const aSelected = selectedTags.includes(a.hashtagId);
+        const bSelected = selectedTags.includes(b.hashtagId);
+
+        if (aSelected && !bSelected) return -1;
+        if (!aSelected && bSelected) return 1;
+        return 0; // 같은 그룹 내에서는 원래 순서 유지
+    });
 
     return (
         <div className="h-full w-full">
@@ -58,7 +67,7 @@ const VocabularyPage = () => {
                 <div className="flex items-center mb-5 overflow-hidden">
                     <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar">
 
-                        {!isLoading && !error && hashtags.map((tag) => {
+                        {!isLoading && !error && sortedHashtags.map((tag) => {
                             const isSelected = selectedTags.includes(tag.hashtagId);
                             return (
                                 <button key={tag.hashtagId}
