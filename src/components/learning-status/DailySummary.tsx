@@ -14,7 +14,7 @@ const DailySummary = ({ date, data }: { date: string, data: SummaryData | null }
             <div>
                 <h3 className="text-sm mb-2">{date}</h3>
                 <div className="p-5 rounded-lg bg-gray-100 text-center">
-                    <p className="text-lg font-semibold text-gray-500">학습 피드백이 없어요</p>
+                    <p className="text-lg font-semibold text-gray-500">피드백을 작성중이예요</p>
                 </div>
             </div>
         );
