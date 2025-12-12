@@ -61,7 +61,7 @@ export default function WelcomeModal({ isOpen, onConfirm, onClose, username = ''
       <div className="flex flex-col items-center justify-center w-full pb-8">
         <button
           onClick={onConfirm}
-          className="w-md pt-4 pb-3.5 bg-blue-500 gap-2 text-white font-bold text-lg rounded-full hover:bg-blue-600 transition-colors shadow-lg disabled:bg-gray-400"
+          className="w-sm mx-auto pt-4 pb-3.5 bg-blue-500 gap-2 text-white font-bold text-lg rounded-full hover:bg-blue-600 transition-colors shadow-lg disabled:bg-gray-400"
         >
           학습 시작
         </button>

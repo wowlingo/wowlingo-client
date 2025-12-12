@@ -16,7 +16,7 @@ export default function ExitConfirmModal({ isOpen, onContinue, onExit }: ExitCon
       />
 
       {/* 모달 콘텐츠 */}
-      <div className="relative w-full max-w-lg h-full flex flex-col px-4">
+      <div className="relative w-full max-w-lg h-full flex flex-col">
         <div className="flex-1 flex flex-col items-center justify-center">
 
         
@@ -37,7 +37,7 @@ export default function ExitConfirmModal({ isOpen, onContinue, onExit }: ExitCon
           {/* 이어서 하기 버튼 (Primary) */}
           <button
             onClick={onContinue}
-            className="w-md pt-4 pb-3.5 bg-blue-500 gap-2 text-white font-bold text-lg rounded-full hover:bg-blue-600 transition-colors disabled:bg-gray-400"
+            className="w-sm mx-auto pt-4 pb-3.5 bg-blue-500 gap-2 text-white font-bold text-lg rounded-full hover:bg-blue-600 transition-colors disabled:bg-gray-400"
           >
             이어서 하기
           </button>
@@ -45,7 +45,7 @@ export default function ExitConfirmModal({ isOpen, onContinue, onExit }: ExitCon
           {/* 중단하기 버튼 (Secondary) */}
           <button
             onClick={onExit}
-            className="w-md pt-4 pb-3.5 bg-gray-200 gap-2 hover:bg-gray-300 text-gray-600 font-bold text-lg rounded-full transition-colors"
+            className="w-sm mx-auto pt-4 pb-3.5 bg-gray-200 gap-2 hover:bg-gray-300 text-gray-600 font-bold text-lg rounded-full transition-colors"
           >
             중단하기
           </button>
