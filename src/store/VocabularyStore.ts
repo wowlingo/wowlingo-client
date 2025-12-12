@@ -27,10 +27,10 @@ interface VocabularyState {
     isLoading: boolean;
     error: string | null;
     vocabulary: VocabularyData[];
-    fetchHashtags: () => Promise<void>;
+    fetchHashtags: (userId: number) => Promise<void>;
     fetchVocabulary: (userId: number, hashtagIds?: number[], sort?: string) => Promise<void>;
     deleteVocabulary: (vocabId: number) => Promise<void>;
-    addVocabulary: (questItemId: number) => Promise<void>;
+    addVocabulary: (userId: number, questItemId: number) => Promise<void>;
 }
 
 export const useVocabularyStore = create<VocabularyState>((set) => ({
@@ -39,10 +39,10 @@ export const useVocabularyStore = create<VocabularyState>((set) => ({
     error: null,
     vocabulary: [],
 
-    fetchHashtags: async () => {
+    fetchHashtags: async (userId: number) => {
         set({ isLoading: true, error: null });
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/vocabulary/hashtags?userId=1`);
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/vocabulary/hashtags?userId=${userId}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
@@ -86,6 +86,13 @@ export const useVocabularyStore = create<VocabularyState>((set) => ({
     },
 
     deleteVocabulary: async (vocabId: number) => {
+        // 삭제 전 현재 상태 백업 (롤백용)
+        const previousVocabulary = useVocabularyStore.getState().vocabulary;
+
+        set(state => ({
+            vocabulary: state.vocabulary.filter(v => v.vocabId !== vocabId)
+        }));
+
         try {
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/vocabulary/${vocabId}`, {
                 method: 'DELETE',
@@ -95,19 +102,21 @@ export const useVocabularyStore = create<VocabularyState>((set) => ({
                 throw new Error('Failed to delete vocabulary item.');
             }
 
-            set(state => ({
-                vocabulary: state.vocabulary.filter(v => v.vocabId !== vocabId)
-            }));
+            set({ error: null });
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-            set({ error: errorMessage });
+            // 삭제 실패 시 이전 상태로 롤백
+            set({
+                vocabulary: previousVocabulary,
+                error: error instanceof Error ? error.message : 'An unknown error occurred'
+            });
+            console.error('Failed to delete vocabulary:', error);
         }
     },
 
-    addVocabulary: async (questItemId?: number) => {
+    addVocabulary: async (userId: number, questItemId: number) => {
         try {
             const resultData = {
-                userId: 1,
+                userId: userId,
                 questItemId: questItemId,
             };
 
@@ -120,14 +129,25 @@ export const useVocabularyStore = create<VocabularyState>((set) => ({
             });
 
             if (!response.ok) {
-                throw new Error('Failed to delete vocabulary item.');
+                throw new Error('Failed to add vocabulary item.');
             }
 
-            // set(state => ({
-            //     vocabulary: state.vocabulary.filter(v => v.vocabId !== vocabId)
-            // }));
+            const jsonResponse: { data: VocabularyData[] } = await response.json();
+            const newVocabs = jsonResponse.data;
 
-            set({ error: null });
+            // 새로 추가/업데이트된 단어들을 처리
+            set(state => {
+                // 기존 vocabulary에서 새로 추가된 단어들의 ID를 제외
+                const newVocabIds = newVocabs.map(v => v.vocabId);
+                const filteredVocabulary = state.vocabulary.filter(
+                    v => !newVocabIds.includes(v.vocabId)
+                );
+
+                return {
+                    vocabulary: [...newVocabs, ...filteredVocabulary],
+                    error: null
+                };
+            });
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
