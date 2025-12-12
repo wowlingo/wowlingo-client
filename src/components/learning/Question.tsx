@@ -105,6 +105,7 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
     toast("단어장에 추가 되었습니다", {
       icon: <ToastBlueIcon />,
       duration: 3000,
+      dismissible: false,
     });
   };
 
