@@ -12,7 +12,7 @@ export default function WelcomeModal({ isOpen, onConfirm, onClose, username = ''
   if (!isOpen) return null;
 
   return (
-    <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-full z-[100] flex flex-col h-full w-full bg-black">
+    <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-lg z-[100] flex flex-col h-[100dvh] bg-black overflow-hidden">
 
       {/* 1. 상단 오른쪽 X 버튼 영역 */}
       <div className="absolute top-0 right-0 p-6 z-50 mt-4 mr-2">
@@ -42,26 +42,28 @@ export default function WelcomeModal({ isOpen, onConfirm, onClose, username = ''
           <img
             src="/images/img_tutorial_wateringcan_10.png"
             alt="Watering Can"
-            className="relative w-60 h-60 object-contain z-10"
+            className="relative w-60 h-60 object-contain z-10 max-h-[40vh]"
           />
         </div>
 
         {/* 텍스트 영역 */}
-        <h2 className="text-2xl font-bold text-white mb-4 tracking-tight text-center">
-          {username}님, 만나서 반가워요!
-        </h2>
+        <div className="shrink-0">
+          <h2 className="text-2xl font-bold text-white mb-4 tracking-tight text-center">
+            {username}님, 만나서 반가워요!
+          </h2>
 
-        <p className="text-gray-300 text-base leading-relaxed text-center">
-          매일 학습을 하며 물방울을 획득하고<br />
-          식물을 키워 보세요.
-        </p>
+          <p className="text-gray-300 text-base leading-relaxed text-center">
+            매일 학습을 하며 물방울을 획득하고<br />
+            식물을 키워 보세요.
+          </p>
+        </div>
       </div>
 
       {/* 3. 하단 버튼 영역 */}
-      <div className="flex flex-col items-center justify-center w-full pb-8">
+      <div className="flex flex-col items-center justify-center w-full pb-8 shrink-0">
         <button
           onClick={onConfirm}
-          className="w-sm mx-auto pt-4 pb-3.5 bg-blue-500 gap-2 text-white font-bold text-lg rounded-full hover:bg-blue-600 transition-colors shadow-lg disabled:bg-gray-400"
+          className="w-full max-w-sm mx-auto pt-4 pb-3.5 bg-blue-500 gap-2 text-white font-bold text-lg rounded-full hover:bg-blue-600 transition-colors shadow-lg disabled:bg-gray-400"
         >
           학습 시작
         </button>
