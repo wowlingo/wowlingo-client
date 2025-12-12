@@ -27,7 +27,7 @@ export default function LogoutModal({ isOpen, onConfirm, onClose }: LogoutModalP
 
         <div className="flex w-full gap-3">
           <button
-            onClick={onConfirm}
+            onClick={onClose}
             className="flex-1 py-3 bg-blue-100 text-blue-600 font-bold text-lg rounded-full hover:bg-blue-200 transition-colors"
           >
             아니요
