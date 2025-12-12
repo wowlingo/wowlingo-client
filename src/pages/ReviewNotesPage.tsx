@@ -8,18 +8,19 @@ import { useAuth } from '../components/common/AuthContext';
 
 const ReviewNotesPage = () => {
     const { user } = useAuth();
-    if (!user) {
-        return null;
-    }
-
     const [currentDate, setCurrentDate] = useState(new Date());
     const { hashtags, isLoading, error, reviewQuestItems, fetchHashtags, fetchQuestItemUnits } = useReviewStore();
     const { addVocabulary } = useVocabularyStore();
 
     useEffect(() => {
+        if (!user) return;
         fetchHashtags(user.userId);
         fetchQuestItemUnits(user.userId);
-    }, [fetchHashtags, fetchQuestItemUnits]);
+    }, [user?.userId]);
+
+    if (!user) {
+        return null;
+    }
 
     const [selectedTags, setSelectedTags] = useState<number[]>([]);
 
@@ -132,7 +133,7 @@ const ReviewNotesPage = () => {
                             title={item.title}
                             sounds={item.sounds}
                             units={item.units}
-                            onAddVoca={() => addVocabulary(item.questItemId)}
+                            onAddVoca={() => addVocabulary(user.userId, item.questItemId)}
                         />
                     ))}
                 </div>

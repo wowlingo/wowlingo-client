@@ -7,19 +7,20 @@ import { useAuth } from '../components/common/AuthContext';
 
 const VocabularyPage = () => {
     const { user } = useAuth();
-    if (!user) {
-        return null;
-    }
-
     const { hashtags, isLoading, error, vocabulary, fetchHashtags, fetchVocabulary, deleteVocabulary } = useVocabularyStore();
 
     const [sortBy, setSortBy] = useState<SortOptionKey>('latest');
     const [selectedTags, setSelectedTags] = useState<number[]>([]);
 
     useEffect(() => {
-        fetchHashtags();
+        if (!user) return;
+        fetchHashtags(user.userId);
         fetchVocabulary(user.userId, selectedTags, sortBy);
-    }, [fetchHashtags, fetchVocabulary]);
+    }, [user?.userId]);
+
+    if (!user) {
+        return null;
+    }
 
     const handleClick = (tagId: number) => {
         let newSelected;
