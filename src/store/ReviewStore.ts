@@ -23,8 +23,8 @@ interface ReviewState {
     isLoading: boolean;
     error: string | null;
     reviewQuestItems: ReviewQuestItem[];
-    fetchHashtags: (date?: Date) => Promise<void>;
-    fetchQuestItemUnits: (hashtagIds?: number[], date?: Date, sort?: string) => Promise<void>;
+    fetchHashtags: (userId: number, date?: Date) => Promise<void>;
+    fetchQuestItemUnits: (userId: number, hashtagIds?: number[], date?: Date, sort?: string) => Promise<void>;
 }
 
 const formatDate = (date: Date) => {
@@ -41,11 +41,11 @@ export const useReviewStore = create<ReviewState>((set) => ({
     error: null,
     reviewQuestItems: [],
 
-    fetchHashtags: async (date?: Date) => {
+    fetchHashtags: async (userId: number, date: Date = new Date()) => {
         set({ isLoading: true, error: null });
         try {
             const params = new URLSearchParams();
-            params.append('userId', "1");
+            params.append('userId', String(userId));
             if (date) {
                 params.append('date', formatDate(date));//'2025-09-25');
             }
@@ -70,11 +70,11 @@ export const useReviewStore = create<ReviewState>((set) => ({
         }
     },
 
-    fetchQuestItemUnits: async (hashtagIds: number[] = [], date?: Date) => {
+    fetchQuestItemUnits: async (userId: number, hashtagIds: number[] = [], date: Date = new Date()) => {
         set({ isLoading: true, error: null });
         try {
             const params = new URLSearchParams();
-            params.append('userId', "1");
+            params.append('userId', String(userId));
             hashtagIds.forEach(id => params.append('hashtags', id.toString()));
             if (date) {
                 params.append('date', formatDate(date));//'2025-09-25');

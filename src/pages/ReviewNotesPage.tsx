@@ -3,16 +3,22 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useReviewStore } from '../store/ReviewStore';
 import { ReviewCard } from '../components/ui/ReviewCard';
 import { useVocabularyStore } from '@/store/VocabularyStore';
+import { useAuth } from '../components/common/AuthContext';
 
 
 const ReviewNotesPage = () => {
+    const { user } = useAuth();
+    if (!user) {
+        return null;
+    }
+
     const [currentDate, setCurrentDate] = useState(new Date());
     const { hashtags, isLoading, error, reviewQuestItems, fetchHashtags, fetchQuestItemUnits } = useReviewStore();
     const { addVocabulary } = useVocabularyStore();
 
     useEffect(() => {
-        fetchHashtags();
-        fetchQuestItemUnits();
+        fetchHashtags(user.userId);
+        fetchQuestItemUnits(user.userId);
     }, [fetchHashtags, fetchQuestItemUnits]);
 
     const [selectedTags, setSelectedTags] = useState<number[]>([]);
@@ -25,7 +31,7 @@ const ReviewNotesPage = () => {
             newSelected = [...selectedTags, tagId]; // 추가 선택
         }
         setSelectedTags(newSelected);
-        fetchQuestItemUnits(newSelected, currentDate, 'latest');
+        fetchQuestItemUnits(user.userId, newSelected, currentDate, 'latest');
     };
 
     const formatDate = (date: Date) => {
@@ -47,8 +53,8 @@ const ReviewNotesPage = () => {
         console.log(newDate);
 
         setCurrentDate(newDate);
-        fetchHashtags(newDate);
-        fetchQuestItemUnits(selectedTags, newDate, 'latest');
+        fetchHashtags(user.userId, newDate);
+        fetchQuestItemUnits(user.userId, selectedTags, newDate, 'latest');
     };
 
     return (

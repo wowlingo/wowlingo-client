@@ -28,7 +28,7 @@ interface VocabularyState {
     error: string | null;
     vocabulary: VocabularyData[];
     fetchHashtags: () => Promise<void>;
-    fetchVocabulary: (hashtagIds?: number[], sort?: string) => Promise<void>;
+    fetchVocabulary: (userId: number, hashtagIds?: number[], sort?: string) => Promise<void>;
     deleteVocabulary: (vocabId: number) => Promise<void>;
     addVocabulary: (questItemId: number) => Promise<void>;
 }
@@ -61,11 +61,11 @@ export const useVocabularyStore = create<VocabularyState>((set) => ({
         }
     },
 
-    fetchVocabulary: async (hashtagIds: number[] = [], sort: string = 'latest') => {
+    fetchVocabulary: async (userId: number, hashtagIds: number[] = [], sort: string = 'latest') => {
         set({ isLoading: true, error: null });
         try {
             const params = new URLSearchParams();
-            params.append('userId', "1");
+            params.append('userId', String(userId));
             hashtagIds.forEach(id => params.append('hashtags', id.toString()));
             if (sort) params.append('sort', sort);
 

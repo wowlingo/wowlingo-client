@@ -3,8 +3,14 @@ import { useEffect, useState } from 'react';
 import { useVocabularyStore } from '../store/VocabularyStore';
 import { SortDropdown, SortOptionKey } from '../components/ui/SortDropdown';
 import { WordCard } from '../components/ui/WordCard';
+import { useAuth } from '../components/common/AuthContext';
 
 const VocabularyPage = () => {
+    const { user } = useAuth();
+    if (!user) {
+        return null;
+    }
+
     const { hashtags, isLoading, error, vocabulary, fetchHashtags, fetchVocabulary, deleteVocabulary } = useVocabularyStore();
 
     const [sortBy, setSortBy] = useState<SortOptionKey>('latest');
@@ -12,7 +18,7 @@ const VocabularyPage = () => {
 
     useEffect(() => {
         fetchHashtags();
-        fetchVocabulary(selectedTags, sortBy);
+        fetchVocabulary(user.userId, selectedTags, sortBy);
     }, [fetchHashtags, fetchVocabulary]);
 
     const handleClick = (tagId: number) => {
@@ -23,12 +29,12 @@ const VocabularyPage = () => {
             newSelected = [...selectedTags, tagId]; // 추가 선택
         }
         setSelectedTags(newSelected);
-        fetchVocabulary(newSelected, sortBy);
+        fetchVocabulary(user.userId, newSelected, sortBy);
     };
 
     const handleSortChange = (newSort: SortOptionKey) => {
         setSortBy(newSort);
-        fetchVocabulary(selectedTags, newSort);
+        fetchVocabulary(user.userId, selectedTags, newSort);
     };
 
 
@@ -70,10 +76,10 @@ const VocabularyPage = () => {
                 {/* 단어 리스트 */}
                 <div className="flex-1 space-y-3 overflow-y-auto no-scrollbar">
                     {vocabulary.map(item => (
-                        <WordCard 
-                            key={item.vocabId} 
+                        <WordCard
+                            key={item.vocabId}
                             id={item.vocabId}
-                            unit={item.str} 
+                            unit={item.str}
                             urlNormal={item.urlNormal}
                             urlSlow={item.slowNormal}
                             onDeleteVoca={() => deleteVocabulary(item.vocabId)}
