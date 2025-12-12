@@ -272,14 +272,27 @@ const Home: React.FC = () => {
 
 
     const handleStartLearning = () => {
-        // 로그인 했을 경우.
-        if (user && activeQuestId) {
-            console.log('activeQuestId: ', activeQuestId);
-            navigate(`/learning/intro/${activeQuestId}`);
-        } else {
-            // 로그인을 안했다면.
+        // 로그인하지 않았다면 로그인 모달 표시
+        if (!user) {
             openLoginModal();
+            return;
         }
+
+        // 로그인한 사용자의 경우
+        let questIdToStart = activeQuestId;
+
+        // activeQuestId가 없으면 order 기준으로 첫 번째 퀘스트 찾기
+        if (!questIdToStart) {
+            if (questList && questList.length > 0) {
+                const sortedQuests = [...questList].sort((a, b) => a.order - b.order);
+                questIdToStart = sortedQuests[0].questId;
+            } else {
+                questIdToStart = 1;
+            }
+        }
+
+        console.log('Starting learning with questId:', questIdToStart);
+        navigate(`/learning/intro/${questIdToStart}`);
     };
 
     const [isHomeGuideModalOpen, setIsHomeGuideModalOpen] = useState(false);
