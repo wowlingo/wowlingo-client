@@ -1,23 +1,50 @@
 import { useState } from 'react';
 import CreatorsModal from './CreatorsModal'
+import { FruitType } from '../../store/learningStore'
 
 interface HomeGuideModalProps {
   isOpen: boolean;
+  fruits: String[];
   onConfirm: () => void;
 }
 
-export default function HomeGuideModal({ isOpen, onConfirm }: HomeGuideModalProps) {
+export default function HomeGuideModal({ isOpen, fruits, onConfirm }: HomeGuideModalProps) {
   if (!isOpen) return null;
 
   const [isCreatorsModalOpen, setIsCreatorsModalOpen] = useState(false);
 
-  const fruitDefaultImages = ['/images/apple_silhouette.png', '/images/strawberry_ silhouette.png', '/images/peach_silhouette.png', '/images/cherry_silhouette.png', '/images/blueberry_silhouette.png',];
+  const fruitDefaultImages = ['/images/apple_silhouette.png', '/images/strawberry_silhouette.png', '/images/peach_silhouette.png', '/images/cherry_silhouette.png', '/images/blueberry_silhouette.png',];
+
+  const fruitReleaseImages = ['/images/apple_release.png', '/images/strawberry_release.png', '/images/peach_release.png', '/images/cherry_release.png', '/images/blueberry_release.png',];
 
   const fruitImages = fruitDefaultImages;
 
+  const fruitIndexMap: Record<FruitType, number> = {
+    [FruitType.Apple]: 0,
+    [FruitType.Strawberry]: 1,
+    [FruitType.Peach]: 2,
+    [FruitType.Cherry]: 3,
+    [FruitType.Blueberry]: 4,
+  };
+
+  // if (fruits.indexOf('apple') >= 0) fruitImages[0] = fruitReleaseImages[0];
+  // if (fruits.indexOf('strawberry') >= 0) fruitImages[1] = fruitReleaseImages[1];
+  // if (fruits.indexOf('peach') >= 0) fruitImages[2] = fruitReleaseImages[2];
+  // if (fruits.indexOf('cherry') >= 0) fruitImages[3] = fruitReleaseImages[3];
+  // if (fruits.indexOf('blueberry') >= 0) fruitImages[4] = fruitReleaseImages[4];
+
+  if (fruits.length > 0) {
+    fruits.forEach((fruit) => {
+      const index = fruitIndexMap[fruit as FruitType];
+      if (index !== undefined) {
+        fruitImages[index] = fruitReleaseImages[index];
+      }
+    });
+  }
+
   return (
     <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-full z-[100] flex items-center justify-center px-4">
-      
+
       {/* 배경 오버레이 - 어두운 색으로 투명하게 처리 */}
       <div className="absolute inset-0 bg-black/80" onClick={onConfirm} />
 

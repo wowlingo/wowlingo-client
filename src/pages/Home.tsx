@@ -8,6 +8,7 @@ import HomeGuideModal from '../components/modals/HomeGuideModal';
 import WelcomeModal from '../components/modals/WelcomeModal';
 import HelloModal from '../components/modals/HelloModal';
 import { useAuth } from '../components/common/AuthContext';
+import { Italic } from 'lucide-react';
 
 
 type LearningItemProps = {
@@ -138,6 +139,7 @@ const Home: React.FC = () => {
     const [fruitLevelBgClass, setFruitLevelBgClass] = useState('');
     const [fruitTitle, setFruitTitle] = useState('');
     const [progressRate, setProgressRate] = useState(0);
+    const [completedFruits, setCompletedFruits] = useState<String[]>([]);
 
     useEffect(() => {
         const checked = sessionStorage.getItem('show_welcome');
@@ -259,6 +261,12 @@ const Home: React.FC = () => {
             console.log('activeQuestId= ' + activeQuestId + ' ' + currentRate);
             console.log('currentQuest= ', currentQuest);
             setProgressRate(currentRate);
+
+            // 내가 모은 학습 완료 과일.
+            const arr: string[] = userQuestProgress.filter(p => p.isCompleted).map(p => p.fruit);
+            const uniqueArr: string[] = [...new Set(arr)];
+            setCompletedFruits(uniqueArr);
+
         } else {
             // 로그인 안했을 때는 모두 기본값 1
             setPlantImage(levelImages[1]);
@@ -331,27 +339,6 @@ const Home: React.FC = () => {
                         </button>
                     </div>
 
-                    <div className="absolute top-[80px] right-[40px] bg-white rounded-xl px-[10px] py-[8px] text-[14px] text-gray-600">
-                        {/* user 정보가 없음 = guest */}
-                        {!user ? (
-                            <>
-                                <div>
-                                    로그인하고 학습하면 <br />
-                                    <span className="text-blue-600 font-bold">성장 기록이 저장돼요!</span>
-                                </div>
-                                <div className="absolute top-[48px] right-[90px] w-3 h-5 bg-white rotate-60"></div>
-                            </>
-                        ) : (
-                            <>
-                                <div>
-                                    레벨 업까지 <span className="text-blue-600 font-bold">{nextLevelCount}문제!</span>
-                                </div>
-                                {/* 꼬리 */}
-                                <div className="absolute top-[25px] right-[90px] w-3 h-5 bg-white rotate-60"></div>
-                            </>
-                        )}
-                    </div>
-
                     <div className="w-[300px] h-[300px] mx-auto relative flex items-center justify-center mt-12">
                         {/* 동심원 배경 */}
                         <img
@@ -366,6 +353,36 @@ const Home: React.FC = () => {
                             alt={`Level ${fruitLevel} plant`}
                             className="relative w-[250px] h-[250px] object-contain"
                         />
+                    </div>
+
+                    <div className="absolute top-[80px] right-[40px] bg-white rounded-xl px-[10px] py-[8px] text-[14px] text-gray-600">
+                        {/* user 정보가 없음 = guest */}
+                        {!user ? (
+                            <>
+                                <div>
+                                    로그인하고 학습하면 <br />
+                                    <span className="text-blue-600 font-bold">성장 기록이 저장돼요!</span>
+                                </div>
+                                <div className="absolute top-[48px] right-[90px] w-3 h-5 bg-white rotate-60"></div>
+                            </>
+                        ) : fruitLevel === 5 ? (
+                            <>
+                                <div>
+                                    새로운 열매가 열렸어요! <br />
+                                    다음 학습 열매를 키워볼까요?
+                                </div>
+                                {/* 꼬리 */}
+                                <div className="absolute top-[48px] right-[90px] w-3 h-5 bg-white rotate-60"></div>
+                            </>
+                        ) : (
+                            <>
+                                <div>
+                                    레벨 업까지 <span className="text-blue-600 font-bold">{nextLevelCount}문제!</span>
+                                </div>
+                                {/* 꼬리 */}
+                                <div className="absolute top-[25px] right-[90px] w-3 h-5 bg-white rotate-60"></div>
+                            </>
+                        )}
                     </div>
 
                     <div className="flex justify-center mt-4">
@@ -494,9 +511,9 @@ const Home: React.FC = () => {
                 </section>
 
             </div>
-
             <HomeGuideModal
                 isOpen={isHomeGuideModalOpen}
+                fruits={completedFruits}
                 onConfirm={closeHomeGuideModal}
             />
             <WelcomeModal

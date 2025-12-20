@@ -61,6 +61,7 @@ type ApiUserQuestProgress = {
   isEnable: boolean;
   accuracyRate: number;  // string → number (백엔드 응답 타입과 일치)
   progressRate: number;
+  fruit: string;
 };
 
 type ApiUserQuestResponse = {
