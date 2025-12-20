@@ -16,6 +16,7 @@ type LearningItemProps = {
     progress: number;
     total: number;
     isEnable: boolean;
+    isCompleted: boolean;
 }
 
 // 학습 단계 항목별 태그 컴포넌트
@@ -26,29 +27,30 @@ const Tag = ({ text }: { text: string }) => (
 )
 
 // 학습 단계 항목별 진행도 컴포넌트
-const ProgressIcon = ({ progress, total }: { progress: number; total: number }) => {
-    const isComplete = true;//progress === total && total > 0;
-    const inProgress = false;//progress > 0 && progress < total;
+const ProgressIcon = ({ progress, total, isEnable }: { progress: number; total: number, isEnable: boolean }) => {
+    // const isComplete = true;//progress === total && total > 0;
+    // const inProgress = false;//progress > 0 && progress < total;
+    const textColor = isEnable ? "text-blue-500" : "text-gray-400";
 
-    if (isComplete) {
+    if (isEnable) {
         return (
             <div className="flex items-center gap-1">
                 <img src="/images/ic_learning_waterdrop.png" alt="progress" className="w-5 h-5" />
-                <span className="font-semibold text-[14px] text-blue-500">{progress}</span>
+                <span className={`font-semibold text-[14px] ${textColor}`}>{progress}</span>
                 <span className="font-semibold text-[14px] text-gray-400">/ {total}</span>
             </div>
         )
     }
 
-    if (inProgress) {
-        return (
-            <div className="flex items-center gap-1">
-                <img src="/images/ic_learning_waterdrop.png" alt="progress" className="w-5 h-5" />
-                <span className="font-semibold text-[14px] text-blue-500">{progress}</span>
-                <span className="font-semibold text-[14px] text-gray-400">/ {total}</span>
-            </div>
-        )
-    }
+    // if (isEnable && inProgress) {
+    //     return (
+    //         <div className="flex items-center gap-1">
+    //             <img src="/images/ic_learning_waterdrop.png" alt="progress" className="w-5 h-5" />
+    //             <span className={`font-semibold text-[14px]  ${textColor}`}>{progress}</span>
+    //             <span className="font-semibold text-[14px] text-gray-400">/ {total}</span>
+    //         </div>
+    //     )
+    // }
 
     // Not started (0 / 70)
     return (
@@ -70,11 +72,10 @@ const CompleteTag = () => (
     </div>
 );
 
-const LearningItem = ({ tags, title, progress, total, isEnable }: LearningItemProps) => {
-    const bgColor = isEnable ? "bg-white" : "bg-gray-200";
+const LearningItem = ({ tags, title, progress, total, isEnable, isCompleted }: LearningItemProps) => {
+    const bgColor = isEnable ? "bg-white" : "bg-gray-100";
     const textColor = isEnable ? "text-gray-800" : "text-gray-400";
-    const isComplete = progress === total && total > 0;
-    const completeTag = isComplete ? <CompleteTag /> : "";
+    const completeTag = isCompleted ? <CompleteTag /> : "";
 
     return (
         <div className={`p-4 rounded-[16px] border border-gray-200 mb-4 ${bgColor}`}>
@@ -91,7 +92,7 @@ const LearningItem = ({ tags, title, progress, total, isEnable }: LearningItemPr
                 </div>
 
                 <div className="flex-shrink-0 ml-2">
-                    <ProgressIcon progress={progress} total={total} />
+                    <ProgressIcon progress={progress} total={total} isEnable={isEnable} />
                 </div>
             </div>
             <div className="flex items-center justify-between">
@@ -431,7 +432,7 @@ const Home: React.FC = () => {
                                     userQuestProgress.map((quest) => {
                                         // const isCompleted = quest.isCompleted;
                                         // const isActive = quest.questId === activeQuestId;
-                                        const isLocked = false; //!isCompleted && !isActive;
+                                        const isLocked = !quest.isEnable;
 
                                         if (isLocked) {
                                             return (
@@ -441,7 +442,8 @@ const Home: React.FC = () => {
                                                         title={quest.title}
                                                         progress={0}
                                                         total={quest.totalCount}
-                                                        isEnable={false}
+                                                        isEnable={quest.isEnable}
+                                                        isCompleted={quest.isCompleted}
                                                     />
                                                 </div>
                                             );
@@ -457,7 +459,8 @@ const Home: React.FC = () => {
                                                     title={quest.title}
                                                     progress={quest.correctCount}
                                                     total={quest.totalCount}
-                                                    isEnable={true}
+                                                    isEnable={quest.isEnable}
+                                                    isCompleted={quest.isCompleted}
                                                 />
                                             </Link>
                                         );
@@ -476,7 +479,8 @@ const Home: React.FC = () => {
                                                     title={quest.title}
                                                     progress={0}
                                                     total={quest.questItemCount}
-                                                    isEnable={true}
+                                                    isEnable={false}
+                                                    isCompleted={false}
                                                 />
                                             </Link>
                                         );
