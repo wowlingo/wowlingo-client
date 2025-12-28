@@ -9,6 +9,19 @@ import WaterDropModal from '../components/modals/WaterDropModal';
 import { useVocabularyStore } from '@/store/VocabularyStore';
 import { useAuth } from '../components/common/AuthContext';
 
+const getDescriptionByType = (type: string): string => {
+  switch (type) {
+    case 'statement-question':
+      return '문장을 듣고, 평서문과 의문문 중\n맞이 보기를 고르세요.';
+    case 'choice':
+      return '들려준 단어/문장과\n일치하는 보기를 고르세요.';
+    case 'same-different':
+      return '들려준 2개의 단어/문장이\n일치하는 지 구분해 주세요.';
+    default:
+      return '';
+  }
+};
+
 // 각 레이아웃에서 커스터마이징할 수 있는 props
 interface BaseLearningLayoutProps {
   children?: React.ReactNode; // 중앙 배경 영역 (이미지 스택 또는 배경 컴포넌트)
@@ -168,6 +181,15 @@ export default function BaseLearningLayout({
       <div className="flex-shrink-0 px-5 py-2">
         <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
       </div>
+
+      {/* 2-1. 설명 텍스트 - 프로그레스 바와 Question 사이 */}
+      {!isCompleted && rawQuestData && (
+        <div className="flex-shrink-0 px-5 pt-4 pb-2">
+          <p className="text-left text-slate-800 text-xl font-semibold font-['Pretendard'] leading-8 whitespace-pre-line">
+            {getDescriptionByType(rawQuestData.type)}
+          </p>
+        </div>
+      )}
 
       {/* 3. Question (Learning Set) or 완료 텍스트 - 상단 고정 */}
       {!isCompleted ? (
