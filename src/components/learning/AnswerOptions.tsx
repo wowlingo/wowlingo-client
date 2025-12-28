@@ -62,27 +62,26 @@ export default function AnswerOptions({ options, questType }: AnswerOptionsProps
   // questType에 따른 버튼 스타일 결정
   const getButtonStyle = (isSelected: boolean) => {
     if (questType === 'choice') {
-      // Figma 디자인 스타일 적용 - 세로 배치
-      const baseClasses = "flex items-center justify-center gap-4 w-full rounded-2xl transition-all";
-      const textClasses = "text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px]";
-      const paddingClasses = "py-[15px] px-4"; // 상단 16px, 하단 15px (총 높이 약 53px)
+      const baseClasses = "flex items-center justify-center gap-4 w-full rounded-2xl transition-all h-16"; // h-16 = 64px
+      const textClasses = "text-lg font-semibold leading-[28px] tracking-[-0.36px]"; // 18px = text-lg
+      const paddingClasses = "px-6"; // 좌우 24px
 
       return `${baseClasses} ${paddingClasses} ${textClasses} ${
         isSelected
-          ? 'bg-blue-100 outline outline-2 outline-offset-[-2px] outline-blue-500 text-blue-500 text-lg font-semibold' // 선택됨: 파란 배경, 흰색 텍스트
-          : 'bg-white border border-[#E5E7EB] text-gray-600 hover:bg-[#F9FAFB]' // 미선택: 흰색 배경, 회색 텍스트
+          ? 'bg-blue-100 outline outline-2 outline-offset-[-2px] outline-blue-500 text-blue-500' // 선택됨: 파란 배경, 파란색 텍스트
+          : 'bg-white border border-slate-200 text-gray-600 hover:bg-gray-50' // 미선택: 흰색 배경, 회색 텍스트
       }`;
     }
 
     // 사각형 가로 두개 배치 스타일 (statement-question, same-different 타입)
     // Figma 디자인: 높이 120px, 가로 배치
     const baseClasses = "flex flex-col items-center justify-center gap-2 rounded-2xl transition-all h-[15vh] min-h-[90px] max-h-[120px]";
-    const textClasses = "text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px]";
+    const textClasses = "text-base font-semibold leading-6 tracking-[-0.32px]";
 
     return `${baseClasses} ${textClasses} ${
       isSelected
-        ? 'bg-blue-100 outline outline-2 outline-offset-[-2px] outline-blue-500 text-blue-500 text-lg font-semibold' // 선택됨: 파란 배경, 흰색 텍스트
-        : 'bg-white border border-[#E5E7EB] text-gray-600 text-lg font-semibold leading-6 hover:bg-[#F9FAFB]' // 미선택: 흰색 배경, 회색 텍스트
+        ? 'bg-blue-100 outline outline-2 outline-offset-[-2px] outline-blue-500 text-blue-500' // 선택됨: 파란 배경, 파란색 텍스트
+        : 'bg-white border border-slate-200 text-gray-600 hover:bg-gray-50' // 미선택: 흰색 배경, 회색 텍스트
     }`;
   };
 

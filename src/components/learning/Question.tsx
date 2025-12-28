@@ -110,17 +110,17 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
   };
 
   return (
-    <div className="w-90 h-30 flex items-center bg-white rounded-xl overflow-hidden shadow-sm">
+    <div className="flex items-center justify-center gap-3 w-full">
       {/* 문제 듣기 버튼 */}
       <button
         onClick={playNormal}
         disabled={isSlowPlaying}
-        className={`w-full h-full flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] transition-colors ${isSlowPlaying ? 'cursor-not-allowed opacity-40 grayscale' : 'hover:bg-gray-50'}`}
+        className={`w-[100px] h-[100px] flex flex-col items-center justify-center gap-[2px] px-[6px] pt-[18px] pb-[17px] bg-white rounded-xl transition-colors ${isSlowPlaying ? 'cursor-not-allowed opacity-40 grayscale' : 'hover:bg-gray-50'}`}
         aria-label="문제 듣기"
       >
-        <div className="w-22 h-10 flex items-center justify-center">
+        <div className="w-[88px] h-10 flex items-center justify-center">
           {isPlaying ? (
-            // 재생 중일 때: 훅에서 받아온 이미지 사용 (훅이 알아서 SLOWLY 프레임을 줌)
+            // 재생 중일 때: 훅에서 받아온 이미지 사용
             <img
               src={currentPlayAnimation}
               alt="듣는 중"
@@ -128,27 +128,24 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
             />
           ) : (
             // 정지 상태: 고정 이미지
-            <img src="/images/sound_03.png" alt="문제 듣기" />
+            <img src="/images/sound_03.png" alt="문제 듣기" className="object-contain" />
           )}
         </div>
-        <span className={`text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px] ${isSlowPlaying ? 'text-gray-300' : 'text-[#4A5564]'}`}>
+        <span className={`text-base font-semibold leading-6 tracking-[-0.32px] ${isSlowPlaying ? 'text-gray-300' : 'text-[#4A5564]'}`}>
           문제 듣기
         </span>
       </button>
-
-      {/* 구분선 */}
-      <div className="w-[1px] h-[67px] bg-[#E5E7EB] relative z-10" />
 
       {/* 천천히 듣기 버튼 */}
       <button
         onClick={playSlow}
         disabled={isPlaying}
-        className={`w-full h-full flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] transition-colors ${isPlaying ? 'cursor-not-allowed opacity-40 grayscale' : 'hover:bg-gray-50'}`}
+        className={`w-[100px] h-[100px] flex flex-col items-center justify-center gap-[2px] px-[6px] pt-[18px] pb-[17px] bg-white rounded-xl transition-colors ${isPlaying ? 'cursor-not-allowed opacity-40 grayscale' : 'hover:bg-gray-50'}`}
         aria-label="천천히 듣기"
       >
-        <div className="w-22 h-10 flex items-center justify-center">
+        <div className="w-[88px] h-10 flex items-center justify-center">
           {isSlowPlaying ? (
-            // 재생 중일 때: 훅에서 받아온 이미지 사용 (훅이 알아서 SLOWLY 프레임을 줌)
+            // 재생 중일 때: 훅에서 받아온 이미지 사용
             <img
               src={currentPlayAnimation}
               alt="듣는 중"
@@ -156,25 +153,24 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
             />
           ) : (
             // 정지 상태: 고정 이미지
-            <img src="/images/slowly_04.png" alt="천천히 듣기" />
+            <img src="/images/slowly_04.png" alt="천천히 듣기" className="object-contain" />
           )}
         </div>
-        <span className={`text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px] ${isPlaying ? 'text-gray-300' : 'text-[#4A5564]'}`}>
+        <span className={`text-base font-semibold leading-6 tracking-[-0.32px] ${isPlaying ? 'text-gray-300' : 'text-[#4A5564]'}`}>
           천천히 듣기
         </span>
       </button>
 
-      <div className="w-[1px] h-[67px] bg-[#E5E7EB] relative z-10" />
-
+      {/* 단어장 추가 버튼 */}
       <button
         onClick={handleAddToVocabulary}
-        className="w-full h-full flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] hover:bg-gray-50 transition-colors"
+        className="w-[100px] h-[100px] flex flex-col items-center justify-center gap-[2px] px-[6px] pt-[18px] pb-[17px] bg-white rounded-xl hover:bg-gray-50 transition-colors"
         aria-label="단어장 추가"
       >
-        <div className="w-22 h-10 flex items-center justify-center">
+        <div className="w-[88px] h-10 flex items-center justify-center">
           <img src="/images/ic_set_add.png" alt="단어장 추가" className="w-10 h-10" />
         </div>
-        <span className="text-[16px] font-semibold text-[#4A5564] leading-[22.4px] tracking-[-0.32px]">
+        <span className="text-base font-semibold text-[#4A5564] leading-6 tracking-[-0.32px]">
           단어장 추가
         </span>
       </button>
