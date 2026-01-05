@@ -3,7 +3,7 @@ import techForImpactLogo from '../../assets/TF!_Logo_B1.png';
 
 const Footer = () => {
     return (
-        <footer className="px-4 py-10 border-t border-gray-50 flex flex-col items-center text-center">
+        <footer className="px-4 py-6 flex flex-col items-center text-center">
             <div className="flex items-center gap-3 mb-3">
                 <img
                     src={kakaoLogo}
