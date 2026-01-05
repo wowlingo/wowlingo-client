@@ -1,6 +1,7 @@
 // src/components/layout/MainLayout.tsx
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
+import Footer from './Footer';
 
 const MainLayout = () => {
     return (
@@ -9,6 +10,7 @@ const MainLayout = () => {
             <main className='flex-grow px-4 py-6'>
                 <Outlet />
             </main>
+            <Footer />
         </div>
     );
 };

@@ -8,7 +8,7 @@ import HomeGuideModal from '../components/modals/HomeGuideModal';
 import WelcomeModal from '../components/modals/WelcomeModal';
 import HelloModal from '../components/modals/HelloModal';
 import { useAuth } from '../components/common/AuthContext';
-import { Italic } from 'lucide-react';
+import Footer from '../components/layout/Footer';
 
 
 type LearningItemProps = {
@@ -542,6 +542,8 @@ const Home: React.FC = () => {
                     setIsHelloModalOpen(false);
                 }}
             />
+
+            <Footer />
         </div>
     );
 };
