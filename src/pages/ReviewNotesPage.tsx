@@ -3,7 +3,6 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useReviewStore } from '../store/ReviewStore';
 import { ReviewCard } from '../components/ui/ReviewCard';
 import { useVocabularyStore } from '@/store/VocabularyStore';
-import ClarityTracker from '../hooks/useClarityTracking';
 
 
 const ReviewNotesPage = () => {
@@ -12,8 +11,6 @@ const ReviewNotesPage = () => {
     const { addVocabulary } = useVocabularyStore();
 
     useEffect(() => {
-        ClarityTracker.reviewNotesOpened();
-
         fetchHashtags();
         fetchQuestItemUnits();
     }, [fetchHashtags, fetchQuestItemUnits]);

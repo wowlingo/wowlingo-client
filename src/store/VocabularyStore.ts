@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import ClarityTracker from '../hooks/useClarityTracking';
 
 
 type VocabularyData = {
@@ -96,8 +95,6 @@ export const useVocabularyStore = create<VocabularyState>((set) => ({
                 throw new Error('Failed to delete vocabulary item.');
             }
 
-            ClarityTracker.vocabularyRemoved();
-
             set(state => ({
                 vocabulary: state.vocabulary.filter(v => v.vocabId !== vocabId)
             }));
@@ -125,8 +122,6 @@ export const useVocabularyStore = create<VocabularyState>((set) => ({
             if (!response.ok) {
                 throw new Error('Failed to add vocabulary item.');
             }
-
-            ClarityTracker.vocabularyAdded();
 
             set({ error: null });
 

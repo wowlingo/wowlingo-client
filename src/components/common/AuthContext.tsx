@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
-import ClarityTracker from '../../hooks/useClarityTracking';
 
 
 interface User {
@@ -62,9 +61,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                             username: decoded.username,
                             isNewUser: decoded.isNewUser,
                         });
-
-                        // Track user identification on page load
-                        ClarityTracker.identifyUser(decoded.userId);
                     }
                 } catch (error) {
                     console.error("유효하지 않은 토큰입니다.", error);
@@ -81,8 +77,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const handleLogin = (token: string, nickname: string, id: number, isNewUser: boolean) => {
         Cookies.set('accessToken', token, { expires: 1 });
         setUser({ userId: id, username: nickname, isNewUser });
-
-        ClarityTracker.identifyUser(id);
 
         sessionStorage.setItem('show_welcome', 'true');
 
