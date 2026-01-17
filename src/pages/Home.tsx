@@ -1,195 +1,549 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react'; // 아이콘 라이브러리 예시
 import { useLearningStore } from '../store/learningStore';
+import Header from '../components/layout/Header';
+import { useNavigate } from "react-router-dom";
+import { useLearningStatusStore } from '../store/LearningStatus';
+import HomeGuideModal from '../components/modals/HomeGuideModal';
+import WelcomeModal from '../components/modals/WelcomeModal';
+import HelloModal from '../components/modals/HelloModal';
+import { useAuth } from '../components/common/AuthContext';
+import Footer from '../components/layout/Footer';
+
+
+type LearningItemProps = {
+    tags: string[];
+    title: string;
+    progress: number;
+    total: number;
+    isEnable: boolean;
+    isCompleted: boolean;
+}
+
+// 학습 단계 항목별 태그 컴포넌트
+const Tag = ({ text }: { text: string }) => (
+    <span className="px-3 py-1 bg-blue-100 text-blue-500 text-[12px] rounded-full font-medium">
+        {text}
+    </span>
+)
+
+// 학습 단계 항목별 진행도 컴포넌트
+const ProgressIcon = ({ progress, total, isEnable }: { progress: number; total: number, isEnable: boolean }) => {
+    // const isComplete = true;//progress === total && total > 0;
+    // const inProgress = false;//progress > 0 && progress < total;
+    const textColor = isEnable ? "text-blue-500" : "text-gray-400";
+
+    if (isEnable) {
+        return (
+            <div className="flex items-center gap-1">
+                <img src="/images/ic_learning_waterdrop.png" alt="progress" className="w-5 h-5" />
+                <span className={`font-semibold text-[14px] ${textColor}`}>{progress}</span>
+                <span className="font-semibold text-[14px] text-gray-400">/ {total}</span>
+            </div>
+        )
+    }
+
+    // if (isEnable && inProgress) {
+    //     return (
+    //         <div className="flex items-center gap-1">
+    //             <img src="/images/ic_learning_waterdrop.png" alt="progress" className="w-5 h-5" />
+    //             <span className={`font-semibold text-[14px]  ${textColor}`}>{progress}</span>
+    //             <span className="font-semibold text-[14px] text-gray-400">/ {total}</span>
+    //         </div>
+    //     )
+    // }
+
+    // Not started (0 / 70)
+    return (
+        <div className="flex items-center gap-1">
+            <img src="/images/ic_learning_waterdrop_gray.png" alt="not-started" className="w-5 h-5" />
+            <span className="font-semibold text-[14px] text-gray-400">{progress} / {total}</span>
+        </div>
+    )
+}
+
+const CompleteTag = () => (
+    <div className="flex items-center gap-1.5 bg-blue-500 text-white text-[12px] font-semibold px-2 py-1 rounded-[4px] select-none">
+        <img
+            src="/images/ic_learning_confetti.png"
+            alt="완료"
+            className="w-[16px] h-[16px]"
+        />
+        완료
+    </div>
+);
+
+const LearningItem = ({ tags, title, progress, total, isEnable, isCompleted }: LearningItemProps) => {
+    const bgColor = isEnable ? "bg-white" : "bg-gray-100";
+    const textColor = isEnable ? "text-gray-800" : "text-gray-400";
+    const completeTag = isCompleted ? <CompleteTag /> : "";
+
+    return (
+        <div className={`p-4 rounded-[16px] border border-gray-200 mb-4 ${bgColor}`}>
+            <div className="flex items-center justify-between mb-2">
+                <div
+                    className="flex-1 overflow-x-auto whitespace-nowrap no-scrollbar relative 
+                    [-webkit-mask-image:linear-gradient(to_right,transparent,black_0.0rem,black_calc(100%-0.5rem),transparent)]"
+                >
+                    <div className="flex items-center gap-1.5">
+                        {tags.map((tag) => (
+                            <Tag key={tag} text={`#${tag}`} />
+                        ))}
+                    </div>
+                </div>
+
+                <div className="flex-shrink-0 ml-2">
+                    <ProgressIcon progress={progress} total={total} isEnable={isEnable} />
+                </div>
+            </div>
+            <div className="flex items-center justify-between">
+                <h3 className={`text-[16px] font-semibold ${textColor}`}>{title}</h3>
+                {completeTag}
+            </div>
+        </div>
+    );
+};
+
+
+interface WeeklyAttendanceItem {
+    day: string;
+    attended: boolean;
+}
 
 const Home: React.FC = () => {
-    const { fetchUserQuestProgress, userQuestProgress, isLoading, fetchQuestList, questList, activeQuestId } = useLearningStore();
+    const { user, openLoginModal } = useAuth();
+    const { fetchUserQuestProgress,
+        activeQuestId,
+        fruit,
+        fruitLevel,
+        nextLevelCount,
+        userQuestProgress, isLoading,
+        fetchQuestList, questList } = useLearningStore();
+    const navigate = useNavigate();
+    const { attemptedDays, fetchQuestAttemptsThisWeek } = useLearningStatusStore();
+
+    const [weeklyAttendance, setWeeklyAttendance] = useState<WeeklyAttendanceItem[]>([
+        { day: '월', attended: false },
+        { day: '화', attended: false },
+        { day: '수', attended: false },
+        { day: '목', attended: false },
+        { day: '금', attended: false },
+        { day: '토', attended: false },
+        { day: '일', attended: false }, // Added '일' as attended to match the image
+    ]);
+
+    // 임시 식물 레벨 (나중에 유저 데이터로 교체)
+    // const [plantLevel] = useState(3); // Changed to level 3 to match the image
+    // const [plantImage] = useState('/images/tree.png'); // Placeholder image for level 3 plant
+    const [plantImage, setPlantImage] = useState('');
+    const [fruitLevelBgClass, setFruitLevelBgClass] = useState('');
+    const [fruitTitle, setFruitTitle] = useState('');
+    const [progressRate, setProgressRate] = useState(0);
+    const [completedFruits, setCompletedFruits] = useState<String[]>([]);
 
     useEffect(() => {
-        console.log('Home useEffect - fetchUserQuestProgress called');
-        fetchUserQuestProgress(1); // 사용자 ID 1의 퀘스트 진행 상태 요청
-        
-        // API가 아직 구현되지 않은 경우를 위한 fallback
-        if (questList.length === 0) {
-            fetchQuestList();
+        const checked = sessionStorage.getItem('show_welcome');
+        console.log('show_welcome: ', checked);
+        if (user && checked === 'true') {
+            console.log(`현재 로그인한 유저1 ID: ${user.userId}`);
+            if (user.isNewUser) {
+                setIsWelcomeModalOpen(true);
+            } else {
+                setIsHelloModalOpen(true);
+            }
         }
-    }, [fetchUserQuestProgress, fetchQuestList, questList.length]);
+    }, [user]);
+
+    useEffect(() => {
+        console.log(`현재 로그인한 유저2`);
+        // 로그인 했을 경우.
+        if (user) {
+            console.log(`현재 로그인한 유저1 ID: ${user.userId}`);
+
+            fetchUserQuestProgress(user.userId); // 사용자 ID 1의 퀘스트 진행 상태 요청
+
+            fetchQuestAttemptsThisWeek(user.userId);
+
+            console.log('attemptedDays: ', attemptedDays);
+
+            const days = ["월", "화", "수", "목", "금", "토", "일"];
+            const updated = days.map((day, index) => ({
+                day,
+                attended: attemptedDays.includes(index + 1)
+            }));
+
+            console.log('updated: ', updated);
+            setWeeklyAttendance(updated);
+
+            // API가 아직 구현되지 않은 경우를 위한 fallback
+            if (questList.length === 0) {
+                fetchQuestList();
+            }
+        }
+
+    }, [user, fetchUserQuestProgress, fetchQuestList, questList.length, fetchQuestAttemptsThisWeek]);
+
 
     // 페이지 포커스 및 학습 완료 시 진행 상태 새로고침
     useEffect(() => {
-        const handleFocus = () => {
-            fetchUserQuestProgress(1);
-        };
+        // 로그인 했을 경우.
+        if (user) {
+            const handleFocus = () => {
+                fetchUserQuestProgress(user.userId);
+            };
 
-        const handleLearningCompleted = () => {
-            fetchUserQuestProgress(1);
-        };
+            const handleLearningCompleted = () => {
+                fetchUserQuestProgress(user.userId);
+            };
 
-        window.addEventListener('focus', handleFocus);
-        window.addEventListener('learningCompleted', handleLearningCompleted);
-        
-        return () => {
-            window.removeEventListener('focus', handleFocus);
-            window.removeEventListener('learningCompleted', handleLearningCompleted);
-        };
+            window.addEventListener('focus', handleFocus);
+            window.addEventListener('learningCompleted', handleLearningCompleted);
+
+            return () => {
+                window.removeEventListener('focus', handleFocus);
+                window.removeEventListener('learningCompleted', handleLearningCompleted);
+            };
+        }
+
     }, [fetchUserQuestProgress]);
 
+    const levelImages: Record<number, string> = {
+        1: '/images/seed.png',
+        2: '/images/plant.png',
+        3: '/images/tree.png',
+        4: '/images/flower.png',
+    }
+    const levelStyles: Record<number, string> = {
+        1: 'bg-[#00A63E]', // LV.1: 녹색
+        2: 'bg-[#2B7FFF]', // LV.2: 파란색
+        3: 'bg-[#615FFF]', // LV.3: 남색
+        4: 'bg-[#8E51FF]', // LV.4: 보라
+        5: 'bg-[#F6339A]', // LV.5: 분홍색
+    };
+
+    const levelTitles: Record<number, string> = {
+        1: '성장의 씨앗',
+        2: '성장의 새싹',
+        3: '성장의 나무',
+        4: '성장의 꽃',
+        5: '성장의 열매',
+    };
+
+    useEffect(() => {
+        // 로그인 했을 경우
+        if (user) {
+            console.log(`현재 로그인한 유저1 ID: ${user.userId}`);
+
+            // 이전 퀘스트들의 만렙(5) 누적 계산
+            // 다시 레벨 초기화가 맞습니다.
+            // const baseLevel = ((activeQuestId ?? 1) - 1) * 5;
+            // const localLevel = fruitLevel - baseLevel;
+            const localLevel = fruitLevel;
+            console.log(fruitLevel, localLevel);
+            let currentImagePath = levelImages[localLevel] || levelImages[1];
+            if (localLevel == 5) {
+                currentImagePath = `/images/${fruit}.png`;
+            }
+            setPlantImage(currentImagePath);
+
+            const currentBgClass = levelStyles[localLevel] || levelStyles[1];
+            console.log(currentBgClass);
+            setFruitLevelBgClass(currentBgClass);
+
+            const currentTitle = levelTitles[localLevel] || levelTitles[1];
+            console.log(currentTitle);
+            setFruitTitle(currentTitle);
+
+            // 학습진행률.
+            const currentQuest = userQuestProgress.find(q => q.questId === activeQuestId);
+            const currentRate = currentQuest?.progressRate ?? 0;
+
+            console.log('activeQuestId= ' + activeQuestId + ' ' + currentRate);
+            console.log('currentQuest= ', currentQuest);
+            setProgressRate(currentRate);
+
+            // 내가 모은 학습 완료 과일.
+            const arr: string[] = userQuestProgress.filter(p => p.isCompleted).map(p => p.fruit);
+            const uniqueArr: string[] = [...new Set(arr)];
+            setCompletedFruits(uniqueArr);
+
+        } else {
+            // 로그인 안했을 때는 모두 기본값 1
+            setPlantImage(levelImages[1]);
+            setFruitLevelBgClass(levelStyles[1]);
+            setFruitTitle(levelTitles[1]);
+            setProgressRate(0);
+        }
+
+    }, [fruitLevel, fruit, setPlantImage, fruitLevelBgClass, setFruitLevelBgClass,
+        fruitTitle, setFruitTitle, activeQuestId]);
+
+
+
+    const handleStartLearning = () => {
+        // 로그인하지 않았다면 로그인 모달 표시
+        if (!user) {
+            openLoginModal();
+            return;
+        }
+
+        // 로그인한 사용자의 경우
+        let questIdToStart = activeQuestId;
+
+        // activeQuestId가 없으면 order 기준으로 첫 번째 퀘스트 찾기
+        if (!questIdToStart) {
+            if (questList && questList.length > 0) {
+                const sortedQuests = [...questList].sort((a, b) => a.order - b.order);
+                questIdToStart = sortedQuests[0].questId;
+            } else {
+                questIdToStart = 1;
+            }
+        }
+
+        console.log('Starting learning with questId:', questIdToStart);
+        navigate(`/learning/intro/${questIdToStart}`);
+    };
+
+    const [isHomeGuideModalOpen, setIsHomeGuideModalOpen] = useState(false);
+    const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false);
+    const [isHelloModalOpen, setIsHelloModalOpen] = useState(false);
+
+    // 4. 모달을 여는 함수
+    const openHomeGuideModal = () => {
+        setIsHomeGuideModalOpen(true);
+    };
+
+    // 5. 모달을 닫는 함수 (이 함수를 HomeGuideModal의 onConfirm으로 전달)
+    const closeHomeGuideModal = () => {
+        setIsHomeGuideModalOpen(false);
+    };
 
     return (
-        <div className="flex flex-col h-screen max-w-lg mx-auto p-4 font-sans">
-            {/* 오늘 진행사항 섹션 */}
-            <section className="bg-white rounded-2xl shadow-md p-6 mb-8">
-                <div className="flex items-center text-sm font-semibold text-orange-500 mb-2">
-                    오늘 진행사항
-                </div>
-                <div className="flex items-baseline mb-4">
-                    <h2 className="text-4xl font-extrabold text-gray-900 mr-2">정답률 NN%</h2>
-                    <span className="text-green-500 text-sm font-medium">어제보다 8% 올랐어요!</span>
-                </div>
-                {/* 1-2 비디오/이미지 영역 */}
-                <div className="bg-black w-full h-40 rounded-lg mb-6 flex items-center justify-center text-white">
-                    <span className="text-gray-400 text-lg">1-2 Video/Image Area</span>
-                </div>
+        <div className="flex flex-col min-h-screen max-w-lg mx-auto font-sans"
+            style={{ background: 'linear-gradient(180deg, #DBEEFD 0%, #FFFFFF 60.00%)' }}>
+            {/* Header with Navigation */}
+            <Header bgColor="bg-[#DBEEFD]" />
 
-                {/* 이번 주 진행사항 섹션 */}
-                <div className="mb-6">
-                    <div className="flex justify-between items-center mb-4">
-                        <div className="flex items-center text-sm font-semibold text-gray-700">
-                            이번주 진행사항을 보여드려요!
+            <div className="flex-grow px-3">
+                {/* 성장 시스템 섹션 */}
+                <section className="rounded-3xl p-6 relative">
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center">
+                            <h2 className="text-[20px] font-bold text-gray-900 mr-2">{fruitTitle}</h2>
+                            <span className={`${fruitLevelBgClass} text-white text-[14px] font-semibold px-3 py-1 rounded-full`}>
+                                LV.{fruitLevel}
+                            </span>
                         </div>
-                        <Link to="/weekly-progress" className="flex items-center text-gray-500 text-sm font-medium">
-                            전체보기
-                            <ChevronRight size={16} className="ml-1" />
-                        </Link>
+                        <button className="p-2 rounded-full bg-transparent" onClick={openHomeGuideModal}>
+                            <img src="/images/ic_co_book.png" alt="Bookmark" className="w-[24px] h-[24px]" />
+                        </button>
                     </div>
-                    <div className="grid grid-cols-7 gap-2">
-                        {/* 요일별 아이콘 (예시) */}
-                        <div className="flex flex-col items-center justify-center p-2 bg-purple-100 rounded-lg">
-                            <span className="text-xs text-gray-600 mb-1">월</span>
-                            <span className="text-3xl">😈</span>
-                        </div>
-                        <div className="flex flex-col items-center justify-center p-2 bg-red-100 rounded-lg">
-                            <span className="text-xs text-gray-600 mb-1">화</span>
-                            <span className="text-3xl">😡</span>
-                        </div>
-                        <div className="flex flex-col items-center justify-center p-2 bg-green-100 rounded-lg">
-                            <span className="text-xs text-gray-600 mb-1">수</span>
-                            <span className="text-3xl">😌</span>
-                        </div>
-                        <div className="flex flex-col items-center justify-center p-2 bg-blue-100 rounded-lg">
-                            <span className="text-xs text-gray-600 mb-1">목</span>
-                            <span className="text-3xl">😢</span>
-                        </div>
-                        <div className="flex flex-col items-center justify-center p-2 bg-orange-100 rounded-lg">
-                            <span className="text-xs text-gray-600 mb-1">금</span>
-                            <span className="text-3xl">🤩</span>
-                        </div>
-                        <div className="flex flex-col items-center justify-center p-2 bg-gray-100 rounded-lg">
-                            <span className="text-xs text-gray-600 mb-1">토</span>
-                            <span className="text-3xl"></span>
-                        </div>
-                        <div className="flex flex-col items-center justify-center p-2 bg-gray-100 rounded-lg">
-                            <span className="text-xs text-gray-600 mb-1">일</span>
-                            <span className="text-3xl"></span>
+
+                    <div className="w-[300px] h-[300px] mx-auto relative flex items-center justify-center mt-12">
+                        {/* 동심원 배경 */}
+                        <img
+                            src="/images/bg-home.png" // ← 첨부한 배경 이미지 이름 (원하는 경로에 저장)
+                            alt="circle background"
+                            className="absolute inset-0 w-full h-full object-contain opacity-90"
+                        />
+
+                        {/* 나무 이미지 */}
+                        <img
+                            src={plantImage}
+                            alt={`Level ${fruitLevel} plant`}
+                            className="relative w-[250px] h-[250px] object-contain"
+                        />
+                    </div>
+
+                    <div className="absolute top-[80px] right-[40px] bg-white rounded-xl px-[10px] py-[8px] text-[14px] text-gray-600">
+                        {/* user 정보가 없음 = guest */}
+                        {!user ? (
+                            <>
+                                <div>
+                                    로그인하고 학습하면 <br />
+                                    <span className="text-blue-600 font-bold">성장 기록이 저장돼요!</span>
+                                </div>
+                                <div className="absolute top-[48px] right-[90px] w-3 h-5 bg-white rotate-60"></div>
+                            </>
+                        ) : fruitLevel === 5 ? (
+                            <>
+                                <div>
+                                    새로운 열매가 열렸어요! <br />
+                                    다음 학습 열매를 키워볼까요?
+                                </div>
+                                {/* 꼬리 */}
+                                <div className="absolute top-[48px] right-[90px] w-3 h-5 bg-white rotate-60"></div>
+                            </>
+                        ) : (
+                            <>
+                                <div>
+                                    레벨 업까지 <span className="text-blue-600 font-bold">{nextLevelCount}문제!</span>
+                                </div>
+                                {/* 꼬리 */}
+                                <div className="absolute top-[25px] right-[90px] w-3 h-5 bg-white rotate-60"></div>
+                            </>
+                        )}
+                    </div>
+
+                    <div className="flex justify-center mt-4">
+                        <div className="relative w-[240px] h-[36px]">
+                            <div className="absolute top-[9px] left-0 w-full h-[18px] bg-[#E5E7EB] rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-gradient-to-r from-[#B1D1FF] to-[#3182F7] transition-all duration-500 ease-out rounded-full"
+                                    style={{ width: `${progressRate}%` }}
+                                />
+                            </div>
+
+                            <div className="absolute right-0 w-8 h-8">
+                                <img
+                                    src="/images/ic_learning_crown.png"
+                                    alt="Crown"
+                                    className="object-contain"
+                                />
+                            </div>
+
                         </div>
                     </div>
-                </div>
+                </section>
 
-                {/* 오답노트 진행 및 스탬프 섹션 */}
-                <div className="bg-gray-800 text-white p-4 rounded-xl flex items-center justify-between">
-                    <span className="font-semibold">오답노트 진행하고 머..스탬프 바꾸기..?</span>
-                </div>
-            </section>
 
-            {/* 게임 STAGE 섹션 */}
-            <section>
-                <h3 className="text-3xl font-extrabold text-gray-900 mb-4">게임 STAGE</h3>
-                <div className="scrollbar-hide flex overflow-x-auto snap-x snap-mandatory gap-4">
-                    {isLoading ? (
-                        <div>Loading...</div>
-                    ) : Array.isArray(userQuestProgress) && userQuestProgress.length > 0 ? (
-                        userQuestProgress.map((quest) => (
-                            <Link 
-                                to={`/learning/intro/${quest.questId}`} 
-                                key={quest.questId} 
-                                className={`flex-shrink-0 w-2xs snap-center block rounded-2xl p-6 relative overflow-hidden shadow-md ${
-                                    quest.questId === activeQuestId
-                                        ? 'bg-black text-white' 
-                                        : quest.isStarted 
-                                            ? 'bg-blue-50 text-blue-800' 
-                                            : 'bg-gray-100 text-gray-600'
-                                }`}
-                            >
-                                {/* 진행 상태 표시 */}
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="text-sm font-semibold">
-                                        {quest.correctCount}/{quest.totalCount}
-                                    </div>
+                {/* 이번 주 출석 체크 섹션 */}
+                <section className="bg-white rounded-[16px] p-6 mb-6 shadow-sm border border-gray-100">
+                    <h2 className="text-[16px] font-semibold text-gray-800 mb-4">이번주 학습현황</h2>
+                    <div className="grid grid-cols-7 gap-1">
+                        {weeklyAttendance.map((item, index) => (
+                            <div key={index} className="flex flex-col items-center">
+                                <span className="text-[14px] text-gray-500 mb-2">{item.day}</span>
+                                <div className="w-8 h-8 flex items-center justify-center">
+                                    <img
+                                        src={item.attended ? '/images/attempt_date_drop.png' : '/images/attempt_date_drop_default.png'}
+                                        alt={item.attended ? '학습' : '미학습'}
+                                        className="w-full h-full object-contain"
+                                    />
                                 </div>
-                                
-                                {/* 퀘스트 제목 */}
-                                <div className={`text-2xl font-extrabold mb-4 ${
-                                    quest.questId === activeQuestId ? 'text-white' : quest.isStarted ? 'text-blue-800' : 'text-gray-800'
-                                }`}>
-                                    {quest.title}
+                            </div>
+                        ))}
+                    </div>
+                    <button className="w-full mt-6 py-3 bg-blue-500 text-white text-lg font-bold rounded-full shadow-md"
+                        onClick={handleStartLearning}>
+                        학습 시작
+                    </button>
+                </section>
+
+                <section className="p-4">
+                    <h2 className="text-[20px] font-semibold text-gray-800 mb-3 px-1">학습 단계</h2>
+                    <div className="space-y-3">
+                        {/* user 정보가 없음 = guest */}
+                        {!user ? (
+                            <div className={`p-4 border border-gray-200 rounded-2xl bg-gray-100`}>
+                                <div className="flex items-center justify-between text-base text-gray-400">
+                                    로그인하고 학습을 시작해보세요.
                                 </div>
-                                
-                                {/* 태그 */}
-                                <div className="flex flex-wrap gap-1 mb-4">
-                                    {quest.tags.map((tag, index) => (
-                                        <span key={index} className={`px-2 py-1 rounded-full text-xs ${
-                                            quest.questId === activeQuestId 
-                                                ? 'bg-gray-700 text-gray-300' 
-                                                : quest.isStarted
-                                                    ? 'bg-blue-200 text-blue-700'
-                                                    : 'bg-gray-200 text-gray-600'
-                                        }`}>
-                                            {tag}
-                                        </span>
-                                    ))}
-                                </div>
-                                
-                                {/* 정답률 및 진행률 표시 */}
-                                {quest.isStarted && (
-                                    <div className={`text-xs ${
-                                        quest.questId === activeQuestId ? 'text-gray-300' : 'text-gray-500'
-                                    }`}>
-                                        정답률: {quest.accuracyRate}% | 진행률: {quest.progressRate}%
-                                    </div>
+                            </div>
+                        ) : (
+                            /* user 정보가 있음 = 로그인 */
+                            <>
+                                {isLoading ? (
+                                    <div className="text-gray-500">로딩 중...</div>
+                                ) : Array.isArray(userQuestProgress) && userQuestProgress.length > 0 ? (
+                                    userQuestProgress.map((quest) => {
+                                        // const isCompleted = quest.isCompleted;
+                                        // const isActive = quest.questId === activeQuestId;
+                                        const isLocked = !quest.isEnable;
+
+                                        if (isLocked) {
+                                            return (
+                                                <div key={quest.questId}>
+                                                    <LearningItem
+                                                        tags={quest.tags}
+                                                        title={quest.title}
+                                                        progress={0}
+                                                        total={quest.totalCount}
+                                                        isEnable={quest.isEnable}
+                                                        isCompleted={quest.isCompleted}
+                                                    />
+                                                </div>
+                                            );
+                                        }
+
+                                        return (
+                                            <Link
+                                                key={quest.questId}
+                                                to={`/learning/intro/${quest.questId}`}
+                                            >
+                                                <LearningItem
+                                                    tags={quest.tags}
+                                                    title={quest.title}
+                                                    progress={quest.correctCount}
+                                                    total={quest.totalCount}
+                                                    isEnable={quest.isEnable}
+                                                    isCompleted={quest.isCompleted}
+                                                />
+                                            </Link>
+                                        );
+                                    })
+                                ) : Array.isArray(questList) && questList.length > 0 ? (
+                                    questList.map((quest) => {
+                                        return (
+                                            <Link
+                                                key={quest.questId}
+                                                to={`/learning/intro/${quest.questId}`}
+                                                // 기존 코드의 스타일 유지 (필요에 따라 수정하세요)
+                                                className="block rounded-2xl p-6 shadow-md transition-all relative bg-gray-50 text-gray-700"
+                                            >
+                                                <LearningItem
+                                                    tags={[]}
+                                                    title={quest.title}
+                                                    progress={0}
+                                                    total={quest.questItemCount}
+                                                    isEnable={false}
+                                                    isCompleted={false}
+                                                />
+                                            </Link>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="text-gray-500">퀘스트 데이터를 불러올 수 없습니다.</div>
                                 )}
-                            </Link>
-                        ))
-                    ) : Array.isArray(questList) && questList.length > 0 ? (
-                        // API가 구현되지 않은 경우 기존 questList 사용
-                        questList.map((quest) => (
-                            <Link 
-                                to={`/learning/intro/${quest.questId}`} 
-                                key={quest.questId} 
-                                className="flex-shrink-0 w-2xs snap-center block bg-gray-100 rounded-2xl p-6 relative overflow-hidden shadow-md"
-                            >
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="text-sm font-semibold text-gray-600">
-                                        0/{quest.questItemCount}
-                                    </div>
-                                </div>
-                                
-                                <div className="text-2xl font-extrabold mb-4 text-gray-800">
-                                    {quest.title}
-                                </div>
-                                
-                                <div className="flex flex-wrap gap-1 mb-4">
-                                    <span className="px-2 py-1 rounded-full text-xs bg-gray-200 text-gray-600">
-                                        #{quest.type}
-                                    </span>
-                                </div>
-                            </Link>
-                        ))
-                    ) : (
-                        <div className="text-gray-500">퀘스트 데이터를 불러올 수 없습니다.</div>
-                    )}
-                </div>
-            </section>
+                            </>
+                        )}
+                    </div>
+                </section>
+
+            </div>
+            <HomeGuideModal
+                isOpen={isHomeGuideModalOpen}
+                fruits={completedFruits}
+                onConfirm={closeHomeGuideModal}
+            />
+            <WelcomeModal
+                isOpen={isWelcomeModalOpen}
+                username={user?.username}
+                onConfirm={() => {
+                    sessionStorage.setItem('show_welcome', 'false');
+                    setIsWelcomeModalOpen(false);
+                    navigate(`/`);
+                }}
+                onClose={() => {
+                    sessionStorage.setItem('show_welcome', 'false');
+                    setIsWelcomeModalOpen(false)
+                }}
+            />
+            <HelloModal
+                isOpen={isHelloModalOpen}
+                username={user?.username}
+                onConfirm={() => {
+                    sessionStorage.setItem('show_welcome', 'false');
+                    setIsHelloModalOpen(false);
+                    navigate(`/`);
+                }}
+                onClose={() => {
+                    sessionStorage.setItem('show_welcome', 'false');
+                    setIsHelloModalOpen(false);
+                }}
+            />
+
+            <Footer />
         </div>
     );
 };

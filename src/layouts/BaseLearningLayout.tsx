@@ -1,47 +1,64 @@
 import React from 'react';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
-import { X } from 'lucide-react';
 import ProgressBar from '../components/common/ProgressBar';
 import { useLearningStore } from '../store/learningStore';
-import IncorrectModal from '../components/common/IncorrectModal';
 import Question from '../components/learning/Question';
-import CakeImageStack from '../components/backgrounds/CakeImageStack';
+import IntroHeader from '../components/intro/IntroHeader';
+import ExitConfirmModal from '../components/modals/ExitConfirmModal';
+import WaterDropModal from '../components/modals/WaterDropModal';
+import { useVocabularyStore } from '@/store/VocabularyStore';
+import { useAuth } from '../components/common/AuthContext';
 
 // 각 레이아웃에서 커스터마이징할 수 있는 props
 interface BaseLearningLayoutProps {
-  children?: React.ReactNode; // 중앙 이미지 영역
-  backgroundClassName?: string; // 배경색 커스터마이징
+  children?: React.ReactNode; // 중앙 배경 영역 (이미지 스택 또는 배경 컴포넌트)
   submitButtonClassName?: string; // 제출 버튼 스타일 커스터마이징
+  backgroundGradient?: string | null; // 배경 그라디언트 커스터마이징 (CSS gradient 문자열)
+  learningBg?: string | null;
+  learningBgClass?: string;
 }
 
-export default function BaseLearningLayout({ 
-  children, 
-  backgroundClassName = "bg-blue-50",
-  submitButtonClassName = "bg-blue-500 hover:bg-blue-600"
+export default function BaseLearningLayout({
+  children,
+  submitButtonClassName = "bg-blue-500 hover:bg-[#2265CC] rounded-full",
+  backgroundGradient,//= "linear-gradient(to bottom, rgba(219, 234, 254, 0.5), rgba(239, 246, 255, 0.5))",
+  learningBg,
+  learningBgClass = "absolute bottom-0 left-0 right-0 top-80 z-0 pointer-events-none",
 }: BaseLearningLayoutProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { addVocabulary } = useVocabularyStore();
   const { questId, stepId } = useParams<{ questId: string; stepId: string }>();
   const urlQuestId = parseInt(questId || '1', 10);
-  const currentStep = parseInt(stepId || '1', 10);
+  const currentStep = parseInt(stepId || '1', 10); // URL에서 직접 가져옴
 
   // Zustand 스토어에서 상태와 액션을 가져옵니다.
   const {
     totalSteps,
     selectedAnswer,
-    modalState,
     isCorrect,
+    isCompleted,
     checkAnswer,
-    showIncorrectModal,
-    closeModalAndGoToNextStep,
     endLearning,
     sendLearningResult,
     learningData,
     startStep,
     endStep,
     rawQuestData, // quest title을 위해 추가
+    stepProgress, // 정답/오답 개수 계산을 위해 추가
+    reset, // 학습 중단 시 스토어 초기화를 위해 추가
   } = useLearningStore();
 
   const currentQuestionData = learningData[currentStep];
+
+  // 정답/오답 개수 계산
+  const correctCount = Object.values(stepProgress).filter(step => step.isCorrect === true).length;
+  const incorrectCount = Object.values(stepProgress).filter(step => step.isCorrect === false).length;
+
+  // 물방울 획득 모달 상태
+  const [showWaterDropModal, setShowWaterDropModal] = React.useState(false);
+  // 학습 중단 확인 모달 상태
+  const [showExitModal, setShowExitModal] = React.useState(false);
 
   // 현재 단계가 시작될 때 시간 기록
   React.useEffect(() => {
@@ -49,6 +66,16 @@ export default function BaseLearningLayout({
       startStep(currentStep);
     }
   }, [currentStep, currentQuestionData]);
+
+  // step이 변경될 때 정답/오답 상태 초기화
+  React.useEffect(() => {
+    console.log('Step changed to:', currentStep);
+    // 새로운 문제로 이동할 때 상태 초기화
+    useLearningStore.setState({
+      isCorrect: null,
+      selectedAnswer: null
+    });
+  }, [currentStep]);
 
   const handleSubmit = () => {
     console.log(`Step ${currentStep} Answer: ${selectedAnswer}`);
@@ -68,106 +95,211 @@ export default function BaseLearningLayout({
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
-      closeModalAndGoToNextStep();
       navigate(`/learning/${urlQuestId}/${currentStep + 1}`);
     } else {
       // 마지막 문제일 경우
       endLearning();
-      sendLearningResult();
-      navigate('/result');
+      if (user) {
+        sendLearningResult(user.userId);
+      } else {
+        console.error('User not logged in. Cannot send learning result.');
+      }
+      // navigate('/result'); // 더 이상 결과 페이지로 이동하지 않음
     }
   };
 
-  // 현재 문제의 사운드 데이터를 가져옵니다 (오답 모달용).
-  const currentSounds = currentQuestionData?.sounds || [];
-  const incorrectModalSounds = currentSounds.map(sound => ({ ...sound, label: undefined }));
+  // 학습 완료 시 모달 표시
+  React.useEffect(() => {
+    if (isCompleted) {
+      // setShowWaterDropModal(true);
+    }
+  }, [isCompleted]);
+
+  const handleConfirm = () => {
+    setShowWaterDropModal(true);
+    // navigate('/');
+  };
+
+  const handleModalConfirm = () => {
+    setShowWaterDropModal(false);
+    // 모달이 닫힌 후 잠시 대기했다가 홈으로 이동
+    setTimeout(() => {
+      navigate('/');
+    }, 300);
+  };
+
 
   return (
-    <div className={`flex flex-col h-screen max-w-lg mx-auto font-sans ${backgroundClassName}`}>
-      {/* 1. 헤더 (타이틀과 나가기 버튼) */}
-      <header className="flex justify-between items-center py-2 px-4">
-        {/* 왼쪽 빈 공간 (균형을 위해) */}
-        <div className="w-10"></div>
-        
-        {/* 가운데 타이틀 */}
-        {rawQuestData?.title && (
-          <h1 className="text-xl font-bold text-gray-900 text-center flex-1">{rawQuestData.title}</h1>
-        )}
-        
-        {/* 우측 나가기 버튼 */}
-        <button
-          onClick={() => navigate('/')}
-          aria-label="Exit learning session"
-          className="p-2 text-gray-500 rounded-full hover:bg-gray-100 hover:text-gray-800 transition-colors"
-        >
-          <X size={24} />
-        </button>
-      </header>
+    <div className="relative h-[100dvh] max-w-lg mx-auto font-sans overflow-hidden">
+      {/* 배경 그라디언트 */}
+      {backgroundGradient && (
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: backgroundGradient
+          }}
+        />
+      )}
 
-      {/* 2. 진행도 (Progress Bar) */}
-      <div className="px-4">
+      {learningBg && (
+        <div
+          className= {learningBgClass}
+        >
+        <img
+          src={learningBg}
+          alt="Learning background"
+          className="w-full h-full object-cover object-top"
+        />
+      </div>
+      )}
+
+      {/* 메인 컨텐츠 */}
+      <div className="relative z-10 flex flex-col h-full">
+      {/* 1. 헤더 - IntroHeader 컴포넌트 사용 */}
+      <div className="flex-shrink-0 px-5">
+        <IntroHeader
+          groupName={rawQuestData?.title || '학습하기'}
+          buttonType="close"
+          onClose={() => setShowExitModal(true)}
+        />
+      </div>
+
+      {/* 2. 진행도 (Progress Bar) - 12px */}
+      <div className="flex-shrink-0 px-5 py-2">
         <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
       </div>
 
-      {/* 3. 메인 콘텐츠 영역 */}
-      <div className="flex-grow flex flex-col justify-between items-center px-4 py-2 min-h-0">
-        {/* 상단: 소리 재생 버튼 */}
-        <div className="flex-shrink-0 pt-2">
-          {currentQuestionData && <Question key={currentStep} sounds={currentQuestionData.sounds} />}
+      {/* 3. Question (Learning Set) or 완료 텍스트 - 상단 고정 */}
+      {!isCompleted ? (
+        <div className="flex-shrink-0 px-5 pt-2 flex justify-center">
+          {currentQuestionData && user &&
+          <Question key={currentStep}
+              sounds={currentQuestionData.sounds}
+              isDouble={currentQuestionData.correctAnswer == 'same' || currentQuestionData.correctAnswer == 'different'} // ox 문제만 사운드 2개 재생.
+              onAddVoca={() => addVocabulary(user.userId, currentQuestionData.questItemId)}
+          />}
         </div>
-
-        {/* 중앙: 커스터마이징 가능한 이미지 영역 */}
-        <div className="flex-grow flex items-center justify-center">
-          {children || <CakeImageStack />}
+      ) : (
+        <div className="flex-shrink-0 px-5 pt-4 flex justify-center">
+          <div className="text-center">
+            <h2 className="text-gray-800 text-slate-800 text-2xl font-semibold font-['Pretendard'] leading-9">학습 완료!</h2>
+            <p className="text-gray-500 text-base font-medium font-['Pretendard'] leading-6">수고하셨어요</p>
+          </div>
         </div>
-
-        {/* 하단: 문제 풀이(Outlet) 영역 */}
-        <main className="flex-shrink-0 w-full">
-          <Outlet />
-        </main>
-      </div>
-
-      {/* 4. 정답 제출 버튼 */}
-      <div className="flex-shrink-0 px-4 pb-4">
-        {isCorrect === true && (
-          <h3 className="w-full bg-gray-100 text-xl font-bold text-blue-500 py-3 px-4 rounded-lg mb-4">
-            정답이에요! 이어서 가볼까요?
-          </h3>
-        )}
-        {isCorrect === false && (
-          <h3 className="w-full bg-gray-100 text-xl font-bold text-red-500 py-3 px-4 rounded-lg mb-4">
-            오답 문구
-          </h3>
-        )}
-
-        <button
-          onClick={() => {
-            if (isCorrect === null) {
-              handleSubmit();
-            } else if (isCorrect === true) {
-              handleNext();
-            } else { // isCorrect === false (오답)
-              if (modalState === 'closed') {
-                showIncorrectModal();
-              } else {
-                handleNext();
-              }
-            }
-          }}
-          disabled={!selectedAnswer || !currentQuestionData}
-          className={`w-full ${submitButtonClassName} text-white font-bold py-3 px-4 rounded-lg disabled:bg-gray-300 transition-colors`}
-        >
-          {(isCorrect != null) ? '다음' : '정답 제출'}
-        </button>
-      </div>
-
-      {/* 오답 모달 */}
-      {modalState === 'incorrect' && (
-        <IncorrectModal
-          onNext={handleNext}
-          sounds={incorrectModalSounds}
-        />
       )}
-    </div>
+
+      {/* 4. 중앙 배경 영역 - Cake */}
+        <div className="flex-grow flex items-center justify-center px-5 relative min-h-0 overflow-y-auto">
+        {children}
+      </div>
+
+      {/* 5. 하단 영역 - 답 선택/피드백/완료 + 버튼 */}
+      <div className="flex-shrink-0 flex flex-col justify-end relative">
+        {isCompleted ? (
+          // 학습 완료 시: 결과 표시 + 확인 버튼
+          <div className="flex-shrink-0 px-5 pb-4 space-y-4 relative z-50">
+            {/* 정답/오답 결과 박스 */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex justify-center gap-12">
+              <div className="text-center">
+                <p className="text-base text-gray-600 font-medium mb-2">정답</p>
+                <p className="text-4xl font-bold text-blue-500">{correctCount}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-base text-gray-600 font-medium mb-2">오답</p>
+                <p className="text-4xl font-bold text-red-500">{incorrectCount}</p>
+              </div>
+            </div>
+
+            {/* 확인 버튼 */}
+            <button
+              onClick={handleConfirm}
+                className={`w-full px-6 py-3 ${submitButtonClassName} gap-2 text-white font-bold transition-colors leading-6 rounded-full`}
+            >
+              확인
+            </button>
+          </div>
+        ) : isCorrect === null ? (
+          // 답 선택 시: Learning Btn (Outlet) + Primary Button
+          <div className="flex-shrink-0 px-5 pb-5 space-y-2 relative z-50">
+            <main className="w-full">
+              <Outlet />
+            </main>
+            <button
+              onClick={handleSubmit}
+              disabled={!selectedAnswer || !currentQuestionData}
+              className={`w-full px-6 py-3 ${submitButtonClassName} text-white font-bold disabled:bg-gray-200 transition-colors leading-6 rounded-full`}
+            >
+              정답 제출
+            </button>
+          </div>
+        ) : (
+          // 정답/오답 시: Bottom Sheet + Button (같은 위치)
+          <div className={`flex-shrink-0 relative z-50 animate-slide-u rounded-tl-3xl rounded-tr-3xl outline outline-1 shadow-2xl overflow-hidden ${
+                isCorrect ? 'outline-blue-200 bg-blue-100' : 'outline-red-200 bg-red-100'
+              }`}>
+            {/* Bottom Sheet 배경 */}
+            <div
+              className={`px-5 pt-6 pb-4`}
+            >
+              {/* 피드백 헤더 */}
+              <div className="flex items-center gap-2 mb-4">
+                {isCorrect ? (
+                  <>
+                    <img src="/images/ic_explain_correct.png" alt="정답" className="w-6 h-6" />
+                    <span className="justify-start text-blue-500 text-xl font-semibold font-['Pretendard'] leading-7">
+                      정답이에요! 이어서 가볼까요?
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <img src="/images/ic_explain_incorrect.png" alt="오답" className="w-6 h-6" />
+                    <span className="justify-start text-red-500 text-xl font-semibold font-['Pretendard'] leading-7">
+                      아쉽지만 오답이에요
+                    </span>
+                  </>
+                )}
+              </div>
+
+              {/* 정답 설명 */}
+              {currentQuestionData && (
+                <div className="justify-start text-gray-600 text-lg font-semibold font-['Pretendard'] leading-7">
+                  정답: {currentQuestionData.answerDetail.type !== 'choice' && (<span>{currentQuestionData.answerDetail.label}</span>)}
+                  <br />
+                    "{currentQuestionData.answerDetail.units.join(', ')}"
+                </div>
+              )}
+            </div>
+
+            {/* 다음 버튼 - Bottom Sheet 밖에 배치하여 "정답 제출"과 같은 위치 */}
+            <div className="px-5 pb-4">
+              <button
+                onClick={handleNext}
+                className={`w-full px-6 py-3 ${isCorrect ? submitButtonClassName : 'bg-red-400 hover:bg-red-500 rounded-full'} gap-2 text-white font-bold transition-colors leading-6 rounded-full`}
+              >
+                다음
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+      </div>
+
+      {/* 물방울 획득 모달 */}
+      <WaterDropModal
+        isOpen={showWaterDropModal}
+        waterDropCount={correctCount}
+        onConfirm={handleModalConfirm}
+      />
+
+      {/* 학습 중단 확인 모달 */}
+      <ExitConfirmModal
+        isOpen={showExitModal}
+        onContinue={() => setShowExitModal(false)}
+        onExit={() => {
+          reset(); // 스토어 완전 초기화
+          navigate('/'); // 홈으로 이동
+        }}
+      />
+      </div>
   );
 }

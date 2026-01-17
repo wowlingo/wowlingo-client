@@ -1,13 +1,15 @@
 import { create } from 'zustand';
 
 
-type QuestItemUnit = {
-    questItemUnitId: number;
-    type: string;
-    str: string;
-    urlNormal: string;
-    slowNormal: string;
-    remark: string;
+type ReviewQuestItem = {
+    // questId: number;
+    // type: string;
+    title: string;
+    questItemId: number;
+    sounds: any[];
+    units: string[];
+    answer?: string | number | null;
+    options?: any[];
 };
 
 type HashtagData = {
@@ -20,9 +22,9 @@ interface ReviewState {
     hashtags: HashtagData[];
     isLoading: boolean;
     error: string | null;
-    questItemUnits: QuestItemUnit[];
-    fetchHashtags: (date?: Date) => Promise<void>;
-    fetchQuestItemUnits: (hashtagIds?: number[], date?: Date, sort?: string) => Promise<void>;
+    reviewQuestItems: ReviewQuestItem[];
+    fetchHashtags: (userId: number, date?: Date) => Promise<void>;
+    fetchQuestItemUnits: (userId: number, hashtagIds?: number[], date?: Date, sort?: string) => Promise<void>;
 }
 
 const formatDate = (date: Date) => {
@@ -37,18 +39,18 @@ export const useReviewStore = create<ReviewState>((set) => ({
     hashtags: [],
     isLoading: false,
     error: null,
-    questItemUnits: [],
+    reviewQuestItems: [],
 
-    fetchHashtags: async (date?: Date) => {
+    fetchHashtags: async (userId: number, date: Date = new Date()) => {
         set({ isLoading: true, error: null });
         try {
             const params = new URLSearchParams();
-            params.append('userId', "4");
+            params.append('userId', String(userId));
             if (date) {
                 params.append('date', formatDate(date));//'2025-09-25');
             }
 
-            const response = await fetch(`http://localhost:8080/api/user-quests/review-notes/hashtags?${params.toString()}`);
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user-quests/review-notes/hashtags?${params.toString()}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
@@ -68,27 +70,27 @@ export const useReviewStore = create<ReviewState>((set) => ({
         }
     },
 
-    fetchQuestItemUnits: async (hashtagIds: number[] = [], date?: Date) => {
+    fetchQuestItemUnits: async (userId: number, hashtagIds: number[] = [], date: Date = new Date()) => {
         set({ isLoading: true, error: null });
         try {
             const params = new URLSearchParams();
-            params.append('userId', "4");
+            params.append('userId', String(userId));
             hashtagIds.forEach(id => params.append('hashtags', id.toString()));
             if (date) {
                 params.append('date', formatDate(date));//'2025-09-25');
             }
             // if (sort) params.append('sort', sort);
 
-            const response = await fetch(`http://localhost:8080/api/user-quests/review-notes?${params.toString()}`);
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/user-quests/review-notes?${params.toString()}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
 
-            const jsonResponse: { data: QuestItemUnit[] } = await response.json();
+            const jsonResponse: { data: ReviewQuestItem[] } = await response.json();
 
-            const newQuestItemUnits = jsonResponse.data;
+            const newDatas = jsonResponse.data;
 
-            set({ questItemUnits: newQuestItemUnits, isLoading: false });
+            set({ reviewQuestItems: newDatas, isLoading: false });
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
             set({ isLoading: false, error: errorMessage });

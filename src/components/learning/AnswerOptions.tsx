@@ -1,9 +1,8 @@
 import { useLearningStore } from '../../store/learningStore';
-import { CircleCheck, CircleQuestionMark, CircleX, Dot } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export interface AnswerOption {
-  id: string;
+  id?: string | number; // choice 타입의 경우 number, 다른 타입의 경우 선택적
   type: string;
   label: string;
 }
@@ -11,10 +10,9 @@ export interface AnswerOption {
 interface AnswerOptionsProps {
   options: AnswerOption[];
   questType?: string; // quest 타입 정보 추가
-  layoutType?: number; // 레이아웃 타입 추가 (1, 2, 3, 4)
 }
 
-export default function AnswerOptions({ options, questType, layoutType = 1 }: AnswerOptionsProps) {
+export default function AnswerOptions({ options, questType }: AnswerOptionsProps) {
   const { setSelectedAnswer } = useLearningStore();
   // 로컬 상태로 선택된 옵션 인덱스 관리 (시각적 선택용)
   const [localSelectedIndex, setLocalSelectedIndex] = useState<number | null>(null);
@@ -24,29 +22,32 @@ export default function AnswerOptions({ options, questType, layoutType = 1 }: An
     setLocalSelectedIndex(null);
   }, [options]);
 
-  const renderIcon = (type: string, isSelected: boolean) => {
-    const iconClass = isSelected ? "text-white" : "text-blue-500";
-    const iconClassRed = isSelected ? "text-white" : "text-red-500";
-    const iconClassGreen = isSelected ? "text-white" : "text-green-500";
-    const iconClassPurple = isSelected ? "text-white" : "text-purple-500";
-    const iconClassGray = isSelected ? "text-white" : "text-gray-500";
-    
-    // 타입에 따른 아이콘 매핑
-    const iconMap: Record<string, React.ReactNode> = {
-      'statement': <Dot size={24} className={iconClass} />,
-      'question': <CircleQuestionMark size={24} className={iconClass} />,
-      'same': <CircleCheck size={24} className={iconClass} />,
-      'different': <CircleX size={24} className={iconClassRed} />,
-      'word': <Dot size={24} className={iconClassGreen} />,
-      'senstence': <CircleX size={24} className={iconClassPurple} />,
+  const renderIcon = (type: string) => {
+    // 타입에 따른 아이콘 이미지 매핑
+    const iconMap: Record<string, string> = {
+      'statement': '/images/ic_choice_statement.png',
+      'question': '/images/ic_choice_question.png',
+      'same': '/images/ic_choice_o.png',
+      'different': '/images/ic_choice_x.png',
     };
-    
-    return iconMap[type] || <Dot size={24} className={iconClassGray} />;
+
+    const iconSrc = iconMap[type];
+    if (!iconSrc) return null;
+
+    return (
+      <img
+        src={iconSrc}
+        alt={type}
+        className="w-12 h-12"
+      />
+    );
   };
 
   const handleOptionClick = (option: AnswerOption, index: number) => {
     // quest type에 따라 다른 값 사용
-    const answerValue = questType === 'choice' ? option.id : option.type;
+    const answerValue = questType === 'choice'
+      ? (option.id !== undefined ? option.id : option.type) // choice 타입은 id 사용, 없으면 type 사용
+      : option.type;
     console.log('Option clicked:', answerValue, 'Quest type:', questType, 'Index:', index); // 디버깅용
     setLocalSelectedIndex(index); // 시각적 선택 상태 업데이트
     setSelectedAnswer(answerValue); // 스토어의 정답 상태 업데이트
@@ -61,24 +62,27 @@ export default function AnswerOptions({ options, questType, layoutType = 1 }: An
   // questType에 따른 버튼 스타일 결정
   const getButtonStyle = (isSelected: boolean) => {
     if (questType === 'choice') {
-      // 피그마 기준 스타일 적용
-      const baseClasses = "flex items-center justify-center gap-4 w-full h-14 rounded-2xl border transition-all font-semibold";
-      const paddingClasses = "py-4 px-4"; // padding-top: 16px, padding-bottom: 15px
-      
-      return `${baseClasses} ${paddingClasses} ${
+      // Figma 디자인 스타일 적용 - 세로 배치
+      const baseClasses = "flex items-center justify-center gap-4 w-full rounded-2xl transition-all";
+      const textClasses = "text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px]";
+      const paddingClasses = "py-[15px] px-4"; // 상단 16px, 하단 15px (총 높이 약 53px)
+
+      return `${baseClasses} ${paddingClasses} ${textClasses} ${
         isSelected
-          ? 'border-2 border-blue-500 text-white' // 선택된 상태: 2px 테두리, 파란색 배경
-          : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300' // 선택 안된 상태: 1px 테두리
+          ? 'bg-blue-100 outline outline-2 outline-offset-[-2px] outline-blue-500 text-blue-500 text-lg font-semibold' // 선택됨: 파란 배경, 흰색 텍스트
+          : 'bg-white border border-[#E5E7EB] text-gray-600 hover:bg-[#F9FAFB]' // 미선택: 흰색 배경, 회색 텍스트
       }`;
     }
-    
-    // 사각형 가로 두개 배치 스타일
-    const baseClasses = "flex items-center justify-center gap-4 p-8 border-2 rounded-lg text-lg transition-all font-semibold";
-    
-    return `${baseClasses} ${
+
+    // 사각형 가로 두개 배치 스타일 (statement-question, same-different 타입)
+    // Figma 디자인: 높이 120px, 가로 배치
+    const baseClasses = "flex flex-col items-center justify-center gap-2 rounded-2xl transition-all h-[15vh] min-h-[90px] max-h-[120px]";
+    const textClasses = "text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px]";
+
+    return `${baseClasses} ${textClasses} ${
       isSelected
-        ? 'border-blue-500 bg-blue-500 text-white ring-4 ring-blue-200 shadow-lg scale-105'
-        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400'
+        ? 'bg-blue-100 outline outline-2 outline-offset-[-2px] outline-blue-500 text-blue-500 text-lg font-semibold' // 선택됨: 파란 배경, 흰색 텍스트
+        : 'bg-white border border-[#E5E7EB] text-gray-600 text-lg font-semibold leading-6 hover:bg-[#F9FAFB]' // 미선택: 흰색 배경, 회색 텍스트
     }`;
   };
 
@@ -89,10 +93,6 @@ export default function AnswerOptions({ options, questType, layoutType = 1 }: An
     }
     return "grid grid-cols-2 gap-4 w-full"; // 기본적으로 가로 배치
   };
-
-  // 디버깅용 - options 데이터 확인
-  console.log('AnswerOptions - options:', options);
-  console.log('AnswerOptions - layoutType:', layoutType);
 
   return (
     <div className="w-full flex flex-col items-center gap-4">
@@ -106,11 +106,8 @@ export default function AnswerOptions({ options, questType, layoutType = 1 }: An
               key={`${option.type || 'unknown'}-${index}`} // 고유한 키 생성 (type 사용)
               onClick={() => handleOptionClick(option, index)}
               className={getButtonStyle(isSelected)}
-              style={questType === 'choice' && isSelected ? {
-                background: 'linear-gradient(0deg, #3182F7, #3182F7), linear-gradient(0deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85))',
-              } : undefined}
             >
-              {renderIcon(option.type, isSelected)}
+              {questType !== 'choice' && renderIcon(option.type)}
               <span>{option.label}</span>
             </button>
           );

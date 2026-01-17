@@ -2,15 +2,17 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
-import RandomLearningLayout from './layouts/RandomLearningLayout';
+import 'sonner/dist/styles.css';
+import { Toaster } from "sonner";
+import LearningFlow from './layouts/LearningFlow';
 import LearningStepPage from './pages/LearningStepPage';
-import GameClearPage from './pages/GameClearPage';
 import LearningIntroPage from './pages/LearningIntroPage';
 import Home from './pages/Home';
 import LearningStatusPage from './pages/LearningStatusPage';
 import MainLayout from './components/layout/MainLayout';
 import ReviewNotesPage from './pages/ReviewNotesPage';
 import VocabularyPage from './pages/VocabularyPage';
+import { AuthProvider } from './components/common/AuthContext';
 
 const router = createBrowserRouter([
   {
@@ -40,7 +42,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/learning/:questId",
-    element: <RandomLearningLayout />, // 랜덤 레이아웃.
+    element: <LearningFlow />, // 랜덤 레이아웃.
     children: [
       {
         path: ':stepId', // 동적 경로 파라미터 사용
@@ -48,14 +50,37 @@ const router = createBrowserRouter([
       },
     ],
   },
-  {
-    path: '/result',
-    element: <GameClearPage />,
-  },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>,
+  <>
+    <React.StrictMode>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </React.StrictMode>
+    <Toaster
+      theme="dark"
+      position="bottom-center"
+      richColors
+      toastOptions={{
+        style: {
+          // width: '335px',
+          height: '63px',
+          padding: '18px 20px',
+          background: 'rgba(0, 0, 0, 0.6)',
+          color: '#fff',
+          borderRadius: '999px',
+          boxSizing: 'border-box',
+          fontSize: '18px',
+          pointerEvents: 'none',
+        },
+        className: 'shadow-lg',
+        classNames: {
+          actionButton: 'custom-toast-action-button',
+          title: 'custom-toast-title'
+        }
+      }}
+    />
+  </>
 );

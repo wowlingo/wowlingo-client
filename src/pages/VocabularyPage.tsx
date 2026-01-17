@@ -1,22 +1,26 @@
 // src/pages/VocabularyPage.tsx
-import { Play, ChevronDown } from 'lucide-react';
-import VocaCard from '../components/vocabulary/VocaCard';
 import { useEffect, useState } from 'react';
 import { useVocabularyStore } from '../store/VocabularyStore';
-
+import { SortDropdown, SortOptionKey } from '../components/ui/SortDropdown';
+import { WordCard } from '../components/ui/WordCard';
+import { useAuth } from '../components/common/AuthContext';
 
 const VocabularyPage = () => {
-    const { hashtags, isLoading, error, vocabulary, fetchHashtags, fetchVocabulary } = useVocabularyStore();
-    // const [filterTags, setFilterTags] = useState<string[]>([]);
-    // const [isLoading, setIsLoading] = useState(true);
-    // const [error, setError] = useState<string | null>(null);
+    const { user } = useAuth();
+    const { hashtags, isLoading, error, vocabulary, fetchHashtags, fetchVocabulary, deleteVocabulary } = useVocabularyStore();
+
+    const [sortBy, setSortBy] = useState<SortOptionKey>('latest');
+    const [selectedTags, setSelectedTags] = useState<number[]>([]);
 
     useEffect(() => {
-        fetchHashtags();
-        fetchVocabulary();
-    }, [fetchHashtags, fetchVocabulary]);
+        if (!user) return;
+        fetchHashtags(user.userId);
+        fetchVocabulary(user.userId, selectedTags, sortBy);
+    }, [user?.userId]);
 
-    const [selectedTags, setSelectedTags] = useState<number[]>([]);
+    if (!user) {
+        return null;
+    }
 
     const handleClick = (tagId: number) => {
         let newSelected;
@@ -26,35 +30,49 @@ const VocabularyPage = () => {
             newSelected = [...selectedTags, tagId]; // 추가 선택
         }
         setSelectedTags(newSelected);
-        fetchVocabulary(newSelected, 'latest');
+        fetchVocabulary(user.userId, newSelected, sortBy);
     };
+
+    const handleSortChange = (newSort: SortOptionKey) => {
+        setSortBy(newSort);
+        fetchVocabulary(user.userId, selectedTags, newSort);
+    };
+
+    // 선택된 태그를 앞으로 정렬
+    const sortedHashtags = [...hashtags].sort((a, b) => {
+        const aSelected = selectedTags.includes(a.hashtagId);
+        const bSelected = selectedTags.includes(b.hashtagId);
+
+        if (aSelected && !bSelected) return -1;
+        if (!aSelected && bSelected) return 1;
+        return 0; // 같은 그룹 내에서는 원래 순서 유지
+    });
 
     return (
         <div className="h-full w-full">
-            <div className="p-4 flex flex-col h-full">
+            <div className="flex flex-col h-full">
                 {/* 전체 개수 및 전체 듣기 */}
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="font-semibold text-gray-800">전체 {vocabulary.length}</h2>
-                    <button className="flex text-gray-700 hover:text-black">
-                        <Play size={24} />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <p className="text-[16px] text-gray-500">전체</p>
+                        <p className="text-[16px] text-black">{vocabulary.length}</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        {/* 분리된 SortDropdown 컴포넌트 사용 */}
+                        <SortDropdown selected={sortBy} onSelect={handleSortChange} />
+                    </div>
                 </div>
 
                 {/* 정렬 및 필터 */}
                 <div className="flex items-center mb-5 overflow-hidden">
-                    <button className="flex items-center text-sm font-medium flex-shrink-0 mr-2">
-                        최신순 <ChevronDown size={16} className="ml-1" />
-                    </button>
                     <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar">
-                        {/* {isLoading && <p>태그 로딩 중...</p>} */}
-                        {/* {error && <p>오류: {error}</p>} */}
 
-                        {!isLoading && !error && hashtags.map((tag) => {
+                        {!isLoading && !error && sortedHashtags.map((tag) => {
                             const isSelected = selectedTags.includes(tag.hashtagId);
                             return (
                                 <button key={tag.hashtagId}
-                                    className={`px-3 py-1 text-sm rounded-full flex-shrink-0
-                                    ${isSelected ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}
+                                    className={`px-3 py-1 text-[14px] rounded-full flex-shrink-0
+                                    ${isSelected ? 'bg-blue-100 text-blue-500 hover:bg-blue-200' : 'border border-gray-200 text-gray-500 hover:bg-gray-200'}
                                     `}
                                     onClick={() => handleClick(tag.hashtagId)}>
                                     #{tag.name}
@@ -68,12 +86,13 @@ const VocabularyPage = () => {
                 {/* 단어 리스트 */}
                 <div className="flex-1 space-y-3 overflow-y-auto no-scrollbar">
                     {vocabulary.map(item => (
-                        <VocaCard 
-                            key={item.vocabId} 
-                            word={item.str} 
-                            savedDate={item.createdAtKST} 
-                            urlNormal={item.urlNormal} 
-                            urlSlow={item.slowNormal} 
+                        <WordCard
+                            key={item.vocabId}
+                            id={item.vocabId}
+                            unit={item.str}
+                            urlNormal={item.urlNormal}
+                            urlSlow={item.slowNormal}
+                            onDeleteVoca={() => deleteVocabulary(item.vocabId)}
                         />
                     ))}
                 </div>

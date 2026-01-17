@@ -1,4 +1,5 @@
 import BaseLearningLayout from './BaseLearningLayout';
+import CakeImageStack from '../components/backgrounds/CakeImageStack';
 import { useLearningStore } from '../store/learningStore';
 import { useEffect } from 'react';
 
@@ -11,9 +12,14 @@ export default function LearningLayout1() {
   }, [setSelectedLayoutType]);
 
   return (
-    <BaseLearningLayout 
-      backgroundClassName="bg-blue-50"
-      submitButtonClassName="bg-blue-500 hover:bg-blue-600"
-    />
+    <BaseLearningLayout
+      submitButtonClassName="bg-blue-500 hover:bg-[#2265CC] rounded-full"
+      backgroundGradient="linear-gradient(to bottom, #D8E8FF 0%, #FFFFFF 100%)"
+      learningBg="/images/bg_cake.png"
+      learningBgClass="absolute bottom-0 left-0 right-0 top-126 z-0 pointer-events-none"
+    >
+      {/* 배경 컴포넌트 */}
+      <CakeImageStack />
+    </BaseLearningLayout>
   );
 }

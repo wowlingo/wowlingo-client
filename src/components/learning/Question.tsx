@@ -1,87 +1,182 @@
-import { Turtle, Volume2, NotebookPen } from 'lucide-react'; // 듣기 아이콘
+import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
+import { ToastBlueIcon } from '../ui/WordCard';
+import { playAudio, playAudios, stopAudio } from '../common/AudioService';
+import { usePlayAnimation } from '../../shared/hooks/usePlayAnimation';
 
-// 하나의 사운드에 대한 타입 정의
 interface Sound {
-  id: number | string; // key로 사용될 고유 ID
+  id: number | string;
   type: string;
-  url: string;         // 오디오 파일의 경로
-  label?: string;       // 버튼에 표시될 텍스트 (예: '느리게')
+  url: string;
+  label?: string;
 }
 
-// 컴포넌트가 받을 props 타입 정의
 interface QuestionProps {
+  isDouble: boolean | null;
   sounds: Sound[];
+  onAddVoca: () => void;
 }
 
-export default function Question({ sounds }: QuestionProps) {
+export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isSlowPlaying, setIsSlowPlaying] = useState(false);
 
-  const renderIcon = (type: Sound['type']) => {
-    if (type === 'normal') {
-      return <Volume2 size={24} className="text-blue-600" />;
+  const currentPlayAnimation = usePlayAnimation(isPlaying, isSlowPlaying);
+
+  // 컴포넌트 언마운트 시 오디오 정지
+  useEffect(() => {
+    return () => {
+      stopAudio();
+    };
+  }, []);
+
+  // 화면 가시성 변경 감지 (홈 버튼, 탭 전환 등)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      // 화면이 숨겨졌을 때 (백그라운드로 이동 시)
+      if (document.visibilityState === 'hidden') {
+        stopAudio();           // 오디오 정지
+        setIsPlaying(false);   // 재생 상태 UI 초기화
+        setIsSlowPlaying(false); // 재생 상태 UI 초기화
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  const playNormal = useCallback(() => {
+    if (isPlaying || isSlowPlaying) return;
+
+    setIsPlaying(true);
+    const onPlayEnd = () => setIsPlaying(false);
+
+    const soundUrls = sounds.filter(s => s.type === 'normal').map(s => s.url);
+
+    if (isDouble) {
+      if (soundUrls.length > 0) {
+        playAudios(soundUrls, onPlayEnd);
+      } else {
+        setIsPlaying(false);
+      }
+    } else {
+      if (soundUrls.length > 0) {
+        playAudio(soundUrls[0], onPlayEnd);
+      } else {
+        setIsPlaying(false);
+      }
     }
-    if (type === 'slow') {
-      return <Turtle size={24} className="text-blue-600" />;
+  }, [isDouble, sounds, isPlaying, isSlowPlaying]);
+
+  const playSlow = () => {
+    if (isPlaying || isSlowPlaying) return;
+
+    setIsSlowPlaying(true);
+    const onPlayEnd = () => setIsSlowPlaying(false);
+
+    const soundUrls = sounds.filter(s => s.type === 'slow').map(s => s.url);
+
+    if (isDouble) {
+      if (soundUrls.length > 0) {
+        playAudios(soundUrls, onPlayEnd);
+      } else {
+        setIsSlowPlaying(false);
+      }
+    } else {
+      if (soundUrls.length > 0) {
+        playAudio(soundUrls[0], onPlayEnd);
+      } else {
+        setIsSlowPlaying(false);
+      }
     }
-    return <Volume2 size={24} className="text-blue-600" />;
   };
 
-  // 사운드를 재생하는 함수
-  const handlePlaySound = (audioUrl: string) => {
-    const audio = new Audio(audioUrl);
-    audio.play().catch(e => console.error("오디오 재생 오류:", e));
-  };
+  // 화면 진입 시 자동 재생
+  useEffect(() => {
+    const timer = setTimeout(playNormal, 400);
+    return () => clearTimeout(timer);
+  }, []);
 
-  // 단어장 추가 함수
   const handleAddToVocabulary = () => {
-    // TODO: 단어장 추가 로직 구현
-    console.log("단어장에 추가");
+    onAddVoca();
+    toast("단어장에 추가 되었습니다", {
+      icon: <ToastBlueIcon />,
+      duration: 3000,
+      dismissible: false,
+    });
   };
 
   return (
-    // 피그마 디자인에 맞는 컨테이너
-    <div 
-      className="w-[335px] h-[115px] bg-gray-100 rounded-2xl p-2 flex items-center gap-[9px] mx-auto my-4"
-      style={{
-        paddingTop: '8px',
-        paddingRight: '10px', 
-        paddingBottom: '8px',
-        paddingLeft: '10px'
-      }}
-    >
+    <div className="w-90 h-30 flex items-center bg-white rounded-xl overflow-hidden shadow-sm">
       {/* 문제 듣기 버튼 */}
       <button
-        onClick={() => sounds.find(s => s.type === 'normal') && handlePlaySound(sounds.find(s => s.type === 'normal')!.url)}
-        className="flex-1 flex flex-col items-center justify-center p-3 bg-white rounded-xl hover:bg-gray-50 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400"
+        onClick={playNormal}
+        disabled={isSlowPlaying}
+        className={`w-full h-full flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] transition-colors ${isSlowPlaying ? 'cursor-not-allowed opacity-40 grayscale' : 'hover:bg-gray-50'}`}
         aria-label="문제 듣기"
       >
-        {renderIcon('normal')}
-        <span className="text-xs text-gray-700 mt-1 font-medium">문제 듣기</span>
+        <div className="w-22 h-10 flex items-center justify-center">
+          {isPlaying ? (
+            // 재생 중일 때: 훅에서 받아온 이미지 사용 (훅이 알아서 SLOWLY 프레임을 줌)
+            <img
+              src={currentPlayAnimation}
+              alt="듣는 중"
+              className="object-contain"
+            />
+          ) : (
+            // 정지 상태: 고정 이미지
+            <img src="/images/sound_03.png" alt="문제 듣기" />
+          )}
+        </div>
+        <span className={`text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px] ${isSlowPlaying ? 'text-gray-300' : 'text-[#4A5564]'}`}>
+          문제 듣기
+        </span>
       </button>
 
       {/* 구분선 */}
-      <div className="w-px h-12 bg-gray-300"></div>
+      <div className="w-[1px] h-[67px] bg-[#E5E7EB] relative z-10" />
 
       {/* 천천히 듣기 버튼 */}
       <button
-        onClick={() => sounds.find(s => s.type === 'slow') && handlePlaySound(sounds.find(s => s.type === 'slow')!.url)}
-        className="flex-1 flex flex-col items-center justify-center p-3 bg-white rounded-xl hover:bg-gray-50 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400"
+        onClick={playSlow}
+        disabled={isPlaying}
+        className={`w-full h-full flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] transition-colors ${isPlaying ? 'cursor-not-allowed opacity-40 grayscale' : 'hover:bg-gray-50'}`}
         aria-label="천천히 듣기"
       >
-        {renderIcon('slow')}
-        <span className="text-xs text-gray-700 mt-1 font-medium">천천히 듣기</span>
+        <div className="w-22 h-10 flex items-center justify-center">
+          {isSlowPlaying ? (
+            // 재생 중일 때: 훅에서 받아온 이미지 사용 (훅이 알아서 SLOWLY 프레임을 줌)
+            <img
+              src={currentPlayAnimation}
+              alt="듣는 중"
+              className="object-contain"
+            />
+          ) : (
+            // 정지 상태: 고정 이미지
+            <img src="/images/slowly_04.png" alt="천천히 듣기" />
+          )}
+        </div>
+        <span className={`text-[16px] font-semibold leading-[22.4px] tracking-[-0.32px] ${isPlaying ? 'text-gray-300' : 'text-[#4A5564]'}`}>
+          천천히 듣기
+        </span>
       </button>
 
-      {/* 구분선 */}
-      <div className="w-px h-12 bg-gray-300"></div>
+      <div className="w-[1px] h-[67px] bg-[#E5E7EB] relative z-10" />
 
-      {/* 단어장 추가 버튼 */}
       <button
         onClick={handleAddToVocabulary}
-        className="flex-1 flex flex-col items-center justify-center p-3 bg-gray-200 rounded-xl hover:bg-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="w-full h-full flex flex-col items-center justify-center gap-[2px] px-[6px] py-[18px] hover:bg-gray-50 transition-colors"
         aria-label="단어장 추가"
       >
-        <NotebookPen size={24} className="text-gray-700" />
-        <span className="text-xs text-gray-700 mt-1 font-medium">단어장 추가</span>
+        <div className="w-22 h-10 flex items-center justify-center">
+          <img src="/images/ic_set_add.png" alt="단어장 추가" className="w-10 h-10" />
+        </div>
+        <span className="text-[16px] font-semibold text-[#4A5564] leading-[22.4px] tracking-[-0.32px]">
+          단어장 추가
+        </span>
       </button>
     </div>
   );

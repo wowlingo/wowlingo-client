@@ -12,9 +12,11 @@ export default function LearningLayout2() {
   }, [setSelectedLayoutType]);
 
   return (
-    <BaseLearningLayout 
-      backgroundClassName="bg-purple-50 relative"
-      submitButtonClassName="bg-blue-500 hover:bg-blue-600"
+    <BaseLearningLayout
+      submitButtonClassName="bg-blue-500 hover:bg-[#2265CC] rounded-full"
+      backgroundGradient="linear-gradient(to bottom, #D8DCFB 0%, #FFFFFF 100%)"
+      learningBg="/images/bg_cat.png"
+      learningBgClass="absolute bottom-0 left-0 right-0 top-126 z-0 pointer-events-none"
     >
       {/* 배경 컴포넌트 */}
       <CatImageStack />
