@@ -72,3 +72,8 @@ npm run preview   # 빌드된 앱 미리보기
 
 - Web Speech API를 지원하는 모던 브라우저
 - Chrome, Edge, Safari 권장
+
+## Acknowledgement
+본 프로젝트는 카카오임팩트 테크포임팩트 프로그램을 통해 개발되었습니다.
+
+![카카오임팩트 로고](./assets/kakao_impact_logo_black.png)

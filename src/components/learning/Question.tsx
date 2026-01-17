@@ -30,6 +30,24 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
     };
   }, []);
 
+  // 화면 가시성 변경 감지 (홈 버튼, 탭 전환 등)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      // 화면이 숨겨졌을 때 (백그라운드로 이동 시)
+      if (document.visibilityState === 'hidden') {
+        stopAudio();           // 오디오 정지
+        setIsPlaying(false);   // 재생 상태 UI 초기화
+        setIsSlowPlaying(false); // 재생 상태 UI 초기화
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
   const playNormal = useCallback(() => {
     if (isPlaying || isSlowPlaying) return;
 
@@ -87,6 +105,7 @@ export default function Question({ sounds, isDouble, onAddVoca }: QuestionProps)
     toast("단어장에 추가 되었습니다", {
       icon: <ToastBlueIcon />,
       duration: 3000,
+      dismissible: false,
     });
   };
 

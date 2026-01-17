@@ -73,6 +73,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           borderRadius: '999px',
           boxSizing: 'border-box',
           fontSize: '18px',
+          pointerEvents: 'none',
         },
         className: 'shadow-lg',
         classNames: {

@@ -58,8 +58,10 @@ type ApiUserQuestProgress = {
   totalCount: number;
   isCompleted: boolean;
   isStarted: boolean;
+  isEnable: boolean;
   accuracyRate: number;  // string → number (백엔드 응답 타입과 일치)
   progressRate: number;
+  fruit: string;
 };
 
 type ApiUserQuestResponse = {

@@ -8,6 +8,7 @@ import HomeGuideModal from '../components/modals/HomeGuideModal';
 import WelcomeModal from '../components/modals/WelcomeModal';
 import HelloModal from '../components/modals/HelloModal';
 import { useAuth } from '../components/common/AuthContext';
+import Footer from '../components/layout/Footer';
 
 
 type LearningItemProps = {
@@ -16,6 +17,7 @@ type LearningItemProps = {
     progress: number;
     total: number;
     isEnable: boolean;
+    isCompleted: boolean;
 }
 
 // 학습 단계 항목별 태그 컴포넌트
@@ -26,29 +28,30 @@ const Tag = ({ text }: { text: string }) => (
 )
 
 // 학습 단계 항목별 진행도 컴포넌트
-const ProgressIcon = ({ progress, total }: { progress: number; total: number }) => {
-    const isComplete = true;//progress === total && total > 0;
-    const inProgress = false;//progress > 0 && progress < total;
+const ProgressIcon = ({ progress, total, isEnable }: { progress: number; total: number, isEnable: boolean }) => {
+    // const isComplete = true;//progress === total && total > 0;
+    // const inProgress = false;//progress > 0 && progress < total;
+    const textColor = isEnable ? "text-blue-500" : "text-gray-400";
 
-    if (isComplete) {
+    if (isEnable) {
         return (
             <div className="flex items-center gap-1">
                 <img src="/images/ic_learning_waterdrop.png" alt="progress" className="w-5 h-5" />
-                <span className="font-semibold text-[14px] text-blue-500">{progress}</span>
+                <span className={`font-semibold text-[14px] ${textColor}`}>{progress}</span>
                 <span className="font-semibold text-[14px] text-gray-400">/ {total}</span>
             </div>
         )
     }
 
-    if (inProgress) {
-        return (
-            <div className="flex items-center gap-1">
-                <img src="/images/ic_learning_waterdrop.png" alt="progress" className="w-5 h-5" />
-                <span className="font-semibold text-[14px] text-blue-500">{progress}</span>
-                <span className="font-semibold text-[14px] text-gray-400">/ {total}</span>
-            </div>
-        )
-    }
+    // if (isEnable && inProgress) {
+    //     return (
+    //         <div className="flex items-center gap-1">
+    //             <img src="/images/ic_learning_waterdrop.png" alt="progress" className="w-5 h-5" />
+    //             <span className={`font-semibold text-[14px]  ${textColor}`}>{progress}</span>
+    //             <span className="font-semibold text-[14px] text-gray-400">/ {total}</span>
+    //         </div>
+    //     )
+    // }
 
     // Not started (0 / 70)
     return (
@@ -70,11 +73,10 @@ const CompleteTag = () => (
     </div>
 );
 
-const LearningItem = ({ tags, title, progress, total, isEnable }: LearningItemProps) => {
-    const bgColor = isEnable ? "bg-white" : "bg-gray-200";
+const LearningItem = ({ tags, title, progress, total, isEnable, isCompleted }: LearningItemProps) => {
+    const bgColor = isEnable ? "bg-white" : "bg-gray-100";
     const textColor = isEnable ? "text-gray-800" : "text-gray-400";
-    const isComplete = progress === total && total > 0;
-    const completeTag = isComplete ? <CompleteTag /> : "";
+    const completeTag = isCompleted ? <CompleteTag /> : "";
 
     return (
         <div className={`p-4 rounded-[16px] border border-gray-200 mb-4 ${bgColor}`}>
@@ -91,7 +93,7 @@ const LearningItem = ({ tags, title, progress, total, isEnable }: LearningItemPr
                 </div>
 
                 <div className="flex-shrink-0 ml-2">
-                    <ProgressIcon progress={progress} total={total} />
+                    <ProgressIcon progress={progress} total={total} isEnable={isEnable} />
                 </div>
             </div>
             <div className="flex items-center justify-between">
@@ -137,6 +139,7 @@ const Home: React.FC = () => {
     const [fruitLevelBgClass, setFruitLevelBgClass] = useState('');
     const [fruitTitle, setFruitTitle] = useState('');
     const [progressRate, setProgressRate] = useState(0);
+    const [completedFruits, setCompletedFruits] = useState<String[]>([]);
 
     useEffect(() => {
         const checked = sessionStorage.getItem('show_welcome');
@@ -258,6 +261,12 @@ const Home: React.FC = () => {
             console.log('activeQuestId= ' + activeQuestId + ' ' + currentRate);
             console.log('currentQuest= ', currentQuest);
             setProgressRate(currentRate);
+
+            // 내가 모은 학습 완료 과일.
+            const arr: string[] = userQuestProgress.filter(p => p.isCompleted).map(p => p.fruit);
+            const uniqueArr: string[] = [...new Set(arr)];
+            setCompletedFruits(uniqueArr);
+
         } else {
             // 로그인 안했을 때는 모두 기본값 1
             setPlantImage(levelImages[1]);
@@ -272,14 +281,27 @@ const Home: React.FC = () => {
 
 
     const handleStartLearning = () => {
-        // 로그인 했을 경우.
-        if (user && activeQuestId) {
-            console.log('activeQuestId: ', activeQuestId);
-            navigate(`/learning/intro/${activeQuestId}`);
-        } else {
-            // 로그인을 안했다면.
+        // 로그인하지 않았다면 로그인 모달 표시
+        if (!user) {
             openLoginModal();
+            return;
         }
+
+        // 로그인한 사용자의 경우
+        let questIdToStart = activeQuestId;
+
+        // activeQuestId가 없으면 order 기준으로 첫 번째 퀘스트 찾기
+        if (!questIdToStart) {
+            if (questList && questList.length > 0) {
+                const sortedQuests = [...questList].sort((a, b) => a.order - b.order);
+                questIdToStart = sortedQuests[0].questId;
+            } else {
+                questIdToStart = 1;
+            }
+        }
+
+        console.log('Starting learning with questId:', questIdToStart);
+        navigate(`/learning/intro/${questIdToStart}`);
     };
 
     const [isHomeGuideModalOpen, setIsHomeGuideModalOpen] = useState(false);
@@ -317,27 +339,6 @@ const Home: React.FC = () => {
                         </button>
                     </div>
 
-                    <div className="absolute top-[80px] right-[40px] bg-white rounded-xl px-[10px] py-[8px] text-[14px] text-gray-600">
-                        {/* user 정보가 없음 = guest */}
-                        {!user ? (
-                            <>
-                                <div>
-                                    로그인하고 학습하면 <br />
-                                    <span className="text-blue-600 font-bold">성장 기록이 저장돼요!</span>
-                                </div>
-                                <div className="absolute top-[48px] right-[90px] w-3 h-5 bg-white rotate-60"></div>
-                            </>
-                        ) : (
-                            <>
-                                <div>
-                                    레벨 업까지 <span className="text-blue-600 font-bold">{nextLevelCount}문제!</span>
-                                </div>
-                                {/* 꼬리 */}
-                                <div className="absolute top-[25px] right-[90px] w-3 h-5 bg-white rotate-60"></div>
-                            </>
-                        )}
-                    </div>
-
                     <div className="w-[300px] h-[300px] mx-auto relative flex items-center justify-center mt-12">
                         {/* 동심원 배경 */}
                         <img
@@ -352,6 +353,36 @@ const Home: React.FC = () => {
                             alt={`Level ${fruitLevel} plant`}
                             className="relative w-[250px] h-[250px] object-contain"
                         />
+                    </div>
+
+                    <div className="absolute top-[80px] right-[40px] bg-white rounded-xl px-[10px] py-[8px] text-[14px] text-gray-600">
+                        {/* user 정보가 없음 = guest */}
+                        {!user ? (
+                            <>
+                                <div>
+                                    로그인하고 학습하면 <br />
+                                    <span className="text-blue-600 font-bold">성장 기록이 저장돼요!</span>
+                                </div>
+                                <div className="absolute top-[48px] right-[90px] w-3 h-5 bg-white rotate-60"></div>
+                            </>
+                        ) : fruitLevel === 5 ? (
+                            <>
+                                <div>
+                                    새로운 열매가 열렸어요! <br />
+                                    다음 학습 열매를 키워볼까요?
+                                </div>
+                                {/* 꼬리 */}
+                                <div className="absolute top-[48px] right-[90px] w-3 h-5 bg-white rotate-60"></div>
+                            </>
+                        ) : (
+                            <>
+                                <div>
+                                    레벨 업까지 <span className="text-blue-600 font-bold">{nextLevelCount}문제!</span>
+                                </div>
+                                {/* 꼬리 */}
+                                <div className="absolute top-[25px] right-[90px] w-3 h-5 bg-white rotate-60"></div>
+                            </>
+                        )}
                     </div>
 
                     <div className="flex justify-center mt-4">
@@ -418,7 +449,7 @@ const Home: React.FC = () => {
                                     userQuestProgress.map((quest) => {
                                         // const isCompleted = quest.isCompleted;
                                         // const isActive = quest.questId === activeQuestId;
-                                        const isLocked = false; //!isCompleted && !isActive;
+                                        const isLocked = !quest.isEnable;
 
                                         if (isLocked) {
                                             return (
@@ -428,7 +459,8 @@ const Home: React.FC = () => {
                                                         title={quest.title}
                                                         progress={0}
                                                         total={quest.totalCount}
-                                                        isEnable={false}
+                                                        isEnable={quest.isEnable}
+                                                        isCompleted={quest.isCompleted}
                                                     />
                                                 </div>
                                             );
@@ -444,7 +476,8 @@ const Home: React.FC = () => {
                                                     title={quest.title}
                                                     progress={quest.correctCount}
                                                     total={quest.totalCount}
-                                                    isEnable={true}
+                                                    isEnable={quest.isEnable}
+                                                    isCompleted={quest.isCompleted}
                                                 />
                                             </Link>
                                         );
@@ -463,7 +496,8 @@ const Home: React.FC = () => {
                                                     title={quest.title}
                                                     progress={0}
                                                     total={quest.questItemCount}
-                                                    isEnable={true}
+                                                    isEnable={false}
+                                                    isCompleted={false}
                                                 />
                                             </Link>
                                         );
@@ -477,9 +511,9 @@ const Home: React.FC = () => {
                 </section>
 
             </div>
-
             <HomeGuideModal
                 isOpen={isHomeGuideModalOpen}
+                fruits={completedFruits}
                 onConfirm={closeHomeGuideModal}
             />
             <WelcomeModal
@@ -508,6 +542,8 @@ const Home: React.FC = () => {
                     setIsHelloModalOpen(false);
                 }}
             />
+
+            <Footer />
         </div>
     );
 };

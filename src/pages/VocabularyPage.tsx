@@ -3,17 +3,24 @@ import { useEffect, useState } from 'react';
 import { useVocabularyStore } from '../store/VocabularyStore';
 import { SortDropdown, SortOptionKey } from '../components/ui/SortDropdown';
 import { WordCard } from '../components/ui/WordCard';
+import { useAuth } from '../components/common/AuthContext';
 
 const VocabularyPage = () => {
+    const { user } = useAuth();
     const { hashtags, isLoading, error, vocabulary, fetchHashtags, fetchVocabulary, deleteVocabulary } = useVocabularyStore();
 
     const [sortBy, setSortBy] = useState<SortOptionKey>('latest');
     const [selectedTags, setSelectedTags] = useState<number[]>([]);
 
     useEffect(() => {
-        fetchHashtags();
-        fetchVocabulary(selectedTags, sortBy);
-    }, [fetchHashtags, fetchVocabulary]);
+        if (!user) return;
+        fetchHashtags(user.userId);
+        fetchVocabulary(user.userId, selectedTags, sortBy);
+    }, [user?.userId]);
+
+    if (!user) {
+        return null;
+    }
 
     const handleClick = (tagId: number) => {
         let newSelected;
@@ -23,14 +30,23 @@ const VocabularyPage = () => {
             newSelected = [...selectedTags, tagId]; // 추가 선택
         }
         setSelectedTags(newSelected);
-        fetchVocabulary(newSelected, sortBy);
+        fetchVocabulary(user.userId, newSelected, sortBy);
     };
 
     const handleSortChange = (newSort: SortOptionKey) => {
         setSortBy(newSort);
-        fetchVocabulary(selectedTags, newSort);
+        fetchVocabulary(user.userId, selectedTags, newSort);
     };
 
+    // 선택된 태그를 앞으로 정렬
+    const sortedHashtags = [...hashtags].sort((a, b) => {
+        const aSelected = selectedTags.includes(a.hashtagId);
+        const bSelected = selectedTags.includes(b.hashtagId);
+
+        if (aSelected && !bSelected) return -1;
+        if (!aSelected && bSelected) return 1;
+        return 0; // 같은 그룹 내에서는 원래 순서 유지
+    });
 
     return (
         <div className="h-full w-full">
@@ -51,7 +67,7 @@ const VocabularyPage = () => {
                 <div className="flex items-center mb-5 overflow-hidden">
                     <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar">
 
-                        {!isLoading && !error && hashtags.map((tag) => {
+                        {!isLoading && !error && sortedHashtags.map((tag) => {
                             const isSelected = selectedTags.includes(tag.hashtagId);
                             return (
                                 <button key={tag.hashtagId}
@@ -70,10 +86,10 @@ const VocabularyPage = () => {
                 {/* 단어 리스트 */}
                 <div className="flex-1 space-y-3 overflow-y-auto no-scrollbar">
                     {vocabulary.map(item => (
-                        <WordCard 
-                            key={item.vocabId} 
+                        <WordCard
+                            key={item.vocabId}
                             id={item.vocabId}
-                            unit={item.str} 
+                            unit={item.str}
                             urlNormal={item.urlNormal}
                             urlSlow={item.slowNormal}
                             onDeleteVoca={() => deleteVocabulary(item.vocabId)}
